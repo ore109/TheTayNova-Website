@@ -23,8 +23,8 @@ const blogPosts = [
     title: 'Creating a Cozy Reading Nook',
     category: 'Interiors',
     excerpt: 'Small design moves that transform a corner into a calm, inviting retreat.',
-    cover: '/assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (4).png',
-    image: '/assets/images/blog/content/cozy.png',
+    cover: '//assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (4).png',
+    image: '//assets/images/blog/content/cozy.png',
     content: [
       'A thoughtfully curated reading nook begins with texture and light. Choose a warm throw, a soft pillow, and a lamp with a gentle glow to anchor the space.',
       'Start with your favorite chair and layer it with tactile pieces like a woven blanket, a plush cushion, and an elegant side table. This encourages quiet moments and creates a sense of intention for the corner.',
@@ -42,8 +42,8 @@ const blogPosts = [
     title: 'Sustainable Rituals for Daily Living',
     category: 'Wellness',
     excerpt: 'Everyday habits that make your home feel calm, balanced, and eco-conscious.',
-    cover: '/assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (2).png',
-    image: '/assets/images/blog/content/4.png',
+    cover: '//assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (2).png',
+    image: '//assets/images/blog/content/4.png',
     content: [
       'Incorporating simple rituals into your routine can elevate the way you move through your home. Start with a morning stretch, a curated playlist, or a moment of gratitude by the window.',
       'Choose reusable kitchen items, gentle natural cleaners, and plants that help purify the air. These small changes create a softer, more sustainable rhythm for the day.',
@@ -61,8 +61,8 @@ const blogPosts = [
     title: 'A Holiday Home Styling Guide',
     category: 'Guides',
     excerpt: 'A seasonal styling guide with easy updates and mood-setting details.',
-    cover: '/assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (3).png',
-    image: '/assets/images/blog/content/lux 1.png',
+    cover: '//assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (3).png',
+    image: '//assets/images/blog/content/lux 1.png',
     content: [
       'Refresh your home for the season using a limited palette and natural textures. Soft throws, warm lighting, and layered candles help create a welcoming atmosphere.',
       'Mix in a few statement pieces that feel personal—like a woven basket, a ceramic vase, or a favorite framed print—to keep the look grounded and memorable.',
@@ -80,8 +80,8 @@ const blogPosts = [
     title: 'Everyday Decor Habits That Last',
     category: 'Lifestyle',
     excerpt: 'Build a home routine around thoughtful objects, consistent editing, and calm visual flow.',
-    cover: '/assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (5).png',
-    image: '/assets/images/blog/content/3.png',
+    cover: '//assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (5).png',
+    image: '//assets/images/blog/content/3.png',
     content: [
       'Design systems are not only for interiors—they can also be part of your everyday habits. Choose a few dependable colors, textures, and containers that work with your life.',
       'Keep surfaces organized with baskets, trays, and simple labels. A small amount of editing each week helps maintain a serene environment.',
@@ -225,91 +225,91 @@ if (document.body.classList.contains('inspo-page')) {
       id: 'loft-glow',
       title: 'Loft Glow',
       type: 'image',
-      src: '/assets/images/inspo/1.jpg',
+      src: '//assets/images/inspo/1.jpg',
       style: 'Modern',
       room: 'Living Room',
       category: 'Decor',
-      link: '/assets/images/inspo/1.jpg'
+      link: '//assets/images/inspo/1.jpg'
     },
     {
       id: 'cozy-bedroom',
       title: 'Cozy Bedroom Mood',
       type: 'image',
-      src: '/assets/images/inspo/12.png',
+      src: '//assets/images/inspo/12.png',
       style: 'Boho',
       room: 'Bedroom',
       category: 'Lighting',
-      link: '/assets/images/inspo/12.png'
+      link: '//assets/images/inspo/12.png'
     },
     {
       id: 'minimal-kitchen',
       title: 'Minimal Kitchen Edit',
       type: 'image',
-      src: '/assets/images/inspo/14.png',
+      src: '//assets/images/inspo/14.png',
       style: 'Minimal',
       room: 'Kitchen',
       category: 'Layout',
-      link: '/assets/images/inspo/14.png'
+      link: '//assets/images/inspo/14.png'
     },
     {
       id: 'boho-luxe',
       title: 'Boho Luxe Living',
       type: 'image',
-      src: '/assets/images/inspo/15.png',
+      src: '//assets/images/inspo/15.png',
       style: 'Boho',
       room: 'Living Room',
       category: 'Decor',
-      link: '/assets/images/inspo/15.png'
+      link: '//assets/images/inspo/15.png'
     },
     {
       id: 'modern-office',
       title: 'Modern Office Flow',
       type: 'image',
-      src: '/assets/images/inspo/2.png',
+      src: '//assets/images/inspo/2.png',
       style: 'Luxury',
       room: 'Office',
       category: 'Organization',
-      link: '/assets/images/inspo/2.png'
+      link: '//assets/images/inspo/2.png'
     },
     {
       id: 'sunny-lounge',
       title: 'Japandi Lounge',
       type: 'image',
-      src: '/assets/images/inspo/3.jpg',
+      src: '//assets/images/inspo/3.jpg',
       style: 'Japandi',
       room: 'Living Room',
       category: 'Lighting',
-      link: '/assets/images/inspo/3.jpg'
+      link: '//assets/images/inspo/3.jpg'
     },
     {
       id: 'creative-reel-1',
       title: 'Creative Reel',
       type: 'video',
-      src: '/assets/videos/reels/1.mp4',
+      src: '//assets/videos/reels/1.mp4',
       style: 'Modern',
       room: 'Living Room',
       category: 'Decor',
-      link: '/assets/videos/reels/1.mp4'
+      link: '//assets/videos/reels/1.mp4'
     },
     {
       id: 'cozy-reel-2',
       title: 'Cozy Morning Reel',
       type: 'video',
-      src: '/assets/videos/reels/2.mp4',
+      src: '//assets/videos/reels/2.mp4',
       style: 'Boho',
       room: 'Bedroom',
       category: 'Lighting',
-      link: '/assets/videos/reels/2.mp4'
+      link: '//assets/videos/reels/2.mp4'
     },
     {
       id: 'modern-reel-3',
       title: 'Studio Reel',
       type: 'video',
-      src: '/assets/videos/reels/3.mp4',
+      src: '//assets/videos/reels/3.mp4',
       style: 'Luxury',
       room: 'Office',
       category: 'Layout',
-      link: '/assets/videos/reels/3.mp4'
+      link: '//assets/videos/reels/3.mp4'
     }
   ];
 
@@ -318,28 +318,28 @@ if (document.body.classList.contains('inspo-page')) {
       id: 'cozy-bedroom',
       title: 'Cozy Bedroom',
       description: 'Soft textures, warm lighting, and an intimate layer of comfort.',
-      cover: '/assets/images/inspo/12.png',
+      cover: '//assets/images/inspo/12.png',
       filters: ['Boho', 'Bedroom', 'Lighting']
     },
     {
       id: 'minimal-kitchen',
       title: 'Minimal Kitchen',
       description: 'Streamlined storage, thoughtful layout, and soft natural finishes.',
-      cover: '/assets/images/inspo/14.png',
+      cover: '//assets/images/inspo/14.png',
       filters: ['Minimal', 'Kitchen', 'Layout']
     },
     {
       id: 'modern-living',
       title: 'Modern Living Room',
       description: 'A crisp, layered space anchored by artful decor and calm structure.',
-      cover: '/assets/images/inspo/1.jpg',
+      cover: '//assets/images/inspo/1.jpg',
       filters: ['Modern', 'Living Room', 'Decor']
     },
     {
       id: 'luxury-office',
       title: 'Luxury Office',
       description: 'A focused workspace with polished finishes, mood lighting, and ease.',
-      cover: '/assets/images/inspo/2.png',
+      cover: '//assets/images/inspo/2.png',
       filters: ['Luxury', 'Office', 'Organization']
     }
   ];
@@ -573,7 +573,7 @@ const shopProducts = [
     type: 'Decor',
     price: 25,
     discount: '10% off',
-    image: '/assets/images/products/cups.jpg',
+    image: '//assets/images/products/cups.jpg',
     description: 'A sculptural set of ceramic cups for elevated everyday rituals.',
     details: [
       'Handcrafted-inspired curves designed to brighten every morning coffee.',
@@ -590,7 +590,7 @@ const shopProducts = [
     type: 'Storage',
     price: 35,
     discount: '15% off',
-    image: '/assets/images/products/basket.jpg',
+    image: '//assets/images/products/basket.jpg',
     description: 'A woven accent basket to keep cozy throws and curated essentials close at hand.',
     details: [
       'Natural texture adds warmth and quiet luxury to a seating area.',
@@ -607,7 +607,7 @@ const shopProducts = [
     type: 'Decor',
     price: 45,
     discount: null,
-    image: '/assets/images/products/towels.jpeg',
+    image: '//assets/images/products/towels.jpeg',
     description: 'Soft, absorbent towels designed to elevate everyday bathroom moments.',
     details: [
       'Generous size and plush texture for a boutique hotel feel.',
@@ -624,7 +624,7 @@ const shopProducts = [
     type: 'Decor',
     price: 30,
     discount: null,
-    image: '/assets/images/products/wood.jpg',
+    image: '//assets/images/products/wood.jpg',
     description: 'A warm wooden tray for styled tabletops, breakfast in bed, and thoughtful serving moments.',
     details: [
       'Smooth finish with an organic shape that feels editorial and elevated.',
@@ -641,7 +641,7 @@ const shopProducts = [
     type: 'Decor',
     price: 48,
     discount: '20% off',
-    image: '/assets/images/products/unnamed.jpg',
+    image: '//assets/images/products/unnamed.jpg',
     description: 'A luxe throw made for layered comfort and quiet visuals.',
     details: [
       'Soft, tactile weave in a neutral shade for timeless styling.',
@@ -658,7 +658,7 @@ const shopProducts = [
     type: 'Lighting',
     price: 68,
     discount: null,
-    image: '/assets/images/products/light.jpg',
+    image: '//assets/images/products/light.jpg',
     description: 'A sculptural lamp with polished details for a soft, ambient glow.',
     details: [
       'Clean form with a luxe finish that complements modern interiors.',
@@ -675,7 +675,7 @@ const shopProducts = [
     type: 'Decor',
     price: 18,
     discount: null,
-    image: '/assets/images/products/soap dispensr.png',
+    image: '//assets/images/products/soap dispensr.png',
     description: 'A refined glass dispenser for stylish bathroom and kitchen counters.',
     details: [
       'Minimal, transparent form for a clean and polished look.',
@@ -692,7 +692,7 @@ const shopProducts = [
     type: 'Decor',
     price: 52,
     discount: null,
-    image: '/assets/images/products/plate.jpg',
+    image: '//assets/images/products/plate.jpg',
     description: 'A neutral plate set with subtle texture for an editorial table setting.',
     details: [
       'Smooth ceramic finish that feels both modern and timeless.',
@@ -863,7 +863,7 @@ const ebookData = [
     description: 'A comprehensive guide to designing a bedroom and study nook that promotes restful sleep, deep focus, and peaceful mornings. Learn spatial layouts, color theory, lighting strategies, and textural elements that work together to create your personal sanctuary.',
     price: '$12.99',
     category: 'Productivity & Wellness',
-    cover: '/assets/images/ebooks/covers/Study and sleep.jpg',
+    cover: '//assets/images/ebooks/covers/Study and sleep.jpg',
     link: 'https://selar.com/m/tay-nova1'
   },
   {
@@ -872,7 +872,7 @@ const ebookData = [
     description: 'Discover how to integrate smart home technology with intentional design. This guide walks you through creating spaces that feel both modern and calm, using technology to enhance—not dominate—your daily rituals.',
     price: '$10.99',
     category: 'Aesthetic Living',
-    cover: '/assets/images/ebooks/covers/Smart home rest.jpg',
+    cover: '//assets/images/ebooks/covers/Smart home rest.jpg',
     link: 'https://selar.com/m/tay-nova1'
   },
   {
@@ -881,7 +881,7 @@ const ebookData = [
     description: 'A step-by-step guide to curating, editing, and redesigning your home in 30 days. Perfect for those ready to declutter, reimagine their space, and create an environment that truly reflects their lifestyle.',
     price: '$14.99',
     category: 'Home Styling',
-    cover: '/assets/images/ebooks/covers/reset home.jpg',
+    cover: '//assets/images/ebooks/covers/reset home.jpg',
     link: 'https://selar.com/m/tay-nova1'
   },
   {
@@ -890,7 +890,7 @@ const ebookData = [
     description: 'Learn how to design a blog page that reflects your brand and keeps readers engaged. From layout strategies to content organization, this guide covers everything you need to launch a beautiful editorial presence.',
     price: '$9.99',
     category: 'Creator Growth',
-    cover: '/assets/images/ebooks/covers/blog page.png',
+    cover: '//assets/images/ebooks/covers/blog page.png',
     link: 'https://selar.com/m/tay-nova1'
   },
   {
@@ -899,7 +899,7 @@ const ebookData = [
     description: 'Explore how to refresh your home seasonally without a full redesign. Discover styling tips, color transitions, and textile swaps that keep your space feeling new throughout the year.',
     price: '$11.99',
     category: 'Lifestyle Guides',
-    cover: '/assets/images/ebooks/covers/2 variation.jpg',
+    cover: '//assets/images/ebooks/covers/2 variation.jpg',
     link: 'https://selar.com/m/tay-nova1'
   }
 ];

@@ -133,7 +133,7 @@ a {
   position: relative;
   padding: 0 1.5rem;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(26, 26, 26, 0.44), rgba(26, 26, 26, 0.76)), url('/assets/images/hero/lux 1.png') center/cover no-repeat;
+  background: linear-gradient(180deg, rgba(26, 26, 26, 0.44), rgba(26, 26, 26, 0.76)), url('//assets/images/hero/lux 1.png') center/cover no-repeat;
 }
 
 body.ebooks-page .hero-copy {
@@ -1265,6 +1265,15 @@ body.ebooks-page .ebooks-section {
   transform: scale(1.05);
 }
 
+#inspiration .inspiration-grid {
+  grid-auto-rows: auto;
+}
+
+#inspiration .inspiration-grid img {
+  aspect-ratio: 9 / 16;
+  height: auto;
+}
+
 .content-section {
   background: var(--color-beige);
 }
@@ -1749,7 +1758,7 @@ body.content-page .section-footer .btn-read {
 }
 
 .collab-hero {
-  background: linear-gradient(180deg, rgba(26, 26, 26, 0.44), rgba(26, 26, 26, 0.76)), url('/assets/images/hero/cozy.png') center/cover no-repeat;
+  background: linear-gradient(180deg, rgba(26, 26, 26, 0.44), rgba(26, 26, 26, 0.76)), url('//assets/images/hero/cozy.png') center/cover no-repeat;
 }
 
 body.collab-page .hero-content h1 {
@@ -1961,6 +1970,17 @@ body.collab-page .hero-copy {
   .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  #inspiration .inspiration-grid {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+  }
+
+  #inspiration .inspiration-grid img {
+    flex: 0 0 min(72vw, 260px);
+    scroll-snap-align: start;
   }
 
   .products-grid,
