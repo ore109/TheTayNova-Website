@@ -4,6 +4,103 @@ document.querySelectorAll('img').forEach((img) => {
   });
 });
 
+const siteHeader = document.querySelector('.site-header');
+const headerInner = document.querySelector('.header-inner');
+const primaryNav = document.querySelector('.nav-primary');
+
+if (siteHeader && headerInner && primaryNav) {
+  const mobileToggle = document.createElement('button');
+  mobileToggle.type = 'button';
+  mobileToggle.className = 'mobile-nav-toggle';
+  mobileToggle.setAttribute('aria-label', 'Open navigation menu');
+  mobileToggle.setAttribute('aria-expanded', 'false');
+  mobileToggle.innerHTML = '<span></span><span></span><span></span>';
+
+  const mobileOverlay = document.createElement('div');
+  mobileOverlay.className = 'mobile-nav-overlay';
+
+  const mobileSidebar = document.createElement('aside');
+  mobileSidebar.className = 'mobile-nav-sidebar';
+  mobileSidebar.setAttribute('aria-label', 'Mobile navigation');
+
+  const navLinks = Array.from(primaryNav.querySelectorAll('a'));
+  const preferredLinks = [
+    { href: 'index.html', label: 'Home' },
+    { href: 'about.html', label: 'About' },
+    { href: 'shop.html', label: 'Shop Finds' },
+    { href: 'ebooks.html', label: 'Ebooks' },
+    { href: 'blog.html', label: 'Blog' },
+    { href: 'content.html', label: 'Content' },
+    { href: 'inspiration.html', label: 'Inspiration Gallery' },
+    { href: 'collab.html', label: 'Work With TayNova' }
+  ];
+
+  const mobileNavItems = preferredLinks
+    .map((item) => {
+      const matchingLink = navLinks.find((link) => link.getAttribute('href') === item.href);
+      return matchingLink ? `<li><a href="${matchingLink.getAttribute('href')}">${item.label}</a></li>` : '';
+    })
+    .join('');
+
+  const footerSocialList = document.querySelector('.footer-social ul');
+  const sidebarSocial = footerSocialList ? footerSocialList.cloneNode(true).outerHTML : '';
+
+  mobileSidebar.innerHTML = `
+    <div class="mobile-nav-head">
+      <a href="index.html" class="brand-logo-link">
+        <div class="brand-lockup">
+          <img src="/assets/images/logo/logo.png" alt="TayNova Logo" class="brand-logo">
+          <h2 class="brand-name">TayNova</h2>
+        </div>
+      </a>
+      <button type="button" class="mobile-nav-close" aria-label="Close navigation menu">&times;</button>
+    </div>
+    <nav class="mobile-nav-panel" aria-label="Mobile primary navigation">
+      <ul>${mobileNavItems}</ul>
+    </nav>
+    <div class="mobile-nav-foot">
+      ${sidebarSocial}
+      <p>Simple Style. Cozy Spaces. Smart Finds.</p>
+    </div>
+  `;
+
+  headerInner.appendChild(mobileToggle);
+  document.body.append(mobileOverlay, mobileSidebar);
+
+  const mobileClose = mobileSidebar.querySelector('.mobile-nav-close');
+  const mobileSidebarLinks = mobileSidebar.querySelectorAll('a');
+
+  function openMobileNav() {
+    document.body.classList.add('mobile-nav-open');
+    mobileToggle.setAttribute('aria-expanded', 'true');
+    mobileClose.focus();
+  }
+
+  function closeMobileNav() {
+    document.body.classList.remove('mobile-nav-open');
+    mobileToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  mobileToggle.addEventListener('click', openMobileNav);
+  mobileClose.addEventListener('click', closeMobileNav);
+  mobileOverlay.addEventListener('click', closeMobileNav);
+  mobileSidebarLinks.forEach((link) => {
+    link.addEventListener('click', closeMobileNav);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && document.body.classList.contains('mobile-nav-open')) {
+      closeMobileNav();
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 768) {
+      closeMobileNav();
+    }
+  });
+}
+
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener('click', function(e) {
     if (this.getAttribute('href') === '#') return;
