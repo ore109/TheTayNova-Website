@@ -6,6 +6,7 @@ document.querySelectorAll('img').forEach((img) => {
 
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   anchor.addEventListener('click', function(e) {
+    if (this.getAttribute('href') === '#') return;
     e.preventDefault();
     const target = document.querySelector(this.getAttribute('href'));
     if (target) {
@@ -1014,6 +1015,66 @@ ebookFilterButtons.forEach((button) => {
 
 if (ebookBackButton) {
   ebookBackButton.addEventListener('click', closeEbookDetail);
+}
+
+const privacyPolicyLinks = document.querySelectorAll('.footer-policy a');
+
+if (privacyPolicyLinks.length) {
+  const privacyModal = document.createElement('div');
+  privacyModal.className = 'privacy-modal';
+  privacyModal.setAttribute('role', 'dialog');
+  privacyModal.setAttribute('aria-modal', 'true');
+  privacyModal.setAttribute('aria-labelledby', 'privacy-modal-title');
+  privacyModal.innerHTML = `
+    <div class="privacy-modal-card" role="document">
+      <button type="button" class="privacy-modal-close" aria-label="Close Privacy Policy">×</button>
+      <h2 id="privacy-modal-title">Privacy Policy</h2>
+      <h3>Privacy Policy for TayNova</h3>
+      <p>At TayNova, accessible from [yourwebsite.com], your privacy is important to us. This Privacy Policy document outlines the types of information that is collected and recorded by TayNova and how we use it.</p>
+      <p>We may collect personal information such as your name and email address when you voluntarily subscribe to our newsletter, contact us, or interact with our website. This information is used to communicate with you, improve our content, and provide relevant recommendations.</p>
+      <p>Like many websites, TayNova uses log files. These files log visitors when they visit websites. The information collected may include internet protocol (IP) addresses, browser type, Internet Service Provider (ISP), date and time stamp, referring/exit pages, and number of clicks. This information is used to analyze trends, administer the site, and track user movement.</p>
+      <p>We may use cookies to store information about visitors' preferences and optimize the user experience by customizing our web page content based on visitors' browser type or other information.</p>
+      <p>TayNova may also participate in affiliate marketing programs, which means we may earn commissions on purchases made through links on this site. These affiliate links do not affect your purchase price.</p>
+      <p>Third-party vendors, including Google, may use cookies to serve ads based on a user's prior visits to this website or other websites. These cookies enable ad networks to provide advertisements that are relevant to your interests.</p>
+      <p>You can choose to disable cookies through your individual browser options. More detailed information about cookie management can be found in your browser’s settings.</p>
+      <p>By using our website, you hereby consent to our Privacy Policy and agree to its terms.</p>
+      <p>If you have additional questions, feel free to contact us at:<br><a href="mailto:oreoluwaoluwadre@gmail.com">oreoluwaoluwadre@gmail.com</a></p>
+    </div>
+  `;
+
+  document.body.appendChild(privacyModal);
+
+  const privacyCloseButton = privacyModal.querySelector('.privacy-modal-close');
+
+  function openPrivacyModal(event) {
+    event.preventDefault();
+    privacyModal.classList.add('is-open');
+    document.body.classList.add('privacy-modal-open');
+    privacyCloseButton.focus();
+  }
+
+  function closePrivacyModal() {
+    privacyModal.classList.remove('is-open');
+    document.body.classList.remove('privacy-modal-open');
+  }
+
+  privacyPolicyLinks.forEach((link) => {
+    link.addEventListener('click', openPrivacyModal);
+  });
+
+  privacyCloseButton.addEventListener('click', closePrivacyModal);
+
+  privacyModal.addEventListener('click', (event) => {
+    if (event.target === privacyModal) {
+      closePrivacyModal();
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && privacyModal.classList.contains('is-open')) {
+      closePrivacyModal();
+    }
+  });
 }
 
 
