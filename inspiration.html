@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inspos Gallery — TayNova</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="inspo-page">
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo-link">
+          <div class="brand-lockup">
+            <img src="assets/Images/logo/logo.png" alt="TayNova Logo" class="brand-logo" onerror="this.src='https://via.placeholder.com/60';" />
+            <h1 class="brand-name">TayNova</h1>
+          </div>
+        </a>
+
+        <nav class="nav-primary" aria-label="Primary navigation">
+          <ul class="nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="shop.html">Shop Finds</a></li>
+            <li><a href="ebooks.html">Ebooks</a></li>
+            <li><a href="content.html">Content</a></li>
+            <li><a href="inspiration.html">Inspos Gallery</a></li>
+            <li><a href="#">Collab</a></li>
+            <li><a href="#">About</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-section" style="background-image: linear-gradient(rgba(4, 4, 4, 0.42), rgba(4, 4, 4, 0.42)), url('assets/Images/inspo/1.jpg'); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: #f5efe6;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="hero-tag">INSPO GALLERY • TRANSFORMATION • HOME STYLING</p>
+          <h1>Turn Ideas Into Reality</h1>
+          <p class="hero-copy">
+            Explore curated home inspirations that show what your space can become — aesthetic, functional, and lifestyle-driven transformations.
+          </p>
+          <div class="hero-actions">
+            <a href="#gallery-controls" class="btn btn-primary">Browse Creative View</a>
+            <a href="#gallery-controls" class="btn btn-secondary">View Sanctuary Collections</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-container" id="gallery-controls">
+        <div class="section-header">
+          <h2 class="section-title">Choose your inspiration flow</h2>
+          <p class="section-copy">
+            Select the view that fits your mood, then narrow the story using style, room, and category filters.
+          </p>
+        </div>
+
+        <div class="page-controls">
+          <div class="filter-controls">
+            <div class="view-toggle" role="tablist" aria-label="Toggle gallery views">
+              <button type="button" class="toggle-pill active" data-view="creative">Creative View</button>
+              <button type="button" class="toggle-pill" data-view="sanctuary">Sanctuary View</button>
+            </div>
+
+            <div class="filter-dropdowns inspo-filters">
+              <div class="filter-group">
+                <label>
+                  <span>Style</span>
+                  <select data-filter-type="style">
+                    <option value="">All styles</option>
+                    <option value="Boho">Boho</option>
+                    <option value="Minimal">Minimal</option>
+                    <option value="Japandi">Japandi</option>
+                    <option value="Modern">Modern</option>
+                    <option value="Luxury">Luxury</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="filter-group">
+                <label>
+                  <span>Room</span>
+                  <select data-filter-type="room">
+                    <option value="">All rooms</option>
+                    <option value="Bedroom">Bedroom</option>
+                    <option value="Kitchen">Kitchen</option>
+                    <option value="Living Room">Living Room</option>
+                    <option value="Office">Office</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="filter-group">
+                <label>
+                  <span>Category</span>
+                  <select data-filter-type="category">
+                    <option value="">All categories</option>
+                    <option value="Decor">Decor</option>
+                    <option value="Layout">Layout</option>
+                    <option value="Lighting">Lighting</option>
+                    <option value="DIY">DIY</option>
+                    <option value="Organization">Organization</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="filter-summary hidden" id="filter-summary">
+              <div class="filter-tags" id="active-filters"></div>
+              <button type="button" id="clear-filters" class="btn btn-secondary filter-clear">Clear Filters</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-container" id="creative-view">
+        <div class="section-header">
+          <h2 class="section-title">Creative View</h2>
+          <p class="section-copy">
+            A free-flow feed of inspiring room moments, design reels, and mood-rich styling ideas.
+          </p>
+        </div>
+        <div id="inspo-media-grid" class="media-grid"></div>
+        <div id="inspo-empty" class="empty-state hidden">No inspiration found for this niche ✨ Try another style.</div>
+      </section>
+
+      <section class="section-container hidden" id="sanctuary-view">
+        <div class="section-header">
+          <h2 class="section-title">Sanctuary View</h2>
+          <p class="section-copy">
+            Curated design moods for spaces that feel layered, intentional, and transformed.
+          </p>
+        </div>
+        <div id="sanctuary-grid" class="sanctuary-grid"></div>
+
+        <div id="sanctuary-detail" class="sanctuary-detail hidden">
+          <div class="sanctuary-detail-header">
+            <div>
+              <h3 id="sanctuary-result-title"></h3>
+              <p id="sanctuary-result-info"></p>
+            </div>
+            <button type="button" id="sanctuary-back" class="btn btn-secondary">Back to Collections</button>
+          </div>
+          <div id="sanctuary-results" class="sanctuary-results"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div class="footer-column footer-copy">
+          <p>© TayNova 2026</p>
+        </div>
+
+        <div class="footer-column footer-social">
+          <ul>
+            <li><a href="https://www.pinterest.com/TayNova06" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/pin.png" alt="Pinterest" /></a></li>
+            <li><a href="https://www.instagram.com/__tay__nova/" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/instas.png" alt="Instagram" /></a></li>
+            <li><a href="https://www.youtube.com/@taynova09" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/youtube-removebg-preview.png" alt="YouTube" /></a></li>
+            <li><a href="https://selar.com/m/tay-nova1" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/selar.png" alt="Selar" /></a></li>
+            <li><a href="https://wa.me/2348124085593" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/whatsapp.png" alt="WhatsApp" /></a></li>
+            <li><a href="mailto:oreoluwaoluwadare2@gmail.com"><img src="assets/Images/Icons/gmail.png" alt="Email" /></a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column footer-policy">
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

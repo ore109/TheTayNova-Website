@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ebooks — TayNova</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="ebooks-page">
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo-link">
+          <div class="brand-lockup">
+            <img src="assets/Images/logo/logo.png" alt="TayNova Logo" class="brand-logo" onerror="this.src='https://via.placeholder.com/60';" />
+            <h1 class="brand-name">TayNova</h1>
+          </div>
+        </a>
+
+        <nav class="nav-primary" aria-label="Primary navigation">
+          <ul class="nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="shop.html">Shop Finds</a></li>
+            <li><a href="ebooks.html">Ebooks</a></li>
+            <li><a href="content.html">Content</a></li>
+            <li><a href="inspiration.html">Inspos Gallery</a></li>
+            <li><a href="collab.html">Collab</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-section" style="background-image: linear-gradient(rgba(4, 4, 4, 0.4), rgba(4, 4, 4, 0.4)), url('assets/Images/ebooks/content/16.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: #f5efe6;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="hero-tag">DIGITAL GUIDES • LEARNING • LIFESTYLE</p>
+          <h1>Thoughtful Guides for Your Home</h1>
+          <p class="hero-copy">
+            Downloadable guides and ebooks designed to help you create beautiful, intentional spaces and live with purpose.
+          </p>
+          <div class="hero-actions">
+            <a href="#ebooks-list" class="btn btn-primary">Explore Guides</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="ebook-controls-section section-container" aria-label="Ebook search and categories">
+        <div class="ebook-controls-row">
+          <div class="ebook-search-area" id="ebook-search">
+            <label for="ebook-search-input" class="sr-only">Search ebooks</label>
+            <input id="ebook-search-input" type="search" placeholder="Search ebooks..." />
+          </div>
+
+          <div class="ebook-filters-area" id="ebook-filters" aria-label="Ebook categories">
+            <div class="ebook-filter-pills">
+              <button type="button" class="ebook-filter-pill active" data-category="All">All</button>
+              <button type="button" class="ebook-filter-pill" data-category="Home Styling">Home Styling</button>
+              <button type="button" class="ebook-filter-pill" data-category="Lifestyle Guides">Lifestyle Guides</button>
+              <button type="button" class="ebook-filter-pill" data-category="Creator Growth">Creator Growth</button>
+              <button type="button" class="ebook-filter-pill" data-category="Productivity & Wellness">Productivity & Wellness</button>
+              <button type="button" class="ebook-filter-pill" data-category="Digital Resources">Digital Resources</button>
+              <button type="button" class="ebook-filter-pill" data-category="Aesthetic Living">Aesthetic Living</button>
+              <button type="button" class="ebook-filter-pill" data-category="Freebies">Freebies</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="ebooks-section section-container" id="ebooks-list">
+        <div class="section-header">
+          <h2 class="section-title">Digital Guides</h2>
+          <p class="section-copy">
+            Curated ebooks and digital guides to inspire and elevate your everyday.
+          </p>
+        </div>
+        <div id="ebook-grid" class="ebooks-grid"></div>
+        <div id="ebook-empty" class="ebook-empty-state hidden">No ebooks found</div>
+      </section>
+
+      <section id="ebook-detail" class="ebook-detail-section section-container hidden">
+        <button id="ebook-back" class="btn btn-primary">← Back to Guides</button>
+        <article class="ebook-detail-card">
+          <img id="detail-ebook-image" src="" alt="" class="ebook-detail-image" />
+          <div class="ebook-detail-content">
+            <h2 id="detail-ebook-title"></h2>
+            <p id="detail-ebook-description" class="ebook-detail-copy"></p>
+            <div class="ebook-detail-meta">
+              <span class="ebook-price" id="detail-ebook-price"></span>
+            </div>
+            <div class="ebook-detail-actions" id="detail-ebook-actions"></div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div class="footer-column footer-copy">
+          <p>© TayNova 2026</p>
+        </div>
+
+        <div class="footer-column footer-social">
+          <ul>
+            <li><a href="https://www.pinterest.com/TayNova06" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/pin.png" alt="Pinterest" /></a></li>
+            <li><a href="https://www.instagram.com/__tay__nova/" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/instas.png" alt="Instagram" /></a></li>
+            <li><a href="https://www.youtube.com/@taynova09" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/youtube-removebg-preview.png" alt="YouTube" /></a></li>
+            <li><a href="https://selar.com/m/tay-nova1" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/selar.png" alt="Selar" /></a></li>
+            <li><a href="https://wa.me/2348124085593" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/whatsapp.png" alt="WhatsApp" /></a></li>
+            <li><a href="mailto:oreoluwaoluwadare2@gmail.com"><img src="assets/Images/Icons/gmail.png" alt="Email" /></a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column footer-policy">
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

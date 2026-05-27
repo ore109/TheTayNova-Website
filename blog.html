@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TayNova Blog — Curated Lifestyle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo-link">
+          <div class="brand-lockup">
+            <img src="assets/Images/logo/logo.png" alt="TayNova Logo" class="brand-logo" onerror="this.src='https://via.placeholder.com/60';" />
+            <h1 class="brand-name">TayNova</h1>
+          </div>
+        </a>
+
+        <nav class="nav-primary" aria-label="Primary navigation">
+          <ul class="nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="shop.html">Shop Finds</a></li>
+            <li><a href="ebooks.html">Ebooks</a></li>
+            <li><a href="content.html">Content</a></li>
+            <li><a href="inspiration.html">Inspos Gallery</a></li>
+            <li><a href="collab.html">Collab</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-section" style="background-image: linear-gradient(rgba(4, 4, 4, 0.35), rgba(4, 4, 4, 0.35)), url('assets/Images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (4).png'); background-size: cover; background-position: center;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="hero-tag">BLOG • INTERIORS • WELLNESS • STYLE</p>
+          <h1>Thoughtful ideas for elevated living.</h1>
+          <p class="hero-copy">
+            Read the latest lifestyle essays, home styling notes, and small rituals that make every space feel intentional.
+          </p>
+          <div class="hero-actions">
+            <a href="#blog-list" class="btn btn-primary">Explore Posts</a>
+            <a href="#blog-search" class="btn btn-secondary">Search Stories</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="blog-search" class="blog-search-section section-container">
+        <div class="blog-search-wrap">
+          <div class="search-panel">
+            <label for="blog-search-input" class="sr-only">Search blog posts</label>
+            <input id="blog-search-input" type="search" placeholder="Search posts, topics, and ideas…" />
+          </div>
+          <div class="filter-panel" aria-label="Blog categories">
+            <button type="button" class="filter-pill active" data-category="All">All</button>
+            <button type="button" class="filter-pill" data-category="Interiors">Interiors</button>
+            <button type="button" class="filter-pill" data-category="Lifestyle">Lifestyle</button>
+            <button type="button" class="filter-pill" data-category="Guides">Guides</button>
+            <button type="button" class="filter-pill" data-category="Wellness">Wellness</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="blog-section section-container">
+        <div class="section-header">
+          <h2 class="section-title">Latest stories</h2>
+          <p class="section-copy">
+            Browse the blog archive for fresh ideas on interiors, effortless styling, and everyday rituals.
+          </p>
+        </div>
+        <div id="blog-list" class="blog-grid"></div>
+        <div id="blog-empty" class="empty-state hidden">We couldn’t find any posts matching your search.</div>
+      </section>
+
+      <section id="blog-detail" class="blog-detail-section section-container hidden">
+        <button id="blog-back" class="btn btn-primary">← Back to all posts</button>
+        <article class="blog-detail-card">
+          <div class="blog-detail-meta" id="detail-category"></div>
+          <h2 id="detail-title"></h2>
+          <p class="blog-detail-copy" id="detail-excerpt"></p>
+          <img id="detail-image" src="" alt="Blog detail image" class="blog-detail-image" />
+          <div class="blog-detail-content" id="detail-content"></div>
+          <div class="blog-detail-actions" id="detail-links"></div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div class="footer-column footer-copy">
+          <p>© TayNova 2026</p>
+        </div>
+
+        <div class="footer-column footer-social">
+          <ul>
+            <li><a href="https://www.pinterest.com/TayNova06" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/pin.png" alt="Pinterest" /></a></li>
+            <li><a href="https://www.instagram.com/__tay__nova/" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/instas.png" alt="Instagram" /></a></li>
+            <li><a href="https://www.youtube.com/@taynova09" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/youtube-removebg-preview.png" alt="YouTube" /></a></li>
+            <li><a href="https://selar.com/m/tay-nova1" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/selar.png" alt="Selar" /></a></li>
+            <li><a href="https://wa.me/2348124085593" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/whatsapp.png" alt="WhatsApp" /></a></li>
+            <li><a href="mailto:oreoluwaoluwadare2@gmail.com"><img src="assets/Images/Icons/gmail.png" alt="Email" /></a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column footer-policy">
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

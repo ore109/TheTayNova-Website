@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop Finds — TayNova</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo-link">
+          <div class="brand-lockup">
+            <img src="assets/Images/logo/logo.png" alt="TayNova Logo" class="brand-logo" onerror="this.src='https://via.placeholder.com/60';" />
+            <h1 class="brand-name">TayNova</h1>
+          </div>
+        </a>
+
+        <nav class="nav-primary" aria-label="Primary navigation">
+          <ul class="nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="blog.html">Blog</a></li>
+            <li><a href="shop.html">Shop Finds</a></li>
+            <li><a href="ebooks.html">Ebooks</a></li>
+            <li><a href="content.html">Content</a></li>
+            <li><a href="inspiration.html">Inspos Gallery</a></li>
+            <li><a href="collab.html">Collab</a></li>
+            <li><a href="about.html">About</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-section" style="background-image: linear-gradient(rgba(4, 4, 4, 0.25), rgba(4, 4, 4, 0.25)), url('assets/Images/products/big tree.jpg'); background-size: cover; background-position: center;">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+          <p class="hero-tag">SHOP FINDS • HOME • LIFESTYLE</p>
+          <h1>Curated Finds for Beautiful Living</h1>
+          <p class="hero-copy">
+            Handpicked home décor, cozy essentials, and aesthetic lifestyle finds curated for your space.
+          </p>
+          <div class="hero-actions">
+            <a href="#shop-products" class="btn btn-primary">Explore Finds</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="shop-filter-section" id="shop-filters">
+        <div class="shop-filter-wrap">
+          <div class="shop-search-panel">
+            <label for="shop-search-input" class="sr-only">Search products</label>
+            <input id="shop-search-input" type="search" placeholder="Search products or categories…" />
+          </div>
+          <div class="shop-selects-grid">
+            <div class="filter-group">
+              <label for="filter-category">Category</label>
+              <select id="filter-category">
+                <option value="All">All</option>
+                <option value="Living Room">Living Room</option>
+                <option value="Kitchen">Kitchen</option>
+                <option value="Bedroom">Bedroom</option>
+                <option value="Bathroom">Bathroom</option>
+                <option value="Office">Office</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filter-subcategory">Subcategory</label>
+              <select id="filter-subcategory">
+                <option value="All">All</option>
+                <option value="Decor">Decor</option>
+                <option value="Tableware">Tableware</option>
+                <option value="Textiles">Textiles</option>
+                <option value="Lighting">Lighting</option>
+                <option value="Storage">Storage</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filter-price">Price Range</label>
+              <select id="filter-price">
+                <option value="All">All</option>
+                <option value="under-30">Under $30</option>
+                <option value="30-60">$30 - $60</option>
+                <option value="60-100">$60 - $100</option>
+                <option value="above-100">Above $100</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="filter-type">Product Type</label>
+              <select id="filter-type">
+                <option value="All">All</option>
+                <option value="Decor">Decor</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Lighting">Lighting</option>
+                <option value="Storage">Storage</option>
+                <option value="DIY">DIY</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="shop-products-section section-container" id="shop-products">
+        <div class="section-header">
+          <h2 class="section-title">Shop Finds</h2>
+          <p class="section-copy">
+            Explore a curated selection of elevated essentials, thoughtful accents, and premium home pieces.
+          </p>
+        </div>
+        <div id="shop-grid" class="shop-grid"></div>
+        <div id="shop-empty" class="shop-empty-state hidden">No products found</div>
+      </section>
+
+      <section id="product-detail" class="shop-detail-section section-container hidden">
+        <button id="shop-back" class="btn btn-primary">← Back to Shop Finds</button>
+        <article class="shop-detail-card">
+          <div class="shop-detail-meta" id="detail-category"></div>
+          <h2 id="detail-title"></h2>
+          <p id="detail-description" class="shop-detail-copy"></p>
+          <img id="detail-image" class="shop-detail-image" src="" alt="" />
+          <div class="shop-detail-info">
+            <p class="shop-detail-price" id="detail-price"></p>
+            <div class="shop-detail-actions" id="detail-actions"></div>
+          </div>
+          <div class="shop-detail-content" id="detail-content"></div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-grid">
+        <div class="footer-column footer-copy">
+          <p>© TayNova 2026</p>
+        </div>
+
+        <div class="footer-column footer-social">
+          <ul>
+            <li><a href="https://www.pinterest.com/TayNova06" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/pin.png" alt="Pinterest" /></a></li>
+            <li><a href="https://www.instagram.com/__tay__nova/" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/instas.png" alt="Instagram" /></a></li>
+            <li><a href="https://www.youtube.com/@taynova09" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/youtube-removebg-preview.png" alt="YouTube" /></a></li>
+            <li><a href="https://selar.com/m/tay-nova1" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/selar.png" alt="Selar" /></a></li>
+            <li><a href="https://wa.me/2348124085593" target="_blank" rel="noreferrer"><img src="assets/Images/Icons/whatsapp.png" alt="WhatsApp" /></a></li>
+            <li><a href="mailto:oreoluwaoluwadare2@gmail.com"><img src="assets/Images/Icons/gmail.png" alt="Email" /></a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column footer-policy">
+          <a href="#">Privacy Policy</a>
+        </div>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
