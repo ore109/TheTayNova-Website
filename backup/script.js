@@ -4,12 +4,6 @@ document.querySelectorAll('img').forEach((img) => {
   });
 });
 
-// PAGE SIZE FOR PAGINATION
-const PAGE_SIZE = 12;
-let blogPage = 1;
-let shopPage = 1;
-let ebookPage = 1;
-
 const siteHeader = document.querySelector('.site-header');
 const headerInner = document.querySelector('.header-inner');
 const primaryNav = document.querySelector('.nav-primary');
@@ -121,27 +115,84 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
   });
 });
 
-// Data arrays removed. Data will be fetched from Supabase at runtime.
-let blogPosts = [];
-
-async function fetchBlogs() {
-  try {
-    if (!window.supabaseClient) throw new Error('Supabase client not initialized');
-    const { data, error } = await window.supabaseClient
-      .from('blog_posts')
-      .select('*')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false });
-    if (error) {
-      console.error('Error fetching blogs:', error);
-      return [];
-    }
-    return data || [];
-  } catch (err) {
-    console.error(err);
-    return [];
+const blogPosts = [
+  {
+    id: 'cozy-nook',
+    title: 'Creating a Cozy Reading Nook',
+    category: 'Interiors',
+    excerpt: 'Small design moves that transform a corner into a calm, inviting retreat.',
+    cover: '/assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (4).png',
+    image: '/assets/images/blog/content/cozy.png',
+    content: [
+      'A thoughtfully curated reading nook begins with texture and light. Choose a warm throw, a soft pillow, and a lamp with a gentle glow to anchor the space.',
+      'Start with your favorite chair and layer it with tactile pieces like a woven blanket, a plush cushion, and an elegant side table. This encourages quiet moments and creates a sense of intention for the corner.',
+      'Add a stack of books, a small plant, and a tray for your tea or coffee. The simplest accents often make the biggest difference in how the space feels.',
+    ],
+    links: [
+      {
+        text: 'Explore curated reading nook accessories',
+        href: 'https://selar.com/m/tay-nova1'
+      }
+    ]
+  },
+  {
+    id: 'sustainable-rituals',
+    title: 'Sustainable Rituals for Daily Living',
+    category: 'Wellness',
+    excerpt: 'Everyday habits that make your home feel calm, balanced, and eco-conscious.',
+    cover: '/assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (2).png',
+    image: '/assets/images/blog/content/4.png',
+    content: [
+      'Incorporating simple rituals into your routine can elevate the way you move through your home. Start with a morning stretch, a curated playlist, or a moment of gratitude by the window.',
+      'Choose reusable kitchen items, gentle natural cleaners, and plants that help purify the air. These small changes create a softer, more sustainable rhythm for the day.',
+      'A calm space is easier to maintain when you keep surfaces clear, designate resting places for everyday items, and let natural light guide your layout.',
+    ],
+    links: [
+      {
+        text: 'Shop sustainable home essentials',
+        href: 'https://selar.com/m/tay-nova1'
+      }
+    ]
+  },
+  {
+    id: 'holiday-home-guide',
+    title: 'A Holiday Home Styling Guide',
+    category: 'Guides',
+    excerpt: 'A seasonal styling guide with easy updates and mood-setting details.',
+    cover: '/assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (3).png',
+    image: '/assets/images/blog/content/lux 1.png',
+    content: [
+      'Refresh your home for the season using a limited palette and natural textures. Soft throws, warm lighting, and layered candles help create a welcoming atmosphere.',
+      'Mix in a few statement pieces that feel personal—like a woven basket, a ceramic vase, or a favorite framed print—to keep the look grounded and memorable.',
+      'Balance seasonal accents with everyday essentials so the space remains inviting beyond the holidays.',
+    ],
+    links: [
+      {
+        text: 'See our seasonal styling picks',
+        href: 'https://selar.com/m/tay-nova1'
+      }
+    ]
+  },
+  {
+    id: 'daily-decor',
+    title: 'Everyday Decor Habits That Last',
+    category: 'Lifestyle',
+    excerpt: 'Build a home routine around thoughtful objects, consistent editing, and calm visual flow.',
+    cover: '/assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (5).png',
+    image: '/assets/images/blog/content/3.png',
+    content: [
+      'Design systems are not only for interiors—they can also be part of your everyday habits. Choose a few dependable colors, textures, and containers that work with your life.',
+      'Keep surfaces organized with baskets, trays, and simple labels. A small amount of editing each week helps maintain a serene environment.',
+      'Allow your décor to evolve slowly. Select pieces that feel timeless and that you look forward to seeing each day.',
+    ],
+    links: [
+      {
+        text: 'Browse everyday essentials',
+        href: 'https://selar.com/m/tay-nova1'
+      }
+    ]
   }
-}
+];
 
 const blogGrid = document.getElementById('blog-list');
 const searchInput = document.getElementById('blog-search-input');
@@ -160,73 +211,30 @@ function renderBlogCards(posts) {
   if (!blogGrid) return;
   blogGrid.innerHTML = '';
 
-  if (posts.length > PAGE_SIZE * blogPage) {
-    const seeMore = document.createElement('div');
-    seeMore.style.textAlign = 'center';
-    seeMore.style.marginTop = '2rem';
-    seeMore.innerHTML = `<button class="btn btn-primary" onclick="blogPage++;renderBlogCards(blogPosts)">See More</button>`;
-    blogGrid.after(seeMore);
+  if (!posts.length) {
+    blogEmpty.classList.remove('hidden');
+    return;
   }
 
   blogEmpty.classList.add('hidden');
 
-  // Helper to build a detail URL relative to the current folder
-  function buildDetailUrl(page, id) {
-    const base = location.origin + location.pathname.replace(/\/[^\/]*$/, '/');
-    return base + `${page}?id=${encodeURIComponent(id)}`;
-  }
-
   posts.forEach((post) => {
     const card = document.createElement('article');
     card.className = 'blog-card';
-    const detailPath = buildDetailUrl('blog-post.html', post.id);
     card.innerHTML = `
-      <img src="${post.cover_url || ''}" alt="${post.title}" onerror="this.outerHTML='<div class=&quot;image-placeholder&quot;>Image coming soon</div>';">
+      <img src="${post.cover}" alt="${post.title}" onerror="this.outerHTML='<div class=&quot;image-placeholder&quot;>Image coming soon</div>';">
       <h3>${post.title}</h3>
-      <p>${post.short_description || ''}</p>
-      <div class="card-actions">
-        <a class="btn btn-read" href="${detailPath}">Read More</a>
-      </div>
+      <p>${post.excerpt}</p>
+      <button type="button" class="btn btn-read" data-post="${post.id}">Read More</button>
     `;
 
-    // Navigate when clicking the card (but allow buttons/links to handle their own actions)
-    card.addEventListener('click', (e) => {
-      const tag = e.target.tagName.toLowerCase();
-      if (tag === 'button') return;
-      if (tag === 'a') return;
-      window.location.href = detailPath;
+    card.querySelector('[data-post]').addEventListener('click', (event) => {
+      event.preventDefault();
+      openBlogDetail(post.id);
     });
-
-    const shareBtn = card.querySelector('.btn-share');
-    if (shareBtn) {
-      shareBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        const url = shareBtn.dataset.url;
-        await shareLink(url);
-      });
-    }
 
     blogGrid.appendChild(card);
   });
-}
-
-// Share helper: uses Web Share API if available, otherwise falls back to clipboard
-async function shareLink(url) {
-  try {
-    await navigator.clipboard.writeText(url);
-  } catch {
-    const ta = document.createElement('textarea');
-    ta.value = url;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    ta.remove();
-  }
-  const toast = document.createElement('div');
-  toast.textContent = '🔗 Link copied!';
-  toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;background:#7c3aed;color:#fff;padding:0.75rem 1.25rem;border-radius:999px;font-weight:700;z-index:9999;font-size:0.9rem;animation:fadeIn 0.3s ease';
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2500);
 }
 
 function getActiveCategory() {
@@ -247,26 +255,50 @@ function filterBlogPosts() {
   renderBlogCards(filtered);
 }
 
-// Detail navigation handled on separate detail pages (no in-page modals)
+function openBlogDetail(id) {
+  const post = blogPosts.find((item) => item.id === id);
+  if (!post || !blogDetailSection) return;
+
+  detailTitle.textContent = post.title;
+  detailCategory.textContent = post.category;
+  detailExcerpt.textContent = post.excerpt;
+  detailImage.src = post.image;
+  detailImage.alt = post.title;
+  detailContent.innerHTML = post.content.map((paragraph) => `<p>${paragraph}</p>`).join('');
+  detailLinks.innerHTML = post.links
+    .map(
+      (link) => `<a class="blog-detail-link" href="${link.href}" target="_blank" rel="noreferrer">${link.text}</a>`
+    )
+    .join('');
+
+  blogDetailSection.classList.remove('hidden');
+  blogGrid.closest('.blog-section').classList.add('hidden');
+  document.getElementById('blog-search').classList.add('hidden');
+  blogDetailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeBlogDetail() {
+  if (!blogDetailSection) return;
+  blogDetailSection.classList.add('hidden');
+  blogGrid.closest('.blog-section').classList.remove('hidden');
+  document.getElementById('blog-search').classList.remove('hidden');
+  blogGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 if (blogGrid && searchInput) {
-  (async () => {
-    blogPosts = await fetchBlogs();
-    await loadBlogCategories();
-    renderBlogCards(blogPosts);
-    searchInput.addEventListener('input', filterBlogPosts);
-    blogFilterButtons.forEach((button) => {
-      button.addEventListener('click', () => {
-        blogFilterButtons.forEach((buttonToReset) => buttonToReset.classList.remove('active'));
-        button.classList.add('active');
-        filterBlogPosts();
-      });
+  renderBlogCards(blogPosts);
+  searchInput.addEventListener('input', filterBlogPosts);
+  blogFilterButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      blogFilterButtons.forEach((buttonToReset) => buttonToReset.classList.remove('active'));
+      button.classList.add('active');
+      filterBlogPosts();
     });
-  })();
+  });
 }
 
 if (blogBackButton) {
-  blogBackButton.addEventListener('click', () => history.back());
+  blogBackButton.addEventListener('click', closeBlogDetail);
 }
 
 if (document.body.classList.contains('inspo-page')) {
@@ -630,26 +662,6 @@ if (document.body.classList.contains('inspo-page')) {
   setView('creative');
 }
 
-let shopProducts = [];
-
-async function fetchProducts() {
-  try {
-    if (!window.supabaseClient) throw new Error('Supabase client not initialized');
-    const { data, error } = await window.supabaseClient
-      .from('products')
-      .select('*')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false });
-    if (error) {
-      console.error('Error fetching products:', error);
-      return [];
-    }
-    return data || [];
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
-}
 
 const shopGrid = document.getElementById('shop-grid');
 const shopSearchInput = document.getElementById('shop-search-input');
@@ -674,13 +686,10 @@ function renderShopCards(products) {
   if (!shopGrid) return;
   shopGrid.innerHTML = '';
 
-  if (products.length > PAGE_SIZE * shopPage) {
-  const seeMore = document.createElement('div');
-  seeMore.style.textAlign = 'center';
-  seeMore.style.marginTop = '2rem';
-  seeMore.innerHTML = `<button class="btn btn-primary" onclick="shopPage++;renderShopCards(shopProducts)">See More</button>`;
-  shopGrid.after(seeMore);
-}
+  if (!products.length) {
+    shopEmpty.classList.remove('hidden');
+    return;
+  }
 
   shopEmpty.classList.add('hidden');
 
@@ -688,44 +697,28 @@ function renderShopCards(products) {
     const card = document.createElement('article');
     card.className = 'product-card shop-card';
     card.dataset.product = product.id;
-    const base = location.origin + location.pathname.replace(/\/[^\/]*$/, '/');
-    const detailPath = base + `product-detail.html?id=${encodeURIComponent(product.id)}`;
-    const isFree = !product.price || product.price == 0;
     card.innerHTML = `
-      <div style="position:relative">
-        <img src="${product.image_url || ''}" alt="${product.name}" />
-        ${isFree ? `<span style="position:absolute;top:10px;left:10px;background:var(--color-gold);color:#000;padding:0.3rem 0.75rem;border-radius:999px;font-weight:800;font-size:0.8rem">🏷️ FREE</span>` : ''}
-      </div>
+      <img src="${encodeURI(product.image)}" alt="${product.name}" />
       <div class="shop-card-body">
         <h3>${product.name}</h3>
         <p>${product.description}</p>
         <div class="shop-card-footer">
-          <div style="text-align:center;margin-top:auto;padding-top:1rem">
-            <a class="btn btn-read" href="${detailPath}" style="display:inline-flex;justify-content:center">Read More</a>
+          <div>
+           <div style="text-align:center;margin-top:auto;padding-top:1rem">
+              <a class="btn btn-read" href="${detailPath}" style="display:inline-flex;justify-content:center">Read More</a>
+            </div> 
           </div>
-          <div class="card-actions">
-            <button type="button" class="btn-shop-now" data-action="shop-now">Shop Now</button>
-          </div>
-        </div>
       </div>
     `;
 
-    // Card click navigates to detail
-    card.addEventListener('click', (e) => {
-      const tag = e.target.tagName.toLowerCase();
-      if (tag === 'button' || tag === 'a') return;
-      window.location.href = detailPath;
-    });
-
-    const shopNowBtn = card.querySelector('[data-action="shop-now"]');
-    if (shopNowBtn) {
-      shopNowBtn.addEventListener('click', (event) => {
+    card.addEventListener('click', () => openProductDetail(product.id));
+    const button = card.querySelector('[data-action="shop-now"]');
+    if (button) {
+      button.addEventListener('click', (event) => {
         event.stopPropagation();
         window.open(product.affiliate_link || '#', '_blank', 'noopener,noreferrer');
       });
     }
-
-    // share button removed from shop cards — omit share handler
 
     shopGrid.appendChild(card);
   });
@@ -771,15 +764,45 @@ function filterShopProducts() {
   renderShopCards(filtered);
 }
 
-// Detail pages use separate detail HTML; in-page product detail functions removed.
+function openProductDetail(id) {
+  const product = shopProducts.find((item) => item.id === id);
+  if (!product || !shopDetailSection) return;
+
+  if (detailTitleShop) detailTitleShop.textContent = product.name;
+  if (detailCategoryShop) detailCategoryShop.textContent = `${product.category} · ${product.subcategory}`;
+  if (detailDescription) detailDescription.textContent = product.description;
+  if (detailimageshop) {
+    detailimageshop.src = encodeURI(product.image);
+    detailimageshop.alt = product.name;
+  }
+  if (detailPrice) detailPrice.textContent = `$${product.price.toFixed(2)}`;
+  if (detailContentShop) {
+    detailContentShop.innerHTML = product.details.map((paragraph) => `<p>${paragraph}</p>`).join('');
+  }
+  if (detailActionsShop) {
+    detailActionsShop.innerHTML = `
+      <a class="shop-detail-link" href="${product.link}" target="_blank" rel="noreferrer">Shop Now</a>
+    `;
+  }
+
+  shopDetailSection.classList.remove('hidden');
+  if (shopProductsSection) shopProductsSection.classList.add('hidden');
+  if (shopFilterSection) shopFilterSection.classList.add('hidden');
+  shopDetailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeProductDetail() {
+  if (!shopDetailSection) return;
+
+  shopDetailSection.classList.add('hidden');
+  if (shopProductsSection) shopProductsSection.classList.remove('hidden');
+  if (shopFilterSection) shopFilterSection.classList.remove('hidden');
+  if (shopProductsSection) shopProductsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 if (shopGrid && shopSearchInput) {
-  (async () => {
-    shopProducts = await fetchProducts();
-     await loadShopCategories();
-    renderShopCards(shopProducts);
-    shopSearchInput.addEventListener('input', filterShopProducts);
-  })();
+  renderShopCards(shopProducts);
+  shopSearchInput.addEventListener('input', filterShopProducts);
 }
 
 [filterCategory, filterSubcategory, filterPrice, filterType].forEach((selector) => {
@@ -789,28 +812,7 @@ if (shopGrid && shopSearchInput) {
 });
 
 if (shopBackButton) {
-  shopBackButton.addEventListener('click', () => history.back());
-}
-
-let ebookData = [];
-
-async function fetchEbooks() {
-  try {
-    if (!window.supabaseClient) throw new Error('Supabase client not initialized');
-    const { data, error } = await window.supabaseClient
-      .from('ebooks')
-      .select('*')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false });
-    if (error) {
-      console.error('Error fetching ebooks:', error);
-      return [];
-    }
-    return data || [];
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
+  shopBackButton.addEventListener('click', closeProductDetail);
 }
 
 const ebookGrid = document.getElementById('ebook-grid');
@@ -837,13 +839,10 @@ function renderEbookCards(ebooks) {
   if (!ebookGrid) return;
   ebookGrid.innerHTML = '';
 
-  if (ebooks.length > PAGE_SIZE * ebookPage) {
-  const seeMore = document.createElement('div');
-  seeMore.style.textAlign = 'center';
-  seeMore.style.marginTop = '2rem';
-  seeMore.innerHTML = `<button class="btn btn-primary" onclick="ebookPage++;renderEbookCards(ebookData)">See More</button>`;
-  ebookGrid.after(seeMore);
-}
+  if (!ebooks.length) {
+    ebookEmpty.classList.remove('hidden');
+    return;
+  }
 
   ebookEmpty.classList.add('hidden');
 
@@ -851,40 +850,18 @@ function renderEbookCards(ebooks) {
     const card = document.createElement('article');
     card.className = 'ebook-card';
     card.dataset.ebook = ebook.id;
-    const base = location.origin + location.pathname.replace(/\/[^\/]*$/, '/');
-    const detailPath = base + `ebook-detail.html?id=${encodeURIComponent(ebook.id)}`;
-    const isFree = !ebook.price || ebook.price == 0;
     card.innerHTML = `
-      <div style="position:relative">
-        <img src="${ebook.cover_url || ''}" alt="${ebook.title}" />
-        ${isFree ? `<span style="position:absolute;top:10px;left:10px;background:var(--color-gold);color:#000;padding:0.3rem 0.75rem;border-radius:999px;font-weight:800;font-size:0.8rem">🏷️ FREE</span>` : ''}
-      </div>
+      <img src="${encodeURI(ebook.cover)}" alt="${ebook.title}" onerror="this.outerHTML='<div class=&quot;image-placeholder&quot;>Cover image</div>';" />
       <div class="ebook-card-body">
         <h3>${ebook.title}</h3>
         <div class="ebook-card-footer">
-          <div class="card-actions">
-            <div style="text-align:center;margin-top:auto;padding-top:1rem">
-              <a class="btn btn-read" href="${detailPath}" style="display:inline-flex;justify-content:center">Read More</a>
-            </div>
-          </div>
+          <span class="ebook-price">${ebook.price ? '$' + ebook.price : ''}</span>
+          <a href="${ebook.link}" target="_blank" rel="noreferrer" class="btn-get-guide" onclick="event.stopPropagation();">Get the Guide</a>
         </div>
       </div>
     `;
 
-    card.addEventListener('click', (e) => {
-      const tag = e.target.tagName.toLowerCase();
-      if (tag === 'button' || tag === 'a') return;
-      window.location.href = detailPath;
-    });
-
-    const shareBtn = card.querySelector('.btn-share');
-    if (shareBtn) {
-      shareBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await shareLink(shareBtn.dataset.url);
-      });
-    }
-
+    card.addEventListener('click', () => openEbookDetail(ebook.id));
     ebookGrid.appendChild(card);
   });
 }
@@ -904,14 +881,38 @@ function filterEbooks() {
   renderEbookCards(filtered);
 }
 
+function openEbookDetail(id) {
+  const ebook = ebookData.find((item) => item.id === id);
+  if (!ebook || !ebookDetailSection) return;
+
+  detailEbookTitle.textContent = ebook.title;
+  detailEbookDescription.textContent = ebook.description;
+  detailEbookPrice.textContent = ebook.price;
+  detailEbookImage.src = encodeURI(ebook.cover);
+  detailEbookImage.alt = ebook.title;
+  detailEbookActions.innerHTML = `
+    <a class="ebook-detail-link" href="${ebook.link}" target="_blank" rel="noreferrer">Get the Guide</a>
+  `;
+
+  ebookDetailSection.classList.remove('hidden');
+  if (ebookListSection) ebookListSection.classList.add('hidden');
+  if (ebookSearchSection) ebookSearchSection.classList.add('hidden');
+  if (ebookFilterSection) ebookFilterSection.classList.add('hidden');
+  ebookDetailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeEbookDetail() {
+  if (!ebookDetailSection) return;
+  ebookDetailSection.classList.add('hidden');
+  if (ebookListSection) ebookListSection.classList.remove('hidden');
+  if (ebookSearchSection) ebookSearchSection.classList.remove('hidden');
+  if (ebookFilterSection) ebookFilterSection.classList.remove('hidden');
+  if (ebookListSection) ebookListSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 if (ebookGrid && ebookSearchInput) {
-  (async () => {
-    ebookData = await fetchEbooks();
-    await loadEbookCategories();
-    renderEbookCards(ebookData);
-    ebookSearchInput.addEventListener('input', filterEbooks);
-  })();
+  renderEbookCards(ebookData);
+  ebookSearchInput.addEventListener('input', filterEbooks);
 }
 
 ebookFilterButtons.forEach((button) => {
@@ -923,187 +924,8 @@ ebookFilterButtons.forEach((button) => {
 });
 
 if (ebookBackButton) {
-  ebookBackButton.addEventListener('click', () => history.back());
+  ebookBackButton.addEventListener('click', closeEbookDetail);
 }
-
-async function loadBlogCategories() {
-  if (!window.supabaseClient) return;
-  const { data } = await window.supabaseClient.from('blog_posts').select('category').eq('status', 'published');
-  const categories = ['All', ...new Set((data || []).map(p => p.category).filter(Boolean))];
-  const filterPanel = document.querySelector('#blog-search .filter-panel');
-  if (!filterPanel) return;
-  filterPanel.innerHTML = categories.map(cat =>
-    `<button type="button" class="filter-pill ${cat === 'All' ? 'active' : ''}" data-category="${cat}">${cat}</button>`
-  ).join('');
-  document.querySelectorAll('#blog-search .filter-pill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#blog-search .filter-pill').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      filterBlogPosts();
-    });
-  });
-}
-
-async function loadEbookCategories() {
-  if (!window.supabaseClient) return;
-  const { data } = await window.supabaseClient.from('ebooks').select('category').eq('status', 'published');
-  const categories = ['All', ...new Set((data || []).map(e => e.category).filter(Boolean))];
-  const filterPills = document.querySelector('.ebook-filter-pills');
-  if (!filterPills) return;
-  filterPills.innerHTML = categories.map(cat =>
-    `<button type="button" class="ebook-filter-pill ${cat === 'All' ? 'active' : ''}" data-category="${cat}">${cat}</button>`
-  ).join('');
-  document.querySelectorAll('.ebook-filter-pill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.ebook-filter-pill').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      filterEbooks();
-    });
-  });
-}
-
-async function loadShopCategories() {
-  if (!window.supabaseClient) return;
-  const { data } = await window.supabaseClient.from('products').select('category').eq('status', 'published');
-  const categories = ['All', ...new Set((data || []).map(p => p.category).filter(Boolean))];
-  const select = document.getElementById('filter-category');
-  if (!select) return;
-  select.innerHTML = categories.map(cat =>
-    `<option value="${cat}">${cat}</option>`
-  ).join('');
-}
-
-// Privacy links use normal navigation; removed modal-based privacy display.
-
-function getIdFromUrl() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get('id');
-}
-
-async function fetchSingle(table, id) {
-  try {
-    if (!window.supabaseClient) throw new Error('Supabase client not initialized');
-    const { data, error } = await window.supabaseClient.from(table).select('*').eq('id', id).single();
-    if (error) {
-      console.error(`Error fetching ${table} id=${id}:`, error);
-      return null;
-    }
-    return data;
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
-}
-
-(async function loadDetailIfNeeded() {
-  const id = getIdFromUrl();
-  if (!id) return;
-
-  // Blog detail page
-  if (document.getElementById('blog-detail') || window.location.pathname.endsWith('blog-post.html')) {
-    const post = await fetchSingle('blog_posts', id);
-    if (post) {
-      if (detailTitle) detailTitle.textContent = post.title || '';
-      if (detailCategory) detailCategory.textContent = post.category || '';
-      if (detailExcerpt) detailExcerpt.textContent = post.short_description || '';
-      if (detailImage) {
-        detailImage.src = post.cover_url || '';
-        detailImage.alt = post.title || '';
-      }
-      if (detailContent) {
-        detailContent.innerHTML = post.content || '';
-      }
-      if (detailLinks) {
-        if (post.links && Array.isArray(post.links)) {
-          detailLinks.innerHTML = post.links
-            .map((link) => `<a class="blog-detail-link" href="${link.href}" target="_blank" rel="noreferrer">${link.text}</a>`)
-            .join('');
-        } else {
-          detailLinks.innerHTML = '';
-        }
-      }
-
-      // Back and share
-      if (blogBackButton) blogBackButton.addEventListener('click', () => history.back());
-      if (blogDetailSection) {
-        const shareBtn = document.createElement('button');
-        shareBtn.type = 'button';
-        shareBtn.title = 'Share';
-        shareBtn.style.cssText = 'position:fixed;top:7rem;right:1.5rem;width:44px;height:44px;border-radius:50%;background:#7c3aed;color:#fff;border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(124,58,237,0.3);z-index:50';
-        shareBtn.innerHTML = '🔗';
-        shareBtn.addEventListener('click', async () => await shareLink(window.location.href));
-        document.body.appendChild(shareBtn);
-      }
-    }
-  }
-// Product detail page
-  if (document.getElementById('product-detail') || window.location.pathname.endsWith('product-detail.html')) {
-    const product = await fetchSingle('products', id);
-    if (product) {
-      if (detailTitleShop) detailTitleShop.textContent = product.name || '';
-      if (detailCategoryShop) detailCategoryShop.textContent = `${product.category || ''} · ${product.subcategory || ''}`;
-      if (detailDescription) detailDescription.innerHTML = product.description || '';
-      if (detailimageshop) {
-        detailimageshop.src = product.image_url || '';
-        detailimageshop.alt = product.name || '';
-      }
-      if (detailPrice) {
-        const isFree = !product.price || product.price == 0;
-        detailPrice.innerHTML = isFree
-          ? '<span style="color:var(--color-gold);font-weight:800;font-size:1.5rem">FREE</span>'
-          : `<span style="font-weight:800;font-size:1.5rem">₦${Number(product.price).toLocaleString()}</span>${product.discount ? ` <span style="background:rgba(201,162,39,0.15);color:var(--color-gold);padding:0.3rem 0.75rem;border-radius:999px;font-size:0.85rem;font-weight:700">${product.discount}% OFF</span>` : ''}`;
-      }
-      if (detailContentShop) {
-        if (Array.isArray(product.details)) {
-          detailContentShop.innerHTML = product.details.map((p) => `<p>${p}</p>`).join('');
-        } else {
-          detailContentShop.innerHTML = product.details || '';
-        }
-      }
-      if (detailActionsShop) {
-        detailActionsShop.innerHTML = `<a class="shop-detail-link" href="${product.affiliate_link || '#'}" target="_blank" rel="noreferrer">Shop Now</a>`;
-        const shareBtn = document.createElement('button');
-        shareBtn.type = 'button';
-        shareBtn.title = 'Share';
-        shareBtn.style.cssText = 'position:fixed;top:7rem;right:1.5rem;width:44px;height:44px;border-radius:50%;background:#7c3aed;color:#fff;border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(124,58,237,0.3);z-index:50';
-        shareBtn.innerHTML = '🔗';
-        shareBtn.addEventListener('click', async () => await shareLink(window.location.href));
-        document.body.appendChild(shareBtn);
-      }
-      if (shopBackButton) shopBackButton.addEventListener('click', () => history.back());
-    }
-  }
-
-  // Ebook detail page
-  if (document.getElementById('ebook-detail') || window.location.pathname.endsWith('ebook-detail.html')) {
-    const ebook = await fetchSingle('ebooks', id);
-    if (ebook) {
-      if (detailEbookTitle) detailEbookTitle.textContent = ebook.title || '';
-      if (detailEbookDescription) detailEbookDescription.innerHTML = ebook.description || '';
-      if (detailEbookPrice) {
-        const isFree = !ebook.price || ebook.price == 0;
-        detailEbookPrice.innerHTML = isFree
-          ? '<span style="color:var(--color-gold);font-weight:800;font-size:1.5rem">FREE</span>'
-          : `<span style="font-weight:800;font-size:1.5rem">₦${Number(ebook.price).toLocaleString()}</span>`;
-      }
-      if (detailEbookImage) {
-        detailEbookImage.src = ebook.cover_url || '';
-        detailEbookImage.alt = ebook.title || '';
-      }
-      if (detailEbookActions) {
-        detailEbookActions.innerHTML = `<a class="ebook-detail-link" href="${ebook.link}" target="_blank" rel="noreferrer">Get the Guide</a>`;
-        const shareBtn = document.createElement('button');
-        shareBtn.type = 'button';
-        shareBtn.title = 'Share';
-        shareBtn.style.cssText = 'position:fixed;top:7rem;right:1.5rem;width:44px;height:44px;border-radius:50%;background:#7c3aed;color:#fff;border:none;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(124,58,237,0.3);z-index:50';
-        shareBtn.innerHTML = '🔗';
-        shareBtn.addEventListener('click', async () => await shareLink(window.location.href));
-        detailEbookActions.prepend(shareBtn);
-      }
-      if (ebookBackButton) ebookBackButton.addEventListener('click', () => history.back());
-    }
-  }
-})();
 
 const privacyPolicyLinks = document.querySelectorAll('.footer-policy a');
 
@@ -1164,76 +986,5 @@ if (privacyPolicyLinks.length) {
     }
   });
 }
-  // HOMEPAGE SECTIONS
-async function loadHomepageSections() {
-  if (!window.supabaseClient) return;
 
-  // Latest 3 blogs
-  const homeBlogGrid = document.getElementById('home-blog-grid');
-  if (homeBlogGrid) {
-    const { data: posts } = await window.supabaseClient
-      .from('blog_posts')
-      .select('id, title, short_description, cover_url')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
-      .limit(3);
-    if (posts && posts.length) {
-      homeBlogGrid.innerHTML = posts.map(post => `
-        <article class="blog-card">
-          <img src="${post.cover_url || ''}" alt="${post.title}" onerror="this.outerHTML='<div class=&quot;image-placeholder&quot;>Image coming soon</div>';" />
-          <h3>${post.title}</h3>
-          <p>${post.short_description ? post.short_description.slice(0,100) + '...' : ''}</p>
-          <a href="blog-post.html?id=${post.id}" class="btn btn-read">Read More</a>
-        </article>
-      `).join('');
-    }
-      homeBlogGrid.insertAdjacentHTML('afterend', '...');
-  }
 
-  // Latest 3 products
-  const homeProductsGrid = document.getElementById('home-products-grid');
-  if (homeProductsGrid) {
-    const { data: products } = await window.supabaseClient
-      .from('products')
-      .select('id, name, image_url, price, discount, affiliate_link')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
-      .limit(3);
-    if (products && products.length) {
-      homeProductsGrid.innerHTML = products.map(p => {
-        const discounted = p.discount > 0 ? (p.price - p.price * p.discount / 100).toFixed(2) : null;
-        return `
-          <div class="product-card">
-            <img src="${p.image_url || ''}" alt="${p.name}" />
-            <h3>${p.name}</h3>
-            <p class="price">${discounted ? `<s>$${p.price}</s> $${discounted}` : `$${p.price}`}</p>
-            <a href="product-detail.html?id=${p.id}" class="btn btn-shop">View Product</a>
-          </div>
-        `;
-      }).join('');
-    }
-    homeProductsGrid.insertAdjacentHTML('afterend', '...');
-  }
-
-  // Latest 3 ebooks
-  const homeEbooksGrid = document.getElementById('home-ebooks-grid');
-  if (homeEbooksGrid) {
-    const { data: ebooks } = await window.supabaseClient
-      .from('ebooks')
-      .select('id, title, cover_url, price, purchase_link')
-      .eq('status', 'published')
-      .order('created_at', { ascending: false })
-      .limit(3);
-    if (ebooks && ebooks.length) {
-      homeEbooksGrid.innerHTML = ebooks.map(eb => `
-        <div class="ebook-card">
-          <img src="${eb.cover_url || ''}" alt="${eb.title}" />
-          <h4>${eb.title}</h4>
-          <a href="ebook-detail.html?id=${eb.id}" class="btn btn-ebook">Get the Guide</a>
-        </div>
-      `).join('');
-    }
-    homeEbooksGrid.insertAdjacentHTML('afterend', '...');
-  }
-}
-loadHomepageSections();

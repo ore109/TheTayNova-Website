@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Ebook Editor — TayNova CMS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" />
+    <style>
+      :root {
+        --admin-black: #151216;
+        --admin-card: rgba(255,255,255,0.08);
+        --admin-card-strong: rgba(255,255,255,0.12);
+        --admin-gold: #c9a227;
+        --admin-white: #ffffff;
+        --admin-muted: rgba(255,255,255,0.66);
+        --admin-border: rgba(255,255,255,0.12);
+        --admin-danger: #e74c3c;
+        --admin-success: #2ecc71;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: Inter, system-ui, sans-serif; color: var(--admin-white); background: radial-gradient(circle at top right, rgba(201,162,39,0.12), transparent 30%), linear-gradient(135deg, #100e12, var(--admin-black)); min-height: 100vh; }
+      button { border: none; font: inherit; cursor: pointer; }
+      img { display: block; max-width: 100%; }
+      a { text-decoration: none; color: inherit; }
+      .hidden { display: none !important; }
+      .auth-check { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; }
+      .auth-card { width: min(480px,100%); padding: 2rem; border: 1px solid var(--admin-border); border-radius: 28px; background: var(--admin-card); backdrop-filter: blur(18px); text-align: center; }
+      .auth-card h1 { font-size: clamp(2rem,6vw,3rem); margin-bottom: 0.75rem; }
+      .auth-card p { color: var(--admin-muted); line-height: 1.7; }
+      .dashboard-shell { min-height: 100vh; padding-left: 280px; }
+      .admin-sidebar { position: fixed; inset: 0 auto 0 0; width: 280px; display: flex; flex-direction: column; gap: 2rem; padding: 1.5rem; border-right: 1px solid var(--admin-border); background: rgba(18,15,20,0.86); backdrop-filter: blur(22px); box-shadow: 24px 0 80px rgba(0,0,0,0.18); z-index: 100; }
+      .sidebar-brand { display: grid; justify-items: center; gap: 0.85rem; padding: 0.75rem 0 1.25rem; border-bottom: 1px solid var(--admin-border); text-align: center; }
+      .sidebar-brand img { width: 58px; height: 58px; object-fit: contain; }
+      .sidebar-brand h2 { font-size: 1.05rem; letter-spacing: 0.04em; }
+      .admin-nav { display: grid; gap: 0.45rem; }
+      .admin-nav a { display: flex; align-items: center; min-height: 46px; padding: 0.85rem 1rem; border-radius: 16px; color: var(--admin-muted); font-weight: 700; transition: color 0.2s, background 0.2s, transform 0.2s; }
+      .admin-nav a:hover, .admin-nav a.active { color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px); }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-gold); }
+      .logout-btn { margin-top: auto; width: 100%; border-radius: 999px; padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-gold); font-weight: 800; }
+      .page-main { padding: clamp(1.5rem,4vw,3rem); max-width: 860px; }
+      .page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+      .back-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1rem; border-radius: 999px; background: rgba(255,255,255,0.08); color: var(--admin-muted); font-size: 0.9rem; font-weight: 600; transition: background 0.2s, color 0.2s; }
+      .back-btn:hover { background: rgba(255,255,255,0.14); color: var(--admin-white); }
+      .page-header h1 { font-size: clamp(1.5rem,3vw,2.2rem); flex: 1; }
+      .stepper { display: flex; margin-bottom: 2.5rem; border-radius: 18px; overflow: hidden; border: 1px solid var(--admin-border); }
+      .step-item { flex: 1; text-align: center; padding: 0.85rem 0.5rem; font-size: 0.78rem; font-weight: 700; color: var(--admin-muted); background: rgba(255,255,255,0.04); border-right: 1px solid var(--admin-border); transition: background 0.2s, color 0.2s; }
+      .step-item:last-child { border-right: none; }
+      .step-item.active { background: rgba(201,162,39,0.18); color: var(--admin-gold); }
+      .step-item.done { background: rgba(46,204,113,0.08); color: var(--admin-success); }
+      .step-panel { display: none; }
+      .step-panel.active { display: block; }
+      .form-group { margin-bottom: 1.5rem; }
+      .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--admin-muted); margin-bottom: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; }
+      .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--admin-border); border-radius: 14px; background: rgba(255,255,255,0.06); color: var(--admin-white); font: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s, background 0.2s; }
+      .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--admin-gold); background: rgba(255,255,255,0.1); }
+      .form-group select option { background: #1a161e; }
+      .form-group textarea { resize: vertical; min-height: 90px; }
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .form-hint { font-size: 0.8rem; color: var(--admin-muted); margin-top: 0.35rem; }
+      .form-error { font-size: 0.8rem; color: var(--admin-danger); margin-top: 0.35rem; display: none; }
+      .form-error.show { display: block; }
+      .required-star { color: var(--admin-gold); }
+      .upload-zone { border: 2px dashed var(--admin-border); border-radius: 18px; padding: 3rem 2rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: rgba(255,255,255,0.03); position: relative; }
+      .upload-zone:hover, .upload-zone.dragover { border-color: var(--admin-gold); background: rgba(201,162,39,0.06); }
+      .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+      .upload-zone strong { display: block; margin: 0.5rem 0 0.25rem; }
+      .upload-zone p { color: var(--admin-muted); font-size: 0.88rem; }
+      .upload-icon { font-size: 3rem; }
+      .cover-preview-wrap { margin-top: 1.25rem; position: relative; display: none; }
+      .cover-preview-wrap img { width: 100%; max-height: 320px; object-fit: contain; border-radius: 16px; }
+      .cover-remove-btn { position: absolute; top: 10px; right: 10px; padding: 0.4rem 0.75rem; border-radius: 999px; background: rgba(0,0,0,0.7); color: white; font-size: 0.8rem; font-weight: 700; }
+      .ql-toolbar.ql-snow { border: 1px solid var(--admin-border) !important; border-bottom: none !important; background: rgba(255,255,255,0.06) !important; border-radius: 16px 16px 0 0; position: sticky; top: 0; z-index: 10; }
+      .ql-container.ql-snow { border: 1px solid var(--admin-border) !important; border-radius: 0 0 16px 16px; background: rgba(255,255,255,0.04); min-height: 200px; font-family: inherit; }
+      .ql-editor { color: #ffffff !important; min-height: 200px; line-height: 1.8; padding: 1.5rem !important; caret-color: #ffffff; }
+      .ql-editor p, .ql-editor li, .ql-editor h1, .ql-editor h2, .ql-editor h3 { color: #ffffff !important; }
+      .ql-snow .ql-stroke { stroke: var(--admin-muted) !important; }
+      .ql-snow .ql-fill { fill: var(--admin-muted) !important; }
+      .ql-snow .ql-picker { color: var(--admin-muted) !important; }
+      .ql-snow .ql-picker-options { background: #1e1a22 !important; border-color: var(--admin-border) !important; }
+      .review-grid { display: grid; gap: 1.25rem; }
+      .review-card { border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; background: rgba(255,255,255,0.04); }
+      .review-label { font-size: 0.75rem; font-weight: 800; color: var(--admin-gold); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem; }
+      .review-value { font-size: 0.95rem; line-height: 1.6; }
+      .review-cover { width: 100%; max-height: 280px; object-fit: contain; border-radius: 14px; }
+      .ebook-cta-preview { border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.5rem; background: rgba(201,162,39,0.06); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+      .ebook-cta-price { font-size: 1.5rem; font-weight: 800; }
+      .btn-cta-preview { padding: 0.75rem 1.5rem; border-radius: 999px; background: var(--admin-gold); color: var(--admin-black); font-weight: 800; font-size: 0.9rem; }
+      .action-bar { position: sticky; bottom: 0; display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end; padding: 1.25rem 0; margin-top: 2rem; border-top: 1px solid var(--admin-border); background: linear-gradient(to top, rgba(16,14,18,0.98), transparent); backdrop-filter: blur(12px); }
+      .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.85rem 1.5rem; border-radius: 999px; font-weight: 700; font-size: 0.9rem; transition: transform 0.2s, opacity 0.2s; cursor: pointer; }
+      .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+      .btn-ghost { background: rgba(255,255,255,0.08); color: var(--admin-white); }
+      .btn-draft { background: rgba(255,255,255,0.12); color: var(--admin-white); }
+      .btn-primary { background: var(--admin-gold); color: var(--admin-black); }
+      .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem; border-radius: 14px; font-weight: 700; z-index: 400; border: 1px solid; transform: translateY(100px); opacity: 0; transition: transform 0.3s, opacity 0.3s; }
+      .toast.show { transform: translateY(0); opacity: 1; }
+      .success-screen { text-align: center; padding: 4rem 2rem; }
+      .success-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+      .success-screen h2 { font-size: 2rem; margin-bottom: 0.75rem; }
+      .success-screen p { color: var(--admin-muted); margin-bottom: 2rem; line-height: 1.7; }
+      .success-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+      @media (max-width: 760px) {
+        .dashboard-shell { padding-left: 0; padding-bottom: 88px; }
+        .admin-sidebar { inset: auto 0 0 0; width: 100%; height: auto; flex-direction: row; align-items: center; gap: 0.65rem; padding: 0.65rem; border-top: 1px solid var(--admin-border); border-right: none; overflow-x: auto; }
+        .sidebar-brand { display: none; }
+        .admin-nav { display: flex; gap: 0.45rem; flex: 1; overflow-x: auto; }
+        .admin-nav a { min-height: 42px; white-space: nowrap; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
+        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-gold); }
+        .logout-btn { width: auto; flex: 0 0 auto; margin: 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; }
+        .form-row { grid-template-columns: 1fr; }
+        .action-bar { justify-content: stretch; }
+        .action-bar .btn { flex: 1; justify-content: center; }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="auth-check" id="checking">
+      <div class="auth-card"><h1>Checking Access</h1><p>Verifying your private TayNova admin session...</p></div>
+    </section>
+    <div class="dashboard-shell hidden" id="dashboard-shell">
+      <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+          <img src="/assets/images/logo/logo.png" alt="TayNova Logo" />
+          <h2>TayNova Admin</h2>
+        </div>
+        <nav class="admin-nav">
+          <a href="/admin/dashboard.html">Home</a>
+          <a href="/admin/blogs.html">Blog</a>
+          <a href="/admin/products.html">Products</a>
+          <a href="/admin/ebooks.html" class="active">Ebooks</a>
+          <a href="/admin/inspiration.html">Inspiration</a>
+          <a href="/admin/content.html">Content</a>
+        </nav>
+        <button class="logout-btn" id="logout">Logout</button>
+      </aside>
+      <main class="page-main">
+        <div class="page-header">
+          <a href="/admin/ebooks.html" class="back-btn">← Back</a>
+          <h1 id="page-title">Upload New Ebook</h1>
+        </div>
+        <div class="stepper">
+          <div class="step-item active" data-step="1">1. Info</div>
+          <div class="step-item" data-step="2">2. Cover</div>
+          <div class="step-item" data-step="3">3. Details</div>
+          <div class="step-item" data-step="4">4. Review</div>
+        </div>
+
+        <!-- STEP 1 -->
+        <div class="step-panel active" id="panel-1">
+          <div class="form-group">
+            <label>Ebook Title <span class="required-star">*</span></label>
+            <input type="text" id="eb-title" placeholder="e.g. The Cozy Home Reset Guide" />
+            <div class="form-error" id="err-title">Title is required</div>
+          </div>
+          <div class="form-group">
+            <label>Description <span class="required-star">*</span></label>
+            <div id="desc-editor"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Price (₦) <span class="required-star">*</span></label>
+                <input type="number" id="eb-price" placeholder="9999" min="0" step="0.01" />
+              <div class="form-error" id="err-price">Valid price is required</div>
+            </div>
+            <div class="form-group">
+              <label>Purchase Link <span class="required-star">*</span></label>
+              <input type="url" id="eb-link" placeholder="https://selar.com/..." />
+              <div class="form-error" id="err-link">Purchase link is required</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category</label>
+              <select id="eb-category">
+                <option value="">Select category...</option>
+                <option>Home & Living</option>
+                <option>Lifestyle</option>
+                <option>Organization</option>
+                <option>Wellness</option>
+                <option>Sustainability</option>
+                <option>Creator Life</option>
+                <option>Budgeting</option>
+                <option>Self Development</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Tags</label>
+              <input type="text" id="eb-tags" placeholder="cozy home, organization, lifestyle..." />
+              <div class="form-hint">Separate with commas</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Number of Pages</label>
+              <input type="number" id="eb-pages" placeholder="e.g. 42" min="1" />
+            </div>
+            <div class="form-group">
+              <label>File Format</label>
+              <select id="eb-format">
+                <option value="">Select format...</option>
+                <option>PDF</option>
+                <option>PDF + Workbook</option>
+                <option>Digital Download</option>
+                <option>Interactive PDF</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="step-panel" id="panel-2">
+          <div class="form-group">
+            <label>Cover Image</label>
+            <div class="upload-zone" id="cover-zone">
+              <input type="file" id="cover-input" accept="image/jpeg,image/png,image/webp" />
+              <div class="upload-icon">📚</div>
+              <strong>Upload Ebook Cover</strong>
+              <p>JPG, PNG, WEBP · Best ratio: 3:4 portrait · Click or drag & drop</p>
+            </div>
+            <div class="cover-preview-wrap" id="cover-preview-wrap">
+              <img id="cover-preview-img" src="" alt="Cover" />
+              <button class="cover-remove-btn" onclick="removeCover()">✕ Remove</button>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:1rem">
+            <label>Or use Cover Image URL</label>
+            <input type="url" id="cover-url-input" placeholder="https://..." oninput="previewCoverUrl()" />
+            <div class="form-hint">Paste an external cover image URL as an alternative</div>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="step-panel" id="panel-3">
+          <p style="color:var(--admin-muted);margin-bottom:1.5rem;line-height:1.7">Add extra details that appear on the ebook sales page — benefits, what readers will learn, chapter overview, bonuses etc. Leave empty to hide this section on the frontend.</p>
+          <div class="form-group">
+            <label>Extra Details (Optional)</label>
+            <div id="extra-editor"></div>
+          </div>
+        </div>
+
+        <!-- STEP 4: REVIEW -->
+        <div class="step-panel" id="panel-4">
+          <div class="review-grid">
+            <div class="review-card" id="review-cover-card" style="display:none">
+              <div class="review-label">Cover</div>
+              <img class="review-cover" id="review-cover-img" src="" alt="Cover" />
+            </div>
+            <div class="review-card">
+              <div class="review-label">Title</div>
+              <div class="review-value" id="review-title">—</div>
+            </div>
+            <div class="review-card">
+              <div class="review-label">Category & Tags</div>
+              <div class="review-value" id="review-meta" style="color:var(--admin-muted)">—</div>
+            </div>
+            <div class="review-card">
+              <div class="review-label">Description Preview</div>
+              <div id="review-desc" style="font-size:0.9rem;line-height:1.7;color:var(--admin-muted);margin-top:0.5rem;max-height:150px;overflow-y:auto"></div>
+            </div>
+            <div class="review-card" id="review-extra-card" style="display:none">
+              <div class="review-label">Extra Details Preview</div>
+              <div id="review-extra" style="font-size:0.9rem;line-height:1.7;color:var(--admin-muted);margin-top:0.5rem;max-height:150px;overflow-y:auto"></div>
+            </div>
+            <div class="review-card">
+              <div class="review-label">Purchase CTA Preview</div>
+              <div class="ebook-cta-preview">
+                <div>
+                  <div style="font-size:0.82rem;color:var(--admin-muted);margin-bottom:0.25rem" id="review-format-pages">—</div>
+                  <div class="ebook-cta-price" id="review-price">$0.00</div>
+                </div>
+                <a id="review-cta-btn" href="#" target="_blank" class="btn-cta-preview">Get the Ebook →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUCCESS -->
+        <div class="step-panel" id="panel-success">
+          <div class="success-screen">
+            <div class="success-icon">🎉</div>
+            <h2>Ebook Published!</h2>
+            <p>Your ebook is now live on TayNova.</p>
+            <div class="success-actions">
+              <a href="/admin/ebooks.html" class="btn btn-ghost">← Back to Ebooks</a>
+              <button class="btn btn-primary" onclick="startNew()">➕ Upload Another</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-bar" id="action-bar"></div>
+      </main>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+      const SUPABASE_URL = 'https://ngnricijtqlikjxrbtlr.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI';
+      const ADMIN_EMAIL = 'oreoluwaoluwadare2@gmail.com';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true } });
+
+      // NGN <> USD utilities
+      const NGN_PER_USD = 1500; // adjust as needed
+      function toNGN(usd) { return parseFloat(usd) * NGN_PER_USD; }
+      function toUSD(ngn) { return parseFloat(ngn) / NGN_PER_USD; }
+      function fmtNGN(n) { if (n === null || n === undefined || isNaN(n)) return '—'; return '₦' + Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+      function fmtUSD(n) { if (n === null || n === undefined || isNaN(n)) return '—'; return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+      let currentStep = 1, TOTAL_STEPS = 4, editingId = null;
+      let coverFile = null, coverUrl = null;
+      let descQuill = null, extraQuill = null;
+      let autoSaveTimer = null;
+
+      const checking = document.getElementById('checking'), shell = document.getElementById('dashboard-shell'), toast = document.getElementById('toast');
+
+      async function guardPage() {
+        const { data } = await sb.auth.getSession();
+        if (!data.session || data.session.user.email !== ADMIN_EMAIL) { window.location.replace('/admin/index.html'); return; }
+        checking.classList.add('hidden'); shell.classList.remove('hidden');
+        initEditors(); renderActionBar(); checkEditMode(); startAutoSave();
+      }
+      document.getElementById('logout').addEventListener('click', async () => { await sb.auth.signOut(); window.location.replace('/admin/index.html'); });
+
+      function showToast(msg, isError = false) {
+        toast.textContent = msg; toast.style.background = isError ? 'rgba(231,76,60,0.18)' : 'rgba(46,204,113,0.18)';
+        toast.style.borderColor = isError ? 'rgba(231,76,60,0.3)' : 'rgba(46,204,113,0.3)'; toast.style.color = isError ? '#e74c3c' : '#2ecc71';
+        toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3500);
+      }
+
+      function initEditors() {
+        const toolbarOpts = [[{ header: [1,2,3,false] }],['bold','italic','underline'],[{ color: [] }],[{ list: 'ordered' },{ list: 'bullet' }],['blockquote','link'],['clean']];
+        descQuill = new Quill('#desc-editor', { theme: 'snow', modules: { toolbar: toolbarOpts } });
+        extraQuill = new Quill('#extra-editor', { theme: 'snow', modules: { toolbar: toolbarOpts } });
+        descQuill.format('color', '#ffffff');
+        extraQuill.format('color', '#ffffff');
+      }
+
+      function goToStep(n) {
+        if (n < 1 || n > TOTAL_STEPS) return;
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.step-item').forEach(s => { const sn = parseInt(s.dataset.step); s.classList.toggle('active', sn === n); s.classList.toggle('done', sn < n); });
+        document.getElementById(`panel-${n}`).classList.add('active');
+        currentStep = n; renderActionBar();
+        if (n === 4) populateReview();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function validateStep(n) {
+        if (n === 1) {
+          const title = document.getElementById('eb-title').value.trim();
+          const price = parseFloat(document.getElementById('eb-price').value);
+          const link = document.getElementById('eb-link').value.trim();
+          if (!title) { document.getElementById('err-title').classList.add('show'); showToast('Title is required', true); return false; }
+          document.getElementById('err-title').classList.remove('show');
+          if (isNaN(price) || price < 0) { document.getElementById('err-price').classList.add('show'); showToast('Valid price is required', true); return false; }
+          document.getElementById('err-price').classList.remove('show');
+          if (!link) { document.getElementById('err-link').classList.add('show'); showToast('Purchase link is required', true); return false; }
+          document.getElementById('err-link').classList.remove('show');
+        }
+        return true;
+      }
+
+      function nextStep() { if (!validateStep(currentStep)) return; goToStep(currentStep + 1); }
+      function prevStep() { goToStep(currentStep - 1); }
+
+      function renderActionBar() {
+        const bar = document.getElementById('action-bar');
+        if (currentStep > TOTAL_STEPS) { bar.innerHTML = ''; return; }
+        let html = '';
+        if (currentStep > 1) html += `<button class="btn btn-ghost" onclick="prevStep()">← Back</button>`;
+        html += `<button class="btn btn-draft" onclick="saveEbook('draft')">💾 Save Draft</button>`;
+        if (currentStep < TOTAL_STEPS) html += `<button class="btn btn-primary" onclick="nextStep()">Continue →</button>`;
+        if (currentStep === TOTAL_STEPS) html += `<button class="btn btn-primary" onclick="saveEbook('published')">🚀 Publish Now</button>`;
+        bar.innerHTML = html;
+      }
+
+      document.getElementById('cover-input').addEventListener('change', e => {
+        const file = e.target.files[0]; if (!file) return;
+        coverFile = file; coverUrl = URL.createObjectURL(file); showCoverPreview(coverUrl);
+      });
+      function showCoverPreview(url) { document.getElementById('cover-preview-img').src = url; document.getElementById('cover-preview-wrap').style.display = 'block'; }
+      function removeCover() { coverFile = null; coverUrl = null; document.getElementById('cover-preview-wrap').style.display = 'none'; document.getElementById('cover-input').value = ''; document.getElementById('cover-url-input').value = ''; }
+      function previewCoverUrl() {
+        const url = document.getElementById('cover-url-input').value.trim();
+        if (url) { coverUrl = url; coverFile = null; showCoverPreview(url); } else { coverUrl = null; document.getElementById('cover-preview-wrap').style.display = 'none'; }
+      }
+
+      const coverZone = document.getElementById('cover-zone');
+      coverZone.addEventListener('dragover', e => { e.preventDefault(); coverZone.classList.add('dragover'); });
+      coverZone.addEventListener('dragleave', () => coverZone.classList.remove('dragover'));
+      coverZone.addEventListener('drop', e => {
+        e.preventDefault(); coverZone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) { coverFile = file; coverUrl = URL.createObjectURL(file); showCoverPreview(coverUrl); }
+      });
+
+      function populateReview() {
+        const title = document.getElementById('eb-title').value.trim();
+        const price = document.getElementById('eb-price').value;
+        const link = document.getElementById('eb-link').value.trim();
+        const cat = document.getElementById('eb-category').value;
+        const tags = document.getElementById('eb-tags').value.trim();
+        const pages = document.getElementById('eb-pages').value;
+        const format = document.getElementById('eb-format').value;
+        const desc = descQuill ? descQuill.root.innerHTML : '';
+        const extra = extraQuill ? extraQuill.root.innerHTML : '';
+
+        document.getElementById('review-title').textContent = title || '—';
+        document.getElementById('review-meta').textContent = [cat, tags].filter(Boolean).join(' · ') || '—';
+        document.getElementById('review-desc').innerHTML = desc || '<em>No description</em>';
+        // price input is NGN; show both NGN and converted USD
+        const priceNum = parseFloat(price) || 0;
+        document.getElementById('review-price').textContent = `${fmtNGN(priceNum)} · ${fmtUSD(toUSD(priceNum))}`;
+        document.getElementById('review-format-pages').textContent = [format, pages ? `${pages} pages` : ''].filter(Boolean).join(' · ') || '—';
+        const ctaBtn = document.getElementById('review-cta-btn');
+        if (link) ctaBtn.href = link;
+
+        const finalCover = coverUrl || document.getElementById('cover-url-input').value.trim();
+        if (finalCover) { document.getElementById('review-cover-img').src = finalCover; document.getElementById('review-cover-card').style.display = 'block'; }
+        else document.getElementById('review-cover-card').style.display = 'none';
+
+        const extraText = extra.replace(/<[^>]*>/g,'').trim();
+        if (extraText) { document.getElementById('review-extra').innerHTML = extra; document.getElementById('review-extra-card').style.display = 'block'; }
+        else document.getElementById('review-extra-card').style.display = 'none';
+      }
+
+      async function uploadFile(file, bucket, folder) {
+        const ext = file.name.split('.').pop();
+        const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await sb.storage.from(bucket).upload(path, file, { upsert: true });
+        if (error) throw error;
+        const { data } = sb.storage.from(bucket).getPublicUrl(path);
+        return data.publicUrl;
+      }
+
+      function cleanContent(html) {
+        if (!html) return html;
+        return html.replace(/color:\s*rgb\(255,\s*255,\s*255\)/gi,'').replace(/color:\s*#fff(fff)?;?/gi,'').replace(/color:\s*white;?/gi,'');
+      }
+
+      async function buildData(status) {
+        let finalCoverUrl = document.getElementById('cover-url-input').value.trim() || coverUrl;
+        if (coverFile && coverFile instanceof File) finalCoverUrl = await uploadFile(coverFile, 'images', 'ebooks/covers');
+        return {
+          title: document.getElementById('eb-title').value.trim(),
+          description: cleanContent(descQuill ? descQuill.root.innerHTML : ''),
+          price: parseFloat(document.getElementById('eb-price').value) || 0,
+          purchase_link: document.getElementById('eb-link').value.trim(),
+          cover_url: finalCoverUrl || null,
+          category: document.getElementById('eb-category').value || null,
+          tags: document.getElementById('eb-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+          extra_details: cleanContent(extraQuill ? extraQuill.root.innerHTML : '') || null,
+          status
+        };
+      }
+
+      async function saveEbook(status) {
+        const btn = event?.target;
+        if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
+        try {
+          const data = await buildData(status);
+          let result;
+          if (editingId) { result = await sb.from('ebooks').update(data).eq('id', editingId); }
+          else { result = await sb.from('ebooks').insert(data).select().single(); if (result.data) editingId = result.data.id; }
+          if (result.error) throw result.error;
+          if (status === 'published') {
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-success').classList.add('active');
+            document.getElementById('action-bar').innerHTML = '';
+            document.querySelectorAll('.step-item').forEach(s => s.classList.add('done'));
+          } else {
+            showToast('Draft saved!');
+            if (btn) { btn.textContent = '💾 Save Draft'; btn.disabled = false; }
+          }
+        } catch (e) {
+          console.error(e); showToast('Failed to save', true);
+          if (btn) { btn.textContent = '💾 Save Draft'; btn.disabled = false; }
+        }
+      }
+
+      function checkEditMode() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if (id) { editingId = id; document.getElementById('page-title').textContent = 'Edit Ebook'; loadEbook(id); }
+      }
+
+      async function loadEbook(id) {
+        const { data, error } = await sb.from('ebooks').select('*').eq('id', id).single();
+        if (error || !data) { showToast('Failed to load ebook', true); return; }
+        document.getElementById('eb-title').value = data.title || '';
+        document.getElementById('eb-price').value = data.price || '';
+        document.getElementById('eb-link').value = data.purchase_link || '';
+        document.getElementById('eb-category').value = data.category || '';
+        document.getElementById('eb-tags').value = (data.tags || []).join(', ');
+        if (data.cover_url) { coverUrl = data.cover_url; document.getElementById('cover-url-input').value = data.cover_url; showCoverPreview(data.cover_url); }
+        setTimeout(() => {
+          if (descQuill && data.description) descQuill.root.innerHTML = data.description;
+          if (extraQuill && data.extra_details) extraQuill.root.innerHTML = data.extra_details;
+        }, 300);
+      }
+
+      function startAutoSave() {
+        autoSaveTimer = setInterval(async () => {
+          const title = document.getElementById('eb-title').value.trim();
+          if (!title) return;
+          try {
+            const data = await buildData('draft');
+            if (editingId) { await sb.from('ebooks').update(data).eq('id', editingId); }
+            else { const { data: newEb } = await sb.from('ebooks').insert(data).select().single(); if (newEb) editingId = newEb.id; }
+            showToast('Auto-saved ✓');
+          } catch (e) {}
+        }, 45000);
+      }
+
+      function startNew() {
+        editingId = null; coverFile = null; coverUrl = null;
+        document.getElementById('eb-title').value = '';
+        document.getElementById('eb-price').value = '';
+        document.getElementById('eb-link').value = '';
+        document.getElementById('eb-category').value = '';
+        document.getElementById('eb-tags').value = '';
+        document.getElementById('cover-url-input').value = '';
+        document.getElementById('cover-preview-wrap').style.display = 'none';
+        document.getElementById('cover-input').value = '';
+        if (descQuill) descQuill.setContents([]);
+        if (extraQuill) extraQuill.setContents([]);
+        goToStep(1);
+      }
+
+      guardPage();
+    </script>
+  </body>
+</html>

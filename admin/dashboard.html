@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>TayNova CMS Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      :root {
+        --admin-black: #151216;
+        --admin-panel: #1e1a22;
+        --admin-card: rgba(255, 255, 255, 0.08);
+        --admin-card-strong: rgba(255, 255, 255, 0.12);
+        --admin-gold: #c9a227;
+        --admin-white: #ffffff;
+        --admin-muted: rgba(255, 255, 255, 0.66);
+        --admin-border: rgba(255, 255, 255, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--admin-white);
+        background:
+          radial-gradient(circle at top right, rgba(201, 162, 39, 0.12), transparent 30%),
+          linear-gradient(135deg, #100e12, var(--admin-black));
+      }
+
+      button {
+        border: none;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      img {
+        display: block;
+        max-width: 100%;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .auth-check {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+      }
+
+      .auth-card {
+        width: min(480px, 100%);
+        padding: 2rem;
+        border: 1px solid var(--admin-border);
+        border-radius: 28px;
+        background: var(--admin-card);
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.28);
+        text-align: center;
+        backdrop-filter: blur(18px);
+      }
+
+      .auth-card h1 {
+        margin: 0 0 0.75rem;
+        font-size: clamp(2rem, 6vw, 3rem);
+      }
+
+      .auth-card p {
+        margin: 0;
+        color: var(--admin-muted);
+        line-height: 1.7;
+      }
+
+      .dashboard-shell {
+        min-height: 100vh;
+        padding-left: 280px;
+      }
+
+      .admin-sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        padding: 1.5rem;
+        border-right: 1px solid var(--admin-border);
+        background: rgba(18, 15, 20, 0.86);
+        box-shadow: 24px 0 80px rgba(0, 0, 0, 0.18);
+        backdrop-filter: blur(22px);
+      }
+
+      .sidebar-brand {
+        display: grid;
+        justify-items: center;
+        gap: 0.85rem;
+        padding: 0.75rem 0 1.25rem;
+        border-bottom: 1px solid var(--admin-border);
+        text-align: center;
+      }
+
+      .sidebar-brand img {
+        width: 58px;
+        height: 58px;
+        object-fit: contain;
+      }
+
+      .sidebar-brand h2 {
+        margin: 0;
+        font-size: 1.05rem;
+        letter-spacing: 0.04em;
+      }
+
+      .admin-nav {
+        display: grid;
+        gap: 0.45rem;
+      }
+
+      .admin-nav a {
+        display: flex;
+        align-items: center;
+        min-height: 46px;
+        padding: 0.85rem 1rem;
+        border-radius: 16px;
+        color: var(--admin-muted);
+        text-decoration: none;
+        font-weight: 700;
+        transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+      }
+
+      .admin-nav a:hover,
+      .admin-nav a:focus-visible,
+      .admin-nav a.active {
+        color: var(--admin-white);
+        background: rgba(201, 162, 39, 0.14);
+        transform: translateX(2px);
+      }
+
+      .admin-nav a.active {
+        box-shadow: inset 3px 0 0 var(--admin-gold);
+      }
+
+      .logout-btn {
+        margin-top: auto;
+        width: 100%;
+        border-radius: 999px;
+        padding: 0.9rem 1.2rem;
+        color: var(--admin-black);
+        background: var(--admin-gold);
+        font-weight: 800;
+      }
+
+      .dashboard-main {
+        padding: clamp(1.5rem, 4vw, 3rem);
+      }
+
+      .dashboard-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .dashboard-header h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(2.1rem, 5vw, 4rem);
+        line-height: 1.05;
+      }
+
+      .dashboard-header p,
+      .date-pill,
+      .card-muted {
+        color: var(--admin-muted);
+      }
+
+      .dashboard-header p {
+        margin: 0;
+        line-height: 1.7;
+      }
+
+      .date-pill {
+        flex: 0 0 auto;
+        border: 1px solid var(--admin-border);
+        border-radius: 999px;
+        padding: 0.75rem 1rem;
+        background: var(--admin-card);
+        backdrop-filter: blur(16px);
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .stat-card,
+      .cms-card,
+      .activity-item {
+        border: 1px solid var(--admin-border);
+        border-radius: 24px;
+        background: var(--admin-card);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.18);
+        backdrop-filter: blur(18px);
+      }
+
+      .stat-card {
+        padding: 1.15rem;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-2px);
+        background: var(--admin-card-strong);
+      }
+
+      .stat-card span {
+        display: block;
+        color: var(--admin-muted);
+        font-size: 0.82rem;
+        line-height: 1.4;
+      }
+
+      .stat-card strong {
+        display: block;
+        margin-top: 0.65rem;
+        color: var(--admin-gold);
+        font-size: 2rem;
+        line-height: 1;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+        gap: 1.5rem;
+      }
+
+      .cms-card {
+        padding: clamp(1.25rem, 3vw, 1.75rem);
+      }
+
+      .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .section-head h2,
+      .latest-post h3 {
+        margin: 0;
+      }
+
+      .section-head h2 {
+        font-size: 1.35rem;
+      }
+
+      .latest-post h3 {
+        font-size: 1.5rem;
+      }
+
+      .latest-post p {
+        margin: 0.85rem 0 1rem;
+        color: var(--admin-muted);
+        line-height: 1.75;
+      }
+
+      .post-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .status-badge,
+      .date-badge,
+      .table-badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.45rem 0.75rem;
+        font-size: 0.78rem;
+        font-weight: 800;
+      }
+
+      .status-badge {
+        color: var(--admin-black);
+        background: var(--admin-gold);
+      }
+
+      .date-badge,
+      .table-badge {
+        color: rgba(255, 255, 255, 0.74);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .edit-btn {
+        margin-top: 1.25rem;
+        display: inline-flex;
+        border-radius: 999px;
+        padding: 0.75rem 1rem;
+        color: var(--admin-black);
+        background: var(--admin-gold);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .activity-list {
+        display: grid;
+        gap: 0.85rem;
+      }
+
+      .activity-item {
+        padding: 1rem;
+      }
+
+      .activity-item h3 {
+        margin: 0.55rem 0 0.35rem;
+        font-size: 1rem;
+      }
+
+      .activity-item p {
+        margin: 0;
+        color: var(--admin-muted);
+        font-size: 0.9rem;
+      }
+
+      .empty-state {
+        margin: 0;
+        color: var(--admin-muted);
+        line-height: 1.7;
+      }
+
+      @media (max-width: 1120px) {
+        .stats-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .dashboard-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .dashboard-shell {
+          padding-left: 0;
+          padding-bottom: 88px;
+        }
+
+        .admin-sidebar {
+          inset: auto 0 0 0;
+          width: 100%;
+          height: auto;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.65rem;
+          padding: 0.65rem;
+          border-top: 1px solid var(--admin-border);
+          border-right: none;
+          overflow-x: auto;
+        }
+
+        .sidebar-brand {
+          display: none;
+        }
+
+        .admin-nav {
+          display: flex;
+          gap: 0.45rem;
+          flex: 1;
+          overflow-x: auto;
+        }
+
+        .admin-nav a {
+          min-height: 42px;
+          white-space: nowrap;
+          padding: 0.7rem 0.85rem;
+          font-size: 0.9rem;
+        }
+
+        .admin-nav a.active {
+          box-shadow: inset 0 -3px 0 var(--admin-gold);
+        }
+
+        .logout-btn {
+          width: auto;
+          flex: 0 0 auto;
+          margin: 0;
+          padding: 0.7rem 0.9rem;
+          font-size: 0.9rem;
+        }
+
+        .dashboard-header {
+          display: grid;
+        }
+
+        .date-pill {
+          width: fit-content;
+        }
+
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="auth-check" id="checking">
+      <div class="auth-card">
+        <h1>Checking Access</h1>
+        <p>Verifying your private TayNova admin session...</p>
+      </div>
+    </section>
+
+    <main class="dashboard-shell hidden" id="dashboard-shell">
+      <aside class="admin-sidebar" aria-label="TayNova admin navigation">
+        <div class="sidebar-brand">
+          <img src="/assets/images/logo/logo.png" alt="TayNova Logo" />
+          <h2>TayNova Admin</h2>
+        </div>
+
+        <nav class="admin-nav" aria-label="Admin navigation">
+          <a href="/admin/dashboard.html" class="active">Home</a>
+          <a href="/admin/blogs.html">Blog</a>
+          <a href="#" data-section="products">Products</a>
+          <a href="#" data-section="ebooks">Ebooks</a>
+          <a href="#" data-section="inspiration">Inspiration</a>
+          <a href="#" data-section="content">Content</a>
+        </nav>
+
+        <button type="button" class="logout-btn" id="logout">Logout</button>
+      </aside>
+
+      <section class="dashboard-main">
+        <header class="dashboard-header">
+          <div>
+            <h1>Welcome back, Oreoluwa</h1>
+            <p>Your private TayNova CMS dashboard is ready for planning, publishing, and creative control.</p>
+          </div>
+          <div class="date-pill" id="current-date"></div>
+        </header>
+
+        <section class="stats-grid" aria-label="Dashboard statistics">
+          <article class="stat-card">
+            <span>Total Blog Posts</span>
+            <strong id="count-blog-posts">--</strong>
+          </article>
+          <article class="stat-card">
+            <span>Total Products</span>
+            <strong id="count-products">--</strong>
+          </article>
+          <article class="stat-card">
+            <span>Total Ebooks</span>
+            <strong id="count-ebooks">--</strong>
+          </article>
+          <article class="stat-card">
+            <span>Total Inspiration Media</span>
+            <strong id="count-inspiration">--</strong>
+          </article>
+          <article class="stat-card">
+            <span>Total Content Items</span>
+            <strong id="count-content">--</strong>
+          </article>
+        </section>
+
+        <div class="dashboard-grid">
+          <section class="cms-card">
+            <div class="section-head">
+              <h2>Latest Post</h2>
+            </div>
+            <div id="latest-post">
+              <p class="empty-state">Loading latest post...</p>
+            </div>
+          </section>
+
+          <section class="cms-card">
+            <div class="section-head">
+              <h2>Recent Activity</h2>
+              <span class="card-muted">Last 5 updates</span>
+            </div>
+            <div class="activity-list" id="recent-activity">
+              <p class="empty-state">Loading recent activity...</p>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const SUPABASE_URL = 'https://ngnricijtqlikjxrbtlr.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI';
+      const ADMIN_EMAIL = 'oreoluwaoluwadare2@gmail.com';
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: {
+          persistSession: true,
+          storage: window.localStorage,
+          autoRefreshToken: true
+        }
+      });
+
+      const tableConfig = [
+        { table: 'blog_posts', label: 'Blog Post', countId: 'count-blog-posts' },
+        { table: 'products', label: 'Product', countId: 'count-products' },
+        { table: 'ebooks', label: 'Ebook', countId: 'count-ebooks' },
+        { table: 'inspiration', label: 'Inspiration Media', countId: 'count-inspiration' },
+        { table: 'content', label: 'Content Item', countId: 'count-content' }
+      ];
+
+      const checking = document.getElementById('checking');
+      const dashboardShell = document.getElementById('dashboard-shell');
+      const logout = document.getElementById('logout');
+      const currentDate = document.getElementById('current-date');
+      const latestPostWrap = document.getElementById('latest-post');
+      const recentActivityWrap = document.getElementById('recent-activity');
+
+      function redirectToLogin() {
+        window.location.replace('/admin/index.html');
+      }
+
+      function formatDate(value) {
+        if (!value) return 'No date';
+        return new Intl.DateTimeFormat('en', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        }).format(new Date(value));
+      }
+
+      function getTitle(item, fallback) {
+        return item.title || item.name || item.heading || item.caption || fallback;
+      }
+
+      function getPreview(item) {
+        const source = item.excerpt || item.summary || item.description || item.content || item.body || '';
+        const plain = String(source).replace(/<[^>]*>/g, '').trim();
+        if (!plain) return 'No preview available yet.';
+        return plain.length > 150 ? `${plain.slice(0, 147)}...` : plain;
+      }
+
+      function getStatus(item) {
+        if (typeof item.published === 'boolean') return item.published ? 'Published' : 'Draft';
+        return item.status || item.state || 'Draft';
+      }
+
+      async function loadCount(config) {
+        const target = document.getElementById(config.countId);
+        const { count, error } = await supabaseClient
+          .from(config.table)
+          .select('*', { count: 'exact', head: true });
+
+        target.textContent = error ? '0' : String(count || 0);
+      }
+
+      async function loadLatestPost() {
+        const { data, error } = await supabaseClient
+          .from('blog_posts')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (error || !data || !data.length) {
+          latestPostWrap.innerHTML = '<p class="empty-state">No posts yet. Create your first blog post.</p>';
+          return;
+        }
+
+        const post = data[0];
+        latestPostWrap.innerHTML = `
+          <article class="latest-post">
+            <h3>${getTitle(post, 'Untitled post')}</h3>
+            <p>${getPreview(post)}</p>
+            <div class="post-meta">
+              <span class="date-badge">${formatDate(post.created_at)}</span>
+              <span class="status-badge">${getStatus(post)}</span>
+            </div>
+            <a href="/admin/blogs.html" class="edit-btn">View / Edit</a>
+          </article>
+        `;
+      }
+
+      async function fetchRecentItems(config) {
+        const { data, error } = await supabaseClient
+          .from(config.table)
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (error || !data) return [];
+
+        return data.map((item) => ({
+          table: config.label,
+          title: getTitle(item, config.label),
+          preview: getPreview(item),
+          created_at: item.created_at
+        }));
+      }
+
+      async function loadRecentActivity() {
+        const groups = await Promise.all(tableConfig.map(fetchRecentItems));
+        const items = groups
+          .flat()
+          .filter((item) => item.created_at)
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .slice(0, 5);
+
+        if (!items.length) {
+          recentActivityWrap.innerHTML = '<p class="empty-state">No recent activity yet.</p>';
+          return;
+        }
+
+        recentActivityWrap.innerHTML = items
+          .map(
+            (item) => `
+              <article class="activity-item">
+                <span class="table-badge">${item.table}</span>
+                <h3>${item.title}</h3>
+                <p>${formatDate(item.created_at)} · ${item.preview}</p>
+              </article>
+            `
+          )
+          .join('');
+      }
+
+      async function loadDashboardData() {
+        currentDate.textContent = new Intl.DateTimeFormat('en', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        }).format(new Date());
+
+        await Promise.all([
+          ...tableConfig.map(loadCount),
+          loadLatestPost(),
+          loadRecentActivity()
+        ]);
+      }
+
+      async function guardDashboard() {
+        const { data } = await supabaseClient.auth.getSession();
+        const userEmail = data.session?.user?.email;
+
+        if (!data.session) {
+          redirectToLogin();
+          return;
+        }
+
+        if (userEmail !== ADMIN_EMAIL) {
+          await supabaseClient.auth.signOut();
+          redirectToLogin();
+          return;
+        }
+
+        checking.classList.add('hidden');
+        dashboardShell.classList.remove('hidden');
+        await loadDashboardData();
+      }
+
+      logout.addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        redirectToLogin();
+      });
+
+      guardDashboard();
+    </script>
+  </body>
+</html>

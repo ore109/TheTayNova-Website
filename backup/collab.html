@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TayNova Blog — Curated Lifestyle</title>
+    <title>TayNova — Collab</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -12,7 +12,7 @@
     />
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
+  <body class="collab-page">
     <header class="site-header">
       <div class="header-inner">
         <a href="index.html" class="brand-logo-link">
@@ -38,58 +38,74 @@
     </header>
 
     <main>
-      <section class="hero-section" style="background-image: linear-gradient(rgba(4, 4, 4, 0.35), rgba(4, 4, 4, 0.35)), url('/assets/images/blog/cover/Green Clean and Corporate Move Pinterest Video Pin Blog Substack (4).png'); background-size: cover; background-position: center;">
+      <section class="hero-section collab-hero">
         <div class="hero-overlay"></div>
         <div class="hero-content">
-          <p class="hero-tag">BLOG • INTERIORS • WELLNESS • STYLE</p>
-          <h1>Thoughtful ideas for elevated living.</h1>
+          <h1>
+            Work with TayNova
+            <span>Content, storytelling & creative partnerships.</span>
+          </h1>
           <p class="hero-copy">
-            Read the latest lifestyle essays, home styling notes, and small rituals that make every space feel intentional.
+            Helping home and lifestyle brands create content that inspires, connects, and converts.
           </p>
           <div class="hero-actions">
-            <a href="#blog-list" class="btn btn-primary">Explore Posts</a>
-            <a href="#blog-search" class="btn btn-secondary">Search Stories</a>
+            <a href="#collab-details" class="btn btn-primary">Explore Collab Options</a>
+            <a href="mailto:oreoluwaoluwadare2@gmail.com" class="btn btn-secondary">Email the Founder</a>
           </div>
         </div>
       </section>
 
-      <section id="blog-search" class="blog-search-section section-container">
-        <div class="blog-search-wrap">
-          <div class="search-panel">
-            <label for="blog-search-input" class="sr-only">Search blog posts</label>
-            <input id="blog-search-input" type="search" placeholder="Search posts, topics, and ideas…" />
-          </div>
-          <div class="filter-panel" aria-label="Blog categories">
-            <button type="button" class="filter-pill active" data-category="All">All</button>
-            <button type="button" class="filter-pill" data-category="Interiors">Interiors</button>
-            <button type="button" class="filter-pill" data-category="Lifestyle">Lifestyle</button>
-            <button type="button" class="filter-pill" data-category="Guides">Guides</button>
-            <button type="button" class="filter-pill" data-category="Wellness">Wellness</button>
-          </div>
+      <section id="collab-details" class="section-container">
+        <h2 class="section-title">Work With TayNova</h2>
+        <p class="section-copy">
+          Whether you're launching a product, building a lifestyle brand, or creating digital content, TayNova helps you communicate your story through clean, intentional, and high-impact visuals and writing.
+        </p>
+
+        <div class="collab-grid">
+          <article class="contact-card">
+            <h3>Brand Partnerships</h3>
+            <p>
+              Strategic collaborations for home brands, lifestyle products, and affiliate marketing campaigns.
+            </p>
+            <a href="mailto:oreoluwaoluwadare2@gmail.com" class="btn btn-collab">Email Collaboration</a>
+          </article>
+
+          <article class="contact-card">
+            <h3>Content Creation</h3>
+            <p>
+              Instagram, Pinterest, reels, and blog content designed for storytelling, visibility, and conversion.
+            </p>
+            <a href="https://wa.me/2348124085593" target="_blank" class="btn btn-collab">Message on WhatsApp</a>
+          </article>
+
+          <article class="contact-card">
+            <h3>Digital Products</h3>
+            <p>
+              Ebooks, guides, and monetized content designed for audience growth and digital sales.
+            </p>
+            <a href="mailto:oreoluwaoluwadare2@gmail.com?subject=Start%20a%20Project" class="btn btn-collab">Start a Project</a>
+          </article>
+
+          <article class="contact-card">
+            <h3>Ghostwriting & Strategy</h3>
+            <p>
+              Blog writing, content planning, and structured storytelling for brands and creators.
+            </p>
+            <a href="mailto:oreoluwaoluwadare2@gmail.com?subject=Request%20Writing%20Help" class="btn btn-collab">Request Writing Help</a>
+          </article>
         </div>
       </section>
 
-      <section class="blog-section section-container">
-        <div class="section-header">
-          <h2 class="section-title">Latest stories</h2>
-          <p class="section-copy">
-            Browse the blog archive for fresh ideas on interiors, effortless styling, and everyday rituals.
-          </p>
-        </div>
-        <div id="blog-list" class="blog-grid"></div>
-        <div id="blog-empty" class="empty-state hidden">We couldn’t find any posts matching your search.</div>
-      </section>
+      <section class="section-container">
+        <h2 class="section-title">Ready to Collaborate?</h2>
+        <p class="section-copy">
+          Share your idea, product, or goal and TayNova will respond with a clear creative direction and next steps.
+        </p>
 
-      <section id="blog-detail" class="blog-detail-section section-container hidden">
-        <button id="blog-back" class="btn btn-primary">← Back to all posts</button>
-        <article class="blog-detail-card">
-          <div class="blog-detail-meta" id="detail-category"></div>
-          <h2 id="detail-title"></h2>
-          <p class="blog-detail-copy" id="detail-excerpt"></p>
-          <img id="detail-image" src="" alt="Blog detail image" class="blog-detail-image" />
-          <div class="blog-detail-content" id="detail-content"></div>
-          <div class="blog-detail-actions" id="detail-links"></div>
-        </article>
+        <div class="hero-actions" style="justify-content: center; gap: 1rem; margin-top: 1.5rem;">
+          <a href="mailto:oreoluwaoluwadare2@gmail.com?subject=Get%20in%20Touch" class="btn btn-primary">Get in Touch</a>
+          <a href="https://wa.me/2348124085593" target="_blank" class="btn btn-secondary">WhatsApp Direct</a>
+        </div>
       </section>
     </main>
 
@@ -116,8 +132,6 @@
       </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-    <script src="supabase.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

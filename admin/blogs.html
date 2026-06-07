@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Blog CMS — TayNova Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      :root {
+        --admin-black: #151216;
+        --admin-card: rgba(255,255,255,0.08);
+        --admin-card-strong: rgba(255,255,255,0.12);
+        --admin-gold: #c9a227;
+        --admin-white: #ffffff;
+        --admin-muted: rgba(255,255,255,0.66);
+        --admin-border: rgba(255,255,255,0.12);
+        --admin-danger: #e74c3c;
+        --admin-success: #2ecc71;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--admin-white);
+        background: radial-gradient(circle at top right, rgba(201,162,39,0.12), transparent 30%),
+          linear-gradient(135deg, #100e12, var(--admin-black));
+        min-height: 100vh;
+      }
+      button { border: none; font: inherit; cursor: pointer; }
+      img { display: block; max-width: 100%; }
+      a { text-decoration: none; color: inherit; }
+      .hidden { display: none !important; }
+
+      .auth-check { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; }
+      .auth-card {
+        width: min(480px,100%); padding: 2rem;
+        border: 1px solid var(--admin-border); border-radius: 28px;
+        background: var(--admin-card); backdrop-filter: blur(18px); text-align: center;
+      }
+      .auth-card h1 { font-size: clamp(2rem,6vw,3rem); margin-bottom: 0.75rem; }
+      .auth-card p { color: var(--admin-muted); line-height: 1.7; }
+
+      .dashboard-shell { min-height: 100vh; padding-left: 280px; }
+
+      .admin-sidebar {
+        position: fixed; inset: 0 auto 0 0; width: 280px;
+        display: flex; flex-direction: column; gap: 2rem; padding: 1.5rem;
+        border-right: 1px solid var(--admin-border);
+        background: rgba(18,15,20,0.86); backdrop-filter: blur(22px);
+        box-shadow: 24px 0 80px rgba(0,0,0,0.18); z-index: 100;
+      }
+      .sidebar-brand {
+        display: grid; justify-items: center; gap: 0.85rem;
+        padding: 0.75rem 0 1.25rem; border-bottom: 1px solid var(--admin-border); text-align: center;
+      }
+      .sidebar-brand img { width: 58px; height: 58px; object-fit: contain; }
+      .sidebar-brand h2 { font-size: 1.05rem; letter-spacing: 0.04em; }
+      .admin-nav { display: grid; gap: 0.45rem; }
+      .admin-nav a {
+        display: flex; align-items: center; min-height: 46px;
+        padding: 0.85rem 1rem; border-radius: 16px; color: var(--admin-muted); font-weight: 700;
+        transition: color 0.2s, background 0.2s, transform 0.2s;
+      }
+      .admin-nav a:hover, .admin-nav a.active {
+        color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px);
+      }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-gold); }
+      .logout-btn {
+        margin-top: auto; width: 100%; border-radius: 999px;
+        padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-gold); font-weight: 800;
+      }
+
+      .page-main { padding: clamp(1.5rem,4vw,3rem); }
+      .page-header {
+        display: flex; align-items: flex-start; justify-content: space-between;
+        gap: 1rem; margin-bottom: 0.5rem; flex-wrap: wrap;
+      }
+      .page-header h1 { font-size: clamp(1.8rem,4vw,2.8rem); }
+      .page-subtitle { color: var(--admin-muted); margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.6; }
+      .btn-new {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        padding: 0.85rem 1.5rem; border-radius: 999px;
+        background: var(--admin-gold); color: var(--admin-black);
+        font-weight: 800; font-size: 0.95rem;
+        transition: transform 0.2s, opacity 0.2s; text-decoration: none;
+      }
+      .btn-new:hover { transform: translateY(-2px); opacity: 0.9; }
+
+      .tab-bar {
+        display: flex; gap: 0.5rem; flex-wrap: wrap;
+        margin-bottom: 1.5rem; border-bottom: 1px solid var(--admin-border); padding-bottom: 0.75rem;
+      }
+      .tab-pill {
+        padding: 0.55rem 1.1rem; border-radius: 999px;
+        background: transparent; color: var(--admin-muted); font-weight: 600; font-size: 0.9rem;
+        transition: background 0.2s, color 0.2s;
+      }
+      .tab-pill:hover { color: var(--admin-white); }
+      .tab-pill.active { background: rgba(201,162,39,0.18); color: var(--admin-gold); }
+
+      .filter-bar {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) minmax(180px, 260px) auto;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+      .filter-control {
+        width: 100%;
+        min-height: 46px;
+        border: 1px solid var(--admin-border);
+        border-radius: 14px;
+        background: rgba(255,255,255,0.06);
+        color: var(--admin-white);
+        font: inherit;
+        font-size: 0.92rem;
+        outline: none;
+        transition: border-color 0.2s, background 0.2s;
+      }
+      .filter-control:focus {
+        border-color: var(--admin-gold);
+        background: rgba(255,255,255,0.1);
+      }
+      .filter-search { padding: 0 1rem; }
+      .filter-select { padding: 0 1rem; cursor: pointer; }
+      .filter-select option { background: #1a161e; color: var(--admin-white); }
+      .filter-clear {
+        min-height: 46px;
+        padding: 0 1.1rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.08);
+        color: var(--admin-white);
+        font-weight: 700;
+        transition: background 0.2s, color 0.2s;
+      }
+      .filter-clear:hover { background: rgba(255,255,255,0.14); color: var(--admin-gold); }
+
+      .library-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 1.25rem;
+      }
+      .content-card {
+        border: 1px solid var(--admin-border); border-radius: 20px;
+        background: var(--admin-card); backdrop-filter: blur(12px);
+        overflow: visible; transition: transform 0.2s, background 0.2s;
+      }
+      .content-card:hover { transform: translateY(-3px); background: var(--admin-card-strong); }
+      .card-cover { width: 100%; height: 160px; object-fit: contain; }
+      .card-cover-placeholder {
+        width: 100%; height: 160px; background: rgba(255,255,255,0.05);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--admin-muted); font-size: 2rem;
+      }
+      .card-body { padding: 1rem; }
+      .card-top {
+        display: flex; align-items: flex-start;
+        justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem;
+      }
+      .card-title { font-size: 1rem; font-weight: 700; line-height: 1.4; flex: 1; }
+      .card-excerpt { font-size: 0.85rem; color: var(--admin-muted); line-height: 1.5; margin-bottom: 0.75rem; }
+      .card-category { font-size: 0.78rem; color: var(--admin-gold); margin-bottom: 0.5rem; }
+      .card-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+      .status-badge {
+        display: inline-flex; align-items: center;
+        padding: 0.3rem 0.65rem; border-radius: 999px; font-size: 0.75rem; font-weight: 800;
+      }
+      .status-draft { background: rgba(255,255,255,0.1); color: var(--admin-muted); }
+      .status-published { background: rgba(46,204,113,0.18); color: var(--admin-success); }
+      .status-scheduled { background: rgba(52,152,219,0.18); color: #3498db; }
+      .status-archived { background: rgba(231,76,60,0.18); color: var(--admin-danger); }
+      .card-date { font-size: 0.78rem; color: var(--admin-muted); }
+
+      .actions-wrap { position: relative; }
+      .actions-btn {
+        width: 32px; height: 32px; border-radius: 8px;
+        background: rgba(255,255,255,0.08); color: var(--admin-white);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; font-weight: 700; transition: background 0.2s;
+      }
+      .actions-btn:hover { background: rgba(255,255,255,0.16); }
+      .actions-dropdown {
+        position: absolute; top: 100%; right: 0; margin-top: 4px; min-width: 140px;
+        border: 1px solid var(--admin-border); border-radius: 14px;
+        background: #1e1a22; box-shadow: 0 20px 50px rgba(0,0,0,0.4); z-index: 50; overflow: hidden;
+      }
+      .actions-dropdown button {
+        width: 100%; padding: 0.75rem 1rem; text-align: left;
+        color: var(--admin-white); font-size: 0.9rem; background: transparent; transition: background 0.15s;
+      }
+      .actions-dropdown button:hover { background: rgba(255,255,255,0.08); }
+      .actions-dropdown button.danger { color: var(--admin-danger); }
+
+      .empty-state {
+        grid-column: 1/-1; text-align: center; padding: 3rem;
+        color: var(--admin-muted); border: 1px dashed var(--admin-border); border-radius: 20px;
+      }
+      .empty-state p { margin-top: 0.5rem; }
+
+      .confirm-modal {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+        z-index: 300; display: flex; align-items: center; justify-content: center; padding: 1rem;
+      }
+      .confirm-box {
+        width: min(420px,100%); border: 1px solid var(--admin-border);
+        border-radius: 24px; background: #1a161e; padding: 2rem; text-align: center;
+      }
+      .confirm-box h3 { font-size: 1.2rem; margin-bottom: 0.75rem; }
+      .confirm-box p { color: var(--admin-muted); margin-bottom: 1.5rem; line-height: 1.6; }
+      .confirm-actions { display: flex; gap: 0.75rem; justify-content: center; }
+      .btn {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.75rem 1.25rem; border-radius: 999px; font-weight: 700; font-size: 0.9rem;
+        transition: transform 0.2s, opacity 0.2s;
+      }
+      .btn:hover { transform: translateY(-1px); opacity: 0.9; }
+      .btn-ghost { background: rgba(255,255,255,0.08); color: var(--admin-white); }
+      .btn-danger { background: rgba(231,76,60,0.2); color: var(--admin-danger); }
+
+      .toast {
+        position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem;
+        border-radius: 14px; font-weight: 700; z-index: 400;
+        transform: translateY(100px); opacity: 0; transition: transform 0.3s, opacity 0.3s;
+      }
+      .toast.show { transform: translateY(0); opacity: 1; }
+
+      @media (max-width: 760px) {
+        .dashboard-shell { padding-left: 0; padding-bottom: 88px; }
+        .admin-sidebar {
+          inset: auto 0 0 0; width: 100%; height: auto; flex-direction: row;
+          align-items: center; gap: 0.65rem; padding: 0.65rem;
+          border-top: 1px solid var(--admin-border); border-right: none; overflow-x: auto;
+        }
+        .sidebar-brand { display: none; }
+        .admin-nav { display: flex; gap: 0.45rem; flex: 1; overflow-x: auto; }
+        .admin-nav a { min-height: 42px; white-space: nowrap; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
+        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-gold); }
+        .logout-btn { width: auto; flex: 0 0 auto; margin: 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; }
+        .filter-bar { grid-template-columns: 1fr; }
+      }
+      .preview-content { color: var(--admin-white); line-height: 1.9; font-size: 1rem; }
+      .preview-content h1 { font-size: 1.8rem; margin: 2rem 0 1rem; font-weight: 800; }
+      .preview-content h2 { font-size: 1.4rem; margin: 1.75rem 0 0.75rem; font-weight: 700; }
+      .preview-content h3 { font-size: 1.15rem; margin: 1.5rem 0 0.6rem; font-weight: 700; }
+      .preview-content p { margin-bottom: 1.25rem; color: rgba(255,255,255,0.85); }
+      .preview-content ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; }
+      .preview-content ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1.25rem; }
+      .preview-content li { margin-bottom: 0.5rem; color: rgba(255,255,255,0.85); line-height: 1.8; }
+      .preview-content a { color: var(--admin-gold) !important; text-decoration: underline; }
+      .preview-content img { max-width: 100%; border-radius: 12px; margin: 1.25rem auto; display: block; }
+      .preview-content blockquote {
+        border-left: 3px solid var(--admin-gold); padding: 0.75rem 1.25rem;
+        margin: 1.5rem 0; background: rgba(201,162,39,0.06);
+        border-radius: 0 12px 12px 0; color: rgba(255,255,255,0.8);
+      }
+      .preview-content strong { color: var(--admin-white); font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <section class="auth-check" id="checking">
+      <div class="auth-card">
+        <h1>Checking Access</h1>
+        <p>Verifying your private TayNova admin session...</p>
+      </div>
+    </section>
+
+    <div class="dashboard-shell hidden" id="dashboard-shell">
+      <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+          <img src="/assets/images/logo/logo.png" alt="TayNova Logo" />
+          <h2>TayNova Admin</h2>
+        </div>
+        <nav class="admin-nav">
+          <a href="/admin/dashboard.html">Home</a>
+          <a href="/admin/blogs.html" class="active">Blog</a>
+          <a href="/admin/products.html">Products</a>
+          <a href="/admin/ebooks.html">Ebooks</a>
+          <a href="/admin/inspiration.html">Inspiration</a>
+          <a href="/admin/content.html">Content</a>
+        </nav>
+        <button class="logout-btn" id="logout">Logout</button>
+      </aside>
+
+      <main class="page-main">
+        <div class="page-header">
+          <div>
+            <h1>Blog CMS</h1>
+          </div>
+          <a href="/admin/blog-create.html" class="btn-new">＋ New Blog</a>
+        </div>
+        <p class="page-subtitle">Manage blog posts, drafts, scheduled articles, and published content.</p>
+
+        <div class="tab-bar">
+          <button class="tab-pill active" data-tab="all">All Posts</button>
+          <button class="tab-pill" data-tab="draft">Drafts</button>
+          <button class="tab-pill" data-tab="scheduled">Scheduled</button>
+          <button class="tab-pill" data-tab="published">Published</button>
+          <button class="tab-pill" data-tab="archived">Archived</button>
+        </div>
+
+        <div class="filter-bar">
+          <input class="filter-control filter-search" type="search" id="blog-search" placeholder="Search by title, description, category, or tags..." />
+          <select class="filter-control filter-select" id="category-filter">
+            <option value="">All Categories</option>
+          </select>
+          <button class="filter-clear" id="clear-filters">Clear</button>
+        </div>
+
+        <div class="library-grid" id="blog-library">
+          <div class="empty-state">
+            <div style="font-size:2rem">📝</div>
+            <p>Loading posts...</p>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="confirm-modal hidden" id="confirm-modal">
+      <div class="confirm-box">
+        <h3>Delete Blog Post?</h3>
+        <p>Are you sure you want to delete this blog post? This action cannot be undone.</p>
+        <div class="confirm-actions">
+          <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+          <button class="btn btn-danger" id="confirm-delete">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const SUPABASE_URL = 'https://ngnricijtqlikjxrbtlr.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI';
+      const ADMIN_EMAIL = 'oreoluwaoluwadare2@gmail.com';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true }
+      });
+
+      let currentTab = 'all';
+      let searchQuery = '';
+      let categoryFilter = '';
+      let allPosts = [];
+      let deleteTargetId = null;
+
+      const checking = document.getElementById('checking');
+      const shell = document.getElementById('dashboard-shell');
+      const library = document.getElementById('blog-library');
+      const searchInput = document.getElementById('blog-search');
+      const categorySelect = document.getElementById('category-filter');
+      const clearFiltersBtn = document.getElementById('clear-filters');
+      const confirmModal = document.getElementById('confirm-modal');
+      const toast = document.getElementById('toast');
+
+      async function guardPage() {
+        const { data } = await sb.auth.getSession();
+        if (!data.session || data.session.user.email !== ADMIN_EMAIL) {
+          window.location.replace('/admin/index.html'); return;
+        }
+        checking.classList.add('hidden');
+        shell.classList.remove('hidden');
+        await loadPosts();
+      }
+
+      document.getElementById('logout').addEventListener('click', async () => {
+        await sb.auth.signOut();
+        window.location.replace('/admin/index.html');
+      });
+
+      function showToast(msg, isError = false) {
+        toast.textContent = msg;
+        toast.style.background = isError ? 'rgba(231,76,60,0.18)' : 'rgba(46,204,113,0.18)';
+        toast.style.borderColor = isError ? 'rgba(231,76,60,0.3)' : 'rgba(46,204,113,0.3)';
+        toast.style.color = isError ? '#e74c3c' : '#2ecc71';
+        toast.style.border = '1px solid';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+      }
+
+      function fmtDate(d) {
+        if (!d) return '—';
+        return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(d));
+      }
+
+      async function loadPosts() {
+        const { data, error } = await sb.from('blog_posts').select('*').order('created_at', { ascending: false });
+        if (error) { showToast('Failed to load posts', true); return; }
+        allPosts = data || [];
+        renderCategoryOptions();
+        renderLibrary();
+      }
+
+      function normalizeText(value) {
+        return String(value || '').toLowerCase().trim();
+      }
+
+      function getPostSearchText(post) {
+        return [
+          post.title,
+          post.short_description,
+          post.category,
+          Array.isArray(post.tags) ? post.tags.join(' ') : post.tags
+        ].filter(Boolean).join(' ').toLowerCase();
+      }
+
+      const DEFAULT_CATEGORIES = ['Home Decor', 'Lifestyle', 'Sustainability', 'Organization', 'Inspiration', 'Wellness'];
+
+      function renderCategoryOptions() {
+        const categories = [...new Set([...DEFAULT_CATEGORIES, ...allPosts.map(post => post.category).filter(Boolean)])]
+          .sort((a, b) => a.localeCompare(b));
+        const currentValue = categorySelect.value;
+        categorySelect.innerHTML = '';
+        const allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = 'All Categories';
+        categorySelect.appendChild(allOption);
+        categories.forEach(category => {
+          const option = document.createElement('option');
+          option.value = category;
+          option.textContent = category;
+          categorySelect.appendChild(option);
+        });
+        if (categories.includes(currentValue)) categorySelect.value = currentValue;
+      }
+
+      function getFilteredPosts() {
+        const query = normalizeText(searchQuery);
+        return allPosts.filter(post => {
+          const matchesTab = currentTab === 'all' || post.status === currentTab;
+          const matchesCategory = !categoryFilter || post.category === categoryFilter;
+          const matchesSearch = !query || getPostSearchText(post).includes(query);
+          return matchesTab && matchesCategory && matchesSearch;
+        });
+      }
+
+      function renderLibrary() {
+        const filtered = getFilteredPosts();
+        if (!filtered.length) {
+          const hasFilters = searchQuery || categoryFilter;
+          const emptyMessage = hasFilters
+            ? 'No posts match your search or category filter.'
+            : currentTab === 'all'
+              ? 'No posts yet. Click + New Blog to get started.'
+              : `No ${currentTab} posts.`;
+          library.innerHTML = `<div class="empty-state"><div style="font-size:2rem">📝</div><p>${emptyMessage}</p></div>`;
+          return;
+        }
+        library.innerHTML = filtered.map(post => `
+          <div class="content-card">
+            ${post.cover_url
+              ? `<img class="card-cover" src="${post.cover_url}" alt="${post.title}" />`
+              : `<div class="card-cover-placeholder">🖼️</div>`}
+            <div class="card-body">
+              <div class="card-top">
+                <div class="card-title">${post.title || 'Untitled'}</div>
+                <div class="actions-wrap">
+                  <button class="actions-btn" onclick="toggleMenu('${post.id}')">⋮</button>
+                  <div class="actions-dropdown hidden" id="menu-${post.id}">
+                    <button onclick="editPost('${post.id}')">✏️ Edit</button>
+                    <button onclick="viewPost('${post.id}')">👁️ View</button>
+                    <button onclick="archivePost('${post.id}','${post.status}')">${post.status === 'archived' ? '🔄 Restore' : '📦 Archive'}</button>
+                    <button class="danger" onclick="promptDelete('${post.id}')">🗑️ Delete</button>
+                  </div>
+                </div>
+              </div>
+              ${post.category ? `<div class="card-category">${post.category}</div>` : ''}
+              ${post.short_description ? `<div class="card-excerpt">${post.short_description.slice(0,100)}${post.short_description.length > 100 ? '...' : ''}</div>` : ''}
+              <div class="card-meta">
+                <span class="status-badge status-${post.status || 'draft'}">${(post.status || 'draft').charAt(0).toUpperCase() + (post.status || 'draft').slice(1)}</span>
+                <span class="card-date">${fmtDate(post.created_at)}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      document.querySelectorAll('.tab-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          document.querySelectorAll('.tab-pill').forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          currentTab = pill.dataset.tab;
+          renderLibrary();
+        });
+      });
+
+      searchInput.addEventListener('input', () => {
+        searchQuery = searchInput.value;
+        renderLibrary();
+      });
+
+      categorySelect.addEventListener('change', () => {
+        categoryFilter = categorySelect.value;
+        renderLibrary();
+      });
+
+      clearFiltersBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        categorySelect.value = '';
+        searchQuery = '';
+        categoryFilter = '';
+        renderLibrary();
+      });
+
+      function toggleMenu(id) {
+        const menu = document.getElementById(`menu-${id}`);
+        document.querySelectorAll('.actions-dropdown').forEach(m => {
+          if (m.id !== `menu-${id}`) m.classList.add('hidden');
+        });
+        menu.classList.toggle('hidden');
+      }
+      document.addEventListener('click', e => {
+        if (!e.target.closest('.actions-wrap')) {
+          document.querySelectorAll('.actions-dropdown').forEach(m => m.classList.add('hidden'));
+        }
+      });
+
+      function editPost(id) {
+        window.location.href = `/admin/blog-create.html?id=${id}`;
+      }
+
+      function viewPost(id) {
+        document.querySelectorAll('.actions-dropdown').forEach(m => m.classList.add('hidden'));
+        const post = allPosts.find(p => p.id === id);
+        if (!post) return;
+        const modal = document.getElementById('preview-modal');
+        const body = document.getElementById('preview-modal-body');
+        document.getElementById('preview-modal-title').textContent = post.title || 'Untitled';
+        body.innerHTML = `
+          ${post.cover_url ? `<img src="${post.cover_url}" style="width:100%;max-height:220px;object-fit:cover;border-radius:16px;margin-bottom:1.25rem" />` : ''}
+          <div style="margin-bottom:1rem">
+            <span class="status-badge status-${post.status || 'draft'}" style="margin-right:0.5rem">${(post.status || 'draft').charAt(0).toUpperCase() + (post.status || 'draft').slice(1)}</span>
+            ${post.category ? `<span style="color:var(--admin-gold);font-size:0.85rem">${post.category}</span>` : ''}
+          </div>
+          <h2 style="font-size:1.4rem;margin-bottom:0.75rem">${post.title || '—'}</h2>
+          ${post.short_description ? `<p style="color:var(--admin-muted);margin-bottom:1.25rem;line-height:1.7">${post.short_description}</p>` : ''}
+          ${post.content ? `<div class="preview-content">${post.content}</div>` : '<p style="color:var(--admin-muted)">No content yet.</p>'}
+          ${post.cta_text ? `<div style="margin-top:1.5rem;padding:1rem;border:1px solid var(--admin-border);border-radius:14px;background:rgba(201,162,39,0.06)"><div style="font-size:0.78rem;color:var(--admin-muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.08em">CTA</div><a href="${post.cta_link}" target="_blank" style="color:var(--admin-gold);font-weight:700">${post.cta_text} →</a></div>` : ''}
+        `;
+        modal.classList.remove('hidden');
+        }
+
+function closePreview() {
+  document.getElementById('preview-modal').classList.add('hidden');
+}
+      
+      async function archivePost(id, status) {
+        document.querySelectorAll('.actions-dropdown').forEach(m => m.classList.add('hidden'));
+        const newStatus = status === 'archived' ? 'draft' : 'archived';
+        const { error } = await sb.from('blog_posts').update({ status: newStatus }).eq('id', id);
+        if (error) { showToast('Failed to update status', true); return; }
+        showToast(newStatus === 'archived' ? 'Post archived' : 'Post restored');
+        await loadPosts();
+      }
+
+      function promptDelete(id) {
+        document.querySelectorAll('.actions-dropdown').forEach(m => m.classList.add('hidden'));
+        deleteTargetId = id;
+        confirmModal.classList.remove('hidden');
+      }
+      document.getElementById('confirm-cancel').addEventListener('click', () => {
+        confirmModal.classList.add('hidden');
+        deleteTargetId = null;
+      });
+      document.getElementById('confirm-delete').addEventListener('click', async () => {
+        if (!deleteTargetId) return;
+        const { error } = await sb.from('blog_posts').delete().eq('id', deleteTargetId);
+        confirmModal.classList.add('hidden');
+        deleteTargetId = null;
+        if (error) { showToast('Failed to delete', true); return; }
+        showToast('Post deleted');
+        await loadPosts();
+      });
+
+      guardPage();
+    </script>
+    <!-- PREVIEW MODAL -->
+    <div class="confirm-modal hidden" id="preview-modal" style="align-items:center">
+      <div class="confirm-box" style="width:min(700px,95%);max-height:85vh;overflow-y:auto;text-align:left;padding:0;border-radius:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--admin-border)">
+          <h3 id="preview-modal-title" style="font-size:1.1rem">Post Preview</h3>
+          <button class="btn btn-ghost" onclick="closePreview()" style="padding:0.4rem 0.75rem;font-size:0.85rem">✕ Close</button>
+        </div>
+        <div id="preview-modal-body" style="padding:1.5rem"></div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Blog Editor — TayNova CMS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" />
+    <style>
+      :root {
+        --admin-black: #151216;
+        --admin-card: rgba(255,255,255,0.08);
+        --admin-card-strong: rgba(255,255,255,0.12);
+        --admin-gold: #c9a227;
+        --admin-white: #ffffff;
+        --admin-muted: rgba(255,255,255,0.66);
+        --admin-border: rgba(255,255,255,0.12);
+        --admin-danger: #e74c3c;
+        --admin-success: #2ecc71;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--admin-white);
+        background: radial-gradient(circle at top right, rgba(201,162,39,0.12), transparent 30%),
+          linear-gradient(135deg, #100e12, var(--admin-black));
+        min-height: 100vh;
+      }
+      button { border: none; font: inherit; cursor: pointer; }
+      img { display: block; max-width: 100%; }
+      a { text-decoration: none; color: inherit; }
+      .hidden { display: none !important; }
+
+      /* AUTH */
+      .auth-check { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; }
+      .auth-card {
+        width: min(480px,100%); padding: 2rem; border: 1px solid var(--admin-border);
+        border-radius: 28px; background: var(--admin-card); backdrop-filter: blur(18px); text-align: center;
+      }
+      .auth-card h1 { font-size: clamp(2rem,6vw,3rem); margin-bottom: 0.75rem; }
+      .auth-card p { color: var(--admin-muted); line-height: 1.7; }
+
+      /* SHELL */
+      .dashboard-shell { min-height: 100vh; padding-left: 280px; }
+
+      /* SIDEBAR */
+      .admin-sidebar {
+        position: fixed; inset: 0 auto 0 0; width: 280px;
+        display: flex; flex-direction: column; gap: 2rem; padding: 1.5rem;
+        border-right: 1px solid var(--admin-border);
+        background: rgba(18,15,20,0.86); backdrop-filter: blur(22px);
+        box-shadow: 24px 0 80px rgba(0,0,0,0.18); z-index: 100;
+      }
+      .sidebar-brand {
+        display: grid; justify-items: center; gap: 0.85rem;
+        padding: 0.75rem 0 1.25rem; border-bottom: 1px solid var(--admin-border); text-align: center;
+      }
+      .sidebar-brand img { width: 58px; height: 58px; object-fit: contain; }
+      .sidebar-brand h2 { font-size: 1.05rem; letter-spacing: 0.04em; }
+      .admin-nav { display: grid; gap: 0.45rem; }
+      .admin-nav a {
+        display: flex; align-items: center; min-height: 46px;
+        padding: 0.85rem 1rem; border-radius: 16px; color: var(--admin-muted); font-weight: 700;
+        transition: color 0.2s, background 0.2s, transform 0.2s;
+      }
+      .admin-nav a:hover, .admin-nav a.active {
+        color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px);
+      }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-gold); }
+      .logout-btn {
+        margin-top: auto; width: 100%; border-radius: 999px;
+        padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-gold); font-weight: 800;
+      }
+
+      /* PAGE */
+      .page-main { padding: clamp(1.5rem,4vw,3rem); max-width: 900px; }
+      .page-header {
+        display: flex; align-items: center; gap: 1rem;
+        margin-bottom: 2rem; flex-wrap: wrap;
+      }
+      .back-btn {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.65rem 1rem; border-radius: 999px;
+        background: rgba(255,255,255,0.08); color: var(--admin-muted);
+        font-size: 0.9rem; font-weight: 600; transition: background 0.2s, color 0.2s;
+      }
+      .back-btn:hover { background: rgba(255,255,255,0.14); color: var(--admin-white); }
+      .page-header h1 { font-size: clamp(1.5rem,3vw,2.2rem); flex: 1; }
+
+      /* STEPPER */
+      .stepper {
+        display: flex; margin-bottom: 2.5rem;
+        border-radius: 18px; overflow: hidden; border: 1px solid var(--admin-border);
+      }
+      .step-item {
+        flex: 1; text-align: center; padding: 0.85rem 0.5rem;
+        font-size: 0.78rem; font-weight: 700; color: var(--admin-muted);
+        background: rgba(255,255,255,0.04);
+        border-right: 1px solid var(--admin-border);
+        transition: background 0.2s, color 0.2s;
+      }
+      .step-item:last-child { border-right: none; }
+      .step-item.active { background: rgba(201,162,39,0.18); color: var(--admin-gold); }
+      .step-item.done { background: rgba(46,204,113,0.08); color: var(--admin-success); }
+
+      /* STEP PANELS */
+      .step-panel { display: none; }
+      .step-panel.active { display: block; }
+
+      /* FORM */
+      .form-group { margin-bottom: 1.5rem; }
+      .form-group label {
+        display: block; font-size: 0.82rem; font-weight: 700;
+        color: var(--admin-muted); margin-bottom: 0.6rem;
+        letter-spacing: 0.08em; text-transform: uppercase;
+      }
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%; padding: 0.9rem 1rem;
+        border: 1px solid var(--admin-border); border-radius: 14px;
+        background: rgba(255,255,255,0.06); color: var(--admin-white);
+        font: inherit; font-size: 0.95rem; outline: none;
+        transition: border-color 0.2s, background 0.2s;
+      }
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        border-color: var(--admin-gold); background: rgba(255,255,255,0.1);
+      }
+      .form-group select option { background: #1a161e; }
+      .form-group textarea { resize: vertical; min-height: 100px; }
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .form-hint { font-size: 0.8rem; color: var(--admin-muted); margin-top: 0.35rem; }
+      .form-error { font-size: 0.8rem; color: var(--admin-danger); margin-top: 0.35rem; display: none; }
+      .form-error.show { display: block; }
+
+      /* UPLOAD ZONE */
+      .upload-zone {
+        border: 2px dashed var(--admin-border); border-radius: 18px;
+        padding: 3rem 2rem; text-align: center; cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        background: rgba(255,255,255,0.03); position: relative;
+      }
+      .upload-zone:hover, .upload-zone.dragover {
+        border-color: var(--admin-gold); background: rgba(201,162,39,0.06);
+      }
+      .upload-zone input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+      }
+      .upload-zone strong { display: block; margin: 0.5rem 0 0.25rem; font-size: 1rem; }
+      .upload-zone p { color: var(--admin-muted); font-size: 0.88rem; }
+      .upload-icon { font-size: 3rem; }
+      .cover-preview-wrap {
+        margin-top: 1.25rem; border-radius: 16px; overflow: hidden;
+        position: relative; display: none;
+      }
+      .cover-preview-wrap img {
+        width: 100%; max-height: 280px; object-fit: contain; border-radius: 16px;
+      }
+      .cover-remove-btn {
+        position: absolute; top: 10px; right: 10px;
+        padding: 0.4rem 0.75rem; border-radius: 999px;
+        background: rgba(0,0,0,0.7); color: white; font-size: 0.8rem; font-weight: 700;
+      }
+      .media-preview-grid {
+        margin-top: 1rem;
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(100px,1fr)); gap: 0.75rem;
+      }
+      .preview-item {
+        position: relative; border-radius: 12px; overflow: hidden;
+        aspect-ratio: 1; background: rgba(255,255,255,0.06);
+      }
+      .preview-item img, .preview-item video { width: 100%; height: 100%; object-fit: contain; }
+      .preview-remove {
+        position: absolute; top: 4px; right: 4px; width: 22px; height: 22px;
+        border-radius: 50%; background: rgba(0,0,0,0.7); color: white;
+        font-size: 0.75rem; display: flex; align-items: center; justify-content: center;
+      }
+
+      /* FOUNDER SECTION */
+      .founder-layout { display: grid; grid-template-columns: 200px 1fr; gap: 2rem; align-items: start; }
+      .founder-img-wrap {
+        border: 1px solid var(--admin-border); border-radius: 18px;
+        padding: 1rem; text-align: center; background: rgba(255,255,255,0.04);
+      }
+      .founder-img-preview {
+        width: 100%; aspect-ratio: 3/4; border-radius: 12px;
+        object-fit: contain; margin-bottom: 0.75rem; display: none;
+        background: rgba(255,255,255,0.06);
+      }
+      .founder-img-placeholder {
+        width: 100%; aspect-ratio: 3/4; border-radius: 12px;
+        background: rgba(255,255,255,0.06); display: flex;
+        align-items: center; justify-content: center;
+        color: var(--admin-muted); font-size: 2rem; margin-bottom: 0.75rem;
+      }
+      .btn-upload-founder {
+        width: 100%; padding: 0.65rem; border-radius: 999px;
+        background: rgba(255,255,255,0.08); color: var(--admin-white);
+        font-size: 0.85rem; font-weight: 700; position: relative; overflow: hidden;
+      }
+      .btn-upload-founder input[type="file"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      }
+
+      /* RICH TEXT EDITOR */
+      .editor-wrap { border-radius: 16px; overflow: visible; }
+      .ql-toolbar.ql-snow {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        border: 1px solid var(--admin-border) !important;
+        border-bottom: none !important;
+        background: #1e1a22 !important;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 12px 28px rgba(0,0,0,0.24);
+      }
+      .ql-container.ql-snow {
+        border: 1px solid var(--admin-border) !important;
+        border-radius: 0 0 16px 16px;
+        background: rgba(255,255,255,0.04);
+        min-height: 280px; font-family: inherit; font-size: 1rem;
+      }
+      .ql-editor { color: #ffffff !important; min-height: 280px; line-height: 1.8; caret-color: #ffffff; }
+      .ql-editor p, .ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor li, .ql-editor blockquote { color: #ffffff !important; }
+      .ql-snow .ql-stroke { stroke: var(--admin-muted) !important; }
+      .ql-snow .ql-fill { fill: var(--admin-muted) !important; }
+      .ql-snow .ql-picker { color: var(--admin-muted) !important; }
+      .ql-snow .ql-picker-options { background: #1e1a22 !important; border-color: var(--admin-border) !important; }
+
+      /* CTA BLOCK */
+      .cta-block {
+        border: 1px solid var(--admin-border); border-radius: 16px;
+        padding: 1.5rem; background: rgba(255,255,255,0.04); margin-top: 1.5rem;
+      }
+      .cta-block-title {
+        font-size: 0.82rem; font-weight: 700; color: var(--admin-muted);
+        letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem;
+      }
+
+      /* REVIEW */
+      .review-grid { display: grid; gap: 1.25rem; }
+      .review-card {
+        border: 1px solid var(--admin-border); border-radius: 16px;
+        padding: 1.25rem; background: rgba(255,255,255,0.04);
+      }
+      .review-label {
+        font-size: 0.75rem; font-weight: 800; color: var(--admin-gold);
+        letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem;
+      }
+      .review-value { font-size: 0.95rem; line-height: 1.6; color: var(--admin-white); }
+      .review-cover {
+        width: 100%; max-height: 260px; object-fit: contain; border-radius: 14px;
+      }
+      .review-content-box {
+        max-height: 220px; overflow-y: auto;
+        font-size: 0.9rem; line-height: 1.7; color: var(--admin-muted);
+      }
+      .review-founder {
+        display: flex; gap: 1.25rem; align-items: center;
+      }
+      .review-founder img {
+        width: 60px; height: 80px; object-fit: contain; border-radius: 10px; flex-shrink: 0;
+      }
+      .review-founder-info h4 { font-size: 1rem; margin-bottom: 0.25rem; }
+      .review-founder-info p { font-size: 0.85rem; color: var(--admin-muted); }
+
+      /* ACTION BAR */
+      .action-bar {
+        position: sticky; bottom: 0; left: 0; right: 0;
+        display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end;
+        padding: 1.25rem 0; margin-top: 2rem;
+        border-top: 1px solid var(--admin-border);
+        background: linear-gradient(to top, rgba(16,14,18,0.98), transparent);
+        backdrop-filter: blur(12px);
+      }
+      .btn {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        padding: 0.85rem 1.5rem; border-radius: 999px; font-weight: 700; font-size: 0.9rem;
+        transition: transform 0.2s, opacity 0.2s; cursor: pointer;
+      }
+      .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+      .btn-ghost { background: rgba(255,255,255,0.08); color: var(--admin-white); }
+      .btn-draft { background: rgba(255,255,255,0.12); color: var(--admin-white); }
+      .btn-primary { background: var(--admin-gold); color: var(--admin-black); }
+      .btn-schedule { background: rgba(52,152,219,0.2); color: #3498db; }
+      .btn-publish { background: var(--admin-gold); color: var(--admin-black); }
+
+      /* TOAST */
+      .toast {
+        position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem;
+        border-radius: 14px; font-weight: 700; z-index: 400;
+        transform: translateY(100px); opacity: 0; transition: transform 0.3s, opacity 0.3s;
+        border: 1px solid;
+      }
+      .toast.show { transform: translateY(0); opacity: 1; }
+
+      /* SUCCESS SCREEN */
+      .success-screen {
+        text-align: center; padding: 4rem 2rem;
+      }
+      .success-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+      .success-screen h2 { font-size: 2rem; margin-bottom: 0.75rem; }
+      .success-screen p { color: var(--admin-muted); margin-bottom: 2rem; line-height: 1.7; }
+      .success-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+      /* RESPONSIVE */
+      @media (max-width: 760px) {
+        .dashboard-shell { padding-left: 0; padding-bottom: 88px; }
+        .admin-sidebar {
+          inset: auto 0 0 0; width: 100%; height: auto; flex-direction: row;
+          align-items: center; gap: 0.65rem; padding: 0.65rem;
+          border-top: 1px solid var(--admin-border); border-right: none; overflow-x: auto;
+        }
+        .sidebar-brand { display: none; }
+        .admin-nav { display: flex; gap: 0.45rem; flex: 1; overflow-x: auto; }
+        .admin-nav a { min-height: 42px; white-space: nowrap; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
+        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-gold); }
+        .logout-btn { width: auto; flex: 0 0 auto; margin: 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; }
+        .form-row { grid-template-columns: 1fr; }
+        .founder-layout { grid-template-columns: 1fr; }
+        .action-bar { justify-content: stretch; }
+        .action-bar .btn { flex: 1; justify-content: center; }
+        .stepper { flex-wrap: wrap; border-radius: 14px; }
+        .step-item { min-width: calc(50% - 1px); border-bottom: 1px solid var(--admin-border); }
+      }
+      .ql-editor { 
+  padding: 2rem !important; 
+  font-size: 1rem !important; 
+  line-height: 1.9 !important;
+      }
+      .ql-editor h1 { font-size: 1.8rem !important; margin: 1.5rem 0 0.75rem !important; }
+      .ql-editor h2 { font-size: 1.4rem !important; margin: 1.25rem 0 0.6rem !important; }
+      .ql-editor p { margin-bottom: 1rem !important; }
+      .ql-editor ul, .ql-editor ol { padding-left: 1.5rem !important; margin-bottom: 1rem !important; }
+      .ql-editor li { margin-bottom: 0.4rem !important; line-height: 1.8 !important; }
+      .ql-editor blockquote { 
+        border-left: 3px solid var(--admin-gold) !important; 
+        padding: 0.75rem 1.25rem !important;
+        margin: 1.25rem 0 !important;
+        background: rgba(201,162,39,0.06) !important;
+        border-radius: 0 12px 12px 0 !important;
+      }
+      .ql-font-cambria { font-family: Cambria, serif; }
+      .ql-font-georgia { font-family: Georgia, serif; }
+      .ql-font-times-new-roman { font-family: 'Times New Roman', serif; }
+      .ql-font span[data-value="cambria"]::before { content: 'Cambria'; font-family: Cambria, serif; }
+      .ql-font span[data-value="georgia"]::before { content: 'Georgia'; font-family: Georgia, serif; }
+      .ql-font span[data-value="times-new-roman"]::before { content: 'Times New Roman'; font-family: 'Times New Roman', serif; }
+    </style>
+  </head>
+  <body>
+    <section class="auth-check" id="checking">
+      <div class="auth-card">
+        <h1>Checking Access</h1>
+        <p>Verifying your private TayNova admin session...</p>
+      </div>
+    </section>
+
+    <div class="dashboard-shell hidden" id="dashboard-shell">
+      <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+          <img src="/assets/images/logo/logo.png" alt="TayNova Logo" />
+          <h2>TayNova Admin</h2>
+        </div>
+        <nav class="admin-nav">
+          <a href="/admin/dashboard.html">Home</a>
+          <a href="/admin/blogs.html" class="active">Blog</a>
+          <a href="/admin/products.html">Products</a>
+          <a href="/admin/ebooks.html">Ebooks</a>
+          <a href="/admin/inspiration.html">Inspiration</a>
+          <a href="/admin/content.html">Content</a>
+        </nav>
+        <button class="logout-btn" id="logout">Logout</button>
+      </aside>
+
+      <main class="page-main">
+        <div class="page-header">
+          <a href="/admin/blogs.html" class="back-btn">← Back</a>
+          <h1 id="page-title">New Blog Post</h1>
+        </div>
+
+        <!-- STEPPER -->
+        <div class="stepper">
+          <div class="step-item active" data-step="1">1. Setup</div>
+          <div class="step-item" data-step="2">2. Cover</div>
+          <div class="step-item" data-step="3">3. Title</div>
+          <div class="step-item" data-step="4">4. Founder</div>
+          <div class="step-item" data-step="5">5. Write</div>
+          <div class="step-item" data-step="6">6. Review</div>
+          <div class="step-item" data-step="7">7. Publish</div>
+        </div>
+
+        <!-- STEP 1: SETUP -->
+        <div class="step-panel active" id="panel-1">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="blog-category">
+              <option value="">Select category...</option>
+              <option>Home Decor</option>
+              <option>Lifestyle</option>
+              <option>Sustainability</option>
+              <option>Organization</option>
+              <option>Inspiration</option>
+              <option>Wellness</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Tags</label>
+            <input type="text" id="blog-tags" placeholder="cozy, minimal, aesthetic..." />
+            <div class="form-hint">Separate tags with commas</div>
+          </div>
+        </div>
+
+        <!-- STEP 2: COVER -->
+        <div class="step-panel" id="panel-2">
+          <div class="form-group">
+            <label>Cover Image *</label>
+            <div class="upload-zone" id="cover-zone">
+              <input type="file" id="cover-input" accept="image/jpeg,image/png,image/webp" />
+              <div class="upload-icon">🖼️</div>
+              <strong>Upload Cover Image</strong>
+              <p>JPG, PNG, WEBP · Click or drag & drop</p>
+            </div>
+            <div class="cover-preview-wrap" id="cover-preview-wrap">
+              <img id="cover-preview-img" src="" alt="Cover preview" />
+              <button class="cover-remove-btn" onclick="removeCover()">✕ Remove</button>
+            </div>
+            <div class="form-error" id="err-cover">Cover image is required before publishing</div>
+          </div>
+        </div>
+
+        <!-- STEP 3: TITLE & INTRO -->
+        <div class="step-panel" id="panel-3">
+          <div class="form-group">
+            <label>Blog Title *</label>
+            <input type="text" id="blog-title" placeholder="Enter blog title..." />
+            <div class="form-error" id="err-title">Title is required</div>
+          </div>
+          <div class="form-group">
+            <label>Short Description / Intro</label>
+            <textarea id="blog-desc" placeholder="Brief summary shown in blog cards and previews..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Subtitle (Optional)</label>
+              <input type="text" id="blog-subtitle" placeholder="Optional subtitle..." />
+            </div>
+            <div class="form-group">
+              <label>Reading Time (Optional)</label>
+              <input type="text" id="blog-read-time" placeholder="e.g. 5 min read" />
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: FOUNDER -->
+        <div class="step-panel" id="panel-4">
+          <p style="color:var(--admin-muted);margin-bottom:1.5rem;line-height:1.7;">
+            Add a personal founder note that appears below the blog hero before the article content. This is optional.
+          </p>
+          <div class="founder-layout">
+            <div class="founder-img-wrap">
+              <div class="founder-img-placeholder" id="founder-placeholder">👤</div>
+              <img class="founder-img-preview" id="founder-img-preview" src="" alt="Founder" />
+              <button class="btn-upload-founder">
+                <input type="file" id="founder-img-input" accept="image/jpeg,image/png,image/webp" />
+                📷 Upload Photo
+              </button>
+            </div>
+            <div>
+              <div class="form-group">
+                <label>Founder Name</label>
+                <input type="text" id="founder-name" placeholder="Oreoluwa" />
+              </div>
+              <div class="form-group">
+                <label>Founder Role</label>
+                <input type="text" id="founder-role" placeholder="Founder of TayNova" />
+              </div>
+              <div class="form-group">
+                <label>Founder Note</label>
+                <textarea id="founder-note" rows="5" placeholder="A personal note from the founder..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5: WRITE -->
+        <div class="step-panel" id="panel-5">
+          <div class="form-group">
+            <label>Blog Content</label>
+            <div class="editor-wrap">
+              <div id="quill-editor"></div>
+            </div>
+          </div>
+          <div class="cta-block">
+            <div class="cta-block-title">Optional CTA Block</div>
+            <div class="form-row">
+              <div class="form-group" style="margin-bottom:0">
+                <label>CTA Text</label>
+                <input type="text" id="cta-text" placeholder="Shop the look..." />
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label>CTA Link</label>
+                <input type="url" id="cta-link" placeholder="https://..." />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 6: REVIEW -->
+        <div class="step-panel" id="panel-6">
+          <div class="review-grid">
+            <div class="review-card" id="review-cover-card" style="display:none">
+              <div class="review-label">Cover Image</div>
+              <img class="review-cover" id="review-cover-img" src="" alt="Cover" />
+            </div>
+            <div class="review-card">
+              <div class="review-label">Title</div>
+              <div class="review-value" id="review-title">—</div>
+            </div>
+            <div class="review-card">
+              <div class="review-label">Description</div>
+              <div class="review-value" id="review-desc" style="color:var(--admin-muted)">—</div>
+            </div>
+            <div class="review-card">
+              <div class="review-label">Category & Tags</div>
+              <div class="review-value" id="review-meta" style="color:var(--admin-muted)">—</div>
+            </div>
+            <div class="review-card" id="review-founder-card" style="display:none">
+              <div class="review-label">Founder Section</div>
+              <div class="review-founder" id="review-founder"></div>
+            </div>
+            <div class="review-card">
+              <div class="review-label">Content Preview</div>
+              <div class="review-content-box" id="review-content">—</div>
+            </div>
+            <div class="review-card" id="review-cta-card" style="display:none">
+              <div class="review-label">CTA</div>
+              <div class="review-value" id="review-cta">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 7: PUBLISH -->
+        <div class="step-panel" id="panel-7">
+          <div style="text-align:center;padding:3rem 1rem">
+            <div style="font-size:3.5rem;margin-bottom:1.5rem">🚀</div>
+            <h2 style="font-size:1.8rem;margin-bottom:0.75rem">Ready to Publish?</h2>
+            <p style="color:var(--admin-muted);max-width:480px;margin:0 auto 2.5rem;line-height:1.7">
+              Your blog post looks great! Choose how you'd like to publish it.
+            </p>
+            <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+              <button class="btn btn-draft" onclick="savePost('draft')">💾 Save as Draft</button>
+              <button class="btn btn-schedule" onclick="savePost('scheduled')">🕐 Schedule Post</button>
+              <button class="btn btn-publish" onclick="savePost('published')">🚀 Publish Now</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SUCCESS SCREEN -->
+        <div class="step-panel" id="panel-success">
+          <div class="success-screen">
+            <div class="success-icon">🎉</div>
+            <h2>Blog Published Successfully!</h2>
+            <p>Your blog post is now live on TayNova.</p>
+            <div class="success-actions">
+              <a href="/admin/blogs.html" class="btn btn-ghost">← Back to Blog CMS</a>
+              <button class="btn btn-primary" onclick="startNew()">＋ Write Another Post</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACTION BAR -->
+        <div class="action-bar" id="action-bar"></div>
+      </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const SUPABASE_URL = 'https://ngnricijtqlikjxrbtlr.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI';
+      const ADMIN_EMAIL = 'oreoluwaoluwadare2@gmail.com';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true }
+      });
+
+      let currentStep = 1;
+      const TOTAL_STEPS = 7;
+      let editingId = null;
+      let coverFile = null;
+      let coverUrl = null;
+      let founderFile = null;
+      let founderUrl = null;
+      let quill = null;
+      let autoSaveTimer = null;
+
+      const checking = document.getElementById('checking');
+      const shell = document.getElementById('dashboard-shell');
+      const toast = document.getElementById('toast');
+
+      // AUTH
+      async function guardPage() {
+        const { data } = await sb.auth.getSession();
+        if (!data.session || data.session.user.email !== ADMIN_EMAIL) {
+          window.location.replace('/admin/index.html'); return;
+        }
+        checking.classList.add('hidden');
+        shell.classList.remove('hidden');
+        initEditor();
+        renderActionBar();
+        checkEditMode();
+        startAutoSave();
+      }
+
+      document.getElementById('logout').addEventListener('click', async () => {
+        await sb.auth.signOut();
+        window.location.replace('/admin/index.html');
+      });
+
+      // TOAST
+      function showToast(msg, isError = false) {
+        toast.textContent = msg;
+        toast.style.background = isError ? 'rgba(231,76,60,0.18)' : 'rgba(46,204,113,0.18)';
+        toast.style.borderColor = isError ? 'rgba(231,76,60,0.3)' : 'rgba(46,204,113,0.3)';
+        toast.style.color = isError ? '#e74c3c' : '#2ecc71';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+      }
+
+      // INIT EDITOR
+      function initEditor() {
+       quill = new Quill('#quill-editor', {
+        theme: 'snow',
+        modules: {
+          toolbar: [
+            [{ font: ['', 'serif', 'monospace', 'cambria', 'georgia', 'times-new-roman'] }],
+            [{ header: [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ color: [] }, { background: [] }],
+            [{ align: [] }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['blockquote', 'code-block'],
+            ['link', 'image'],
+            ['clean']
+          ]
+        }
+    });
+        
+
+        // Strip default color when not manually set
+        quill.on('text-change', () => {
+          const delta = quill.getContents();
+          delta.ops.forEach(op => {
+            if (op.attributes && op.attributes.color === '#ffffff') {
+              delete op.attributes.color;
+            }
+          });
+        });
+      }
+
+      // CHECK EDIT MODE
+      function checkEditMode() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if (id) {
+          editingId = id;
+          document.getElementById('page-title').textContent = 'Edit Blog Post';
+          loadPost(id);
+        }
+      }
+
+      async function loadPost(id) {
+        const { data, error } = await sb.from('blog_posts').select('*').eq('id', id).single();
+        if (error || !data) { showToast('Failed to load post', true); return; }
+        document.getElementById('blog-category').value = data.category || '';
+        document.getElementById('blog-tags').value = (data.tags || []).join(', ');
+        document.getElementById('blog-title').value = data.title || '';
+        document.getElementById('blog-desc').value = data.short_description || '';
+        document.getElementById('blog-subtitle').value = data.subtitle || '';
+        document.getElementById('blog-read-time').value = data.read_time || '';
+        document.getElementById('founder-name').value = data.founder_name || '';
+        document.getElementById('founder-role').value = data.founder_role || '';
+        document.getElementById('founder-note').value = data.founder_note || '';
+        document.getElementById('cta-text').value = data.cta_text || '';
+        document.getElementById('cta-link').value = data.cta_link || '';
+        if (data.cover_url) {
+          coverUrl = data.cover_url;
+          showCoverPreview(coverUrl);
+        }
+        if (data.founder_image_url) {
+          founderUrl = data.founder_image_url;
+          showFounderPreview(founderUrl);
+        }
+        setTimeout(() => {
+          if (quill && data.content) quill.root.innerHTML = data.content;
+        }, 300);
+      }
+
+      // STEP NAVIGATION
+      function goToStep(n) {
+        if (n < 1 || n > TOTAL_STEPS) return;
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.step-item').forEach(s => {
+          const sn = parseInt(s.dataset.step);
+          s.classList.toggle('active', sn === n);
+          s.classList.toggle('done', sn < n);
+        });
+        const panel = document.getElementById(`panel-${n}`);
+        if (panel) panel.classList.add('active');
+        currentStep = n;
+        renderActionBar();
+        if (n === 6) populateReview();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function validateStep(n) {
+        if (n === 3) {
+          const title = document.getElementById('blog-title').value.trim();
+          if (!title) {
+            document.getElementById('err-title').classList.add('show');
+            showToast('Blog title is required', true);
+            return false;
+          }
+          document.getElementById('err-title').classList.remove('show');
+        }
+        return true;
+      }
+
+      function nextStep() {
+        if (!validateStep(currentStep)) return;
+        goToStep(currentStep + 1);
+      }
+
+      function prevStep() {
+        goToStep(currentStep - 1);
+      }
+
+      // ACTION BAR
+      function renderActionBar() {
+        const bar = document.getElementById('action-bar');
+        if (currentStep > TOTAL_STEPS) { bar.innerHTML = ''; return; }
+
+        let html = '';
+        if (currentStep > 1) {
+          html += `<button class="btn btn-ghost" onclick="prevStep()">← Back</button>`;
+        }
+        html += `<button class="btn btn-draft" onclick="savePost('draft')">💾 Save Draft</button>`;
+        if (currentStep < TOTAL_STEPS) {
+          html += `<button class="btn btn-primary" onclick="nextStep()">Continue →</button>`;
+        }
+        bar.innerHTML = html;
+      }
+
+      // COVER IMAGE
+      document.getElementById('cover-input').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        coverFile = file;
+        coverUrl = URL.createObjectURL(file);
+        showCoverPreview(coverUrl);
+      });
+
+      function showCoverPreview(url) {
+        document.getElementById('cover-preview-img').src = url;
+        document.getElementById('cover-preview-wrap').style.display = 'block';
+      }
+
+      function removeCover() {
+        coverFile = null;
+        coverUrl = null;
+        document.getElementById('cover-preview-wrap').style.display = 'none';
+        document.getElementById('cover-input').value = '';
+      }
+
+      // DRAG & DROP COVER
+      const coverZone = document.getElementById('cover-zone');
+      coverZone.addEventListener('dragover', e => { e.preventDefault(); coverZone.classList.add('dragover'); });
+      coverZone.addEventListener('dragleave', () => coverZone.classList.remove('dragover'));
+      coverZone.addEventListener('drop', e => {
+        e.preventDefault(); coverZone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) {
+          coverFile = file;
+          coverUrl = URL.createObjectURL(file);
+          showCoverPreview(coverUrl);
+        }
+      });
+
+      // FOUNDER IMAGE
+      document.getElementById('founder-img-input').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        founderFile = file;
+        founderUrl = URL.createObjectURL(file);
+        showFounderPreview(founderUrl);
+      });
+
+      function showFounderPreview(url) {
+        document.getElementById('founder-placeholder').style.display = 'none';
+        const img = document.getElementById('founder-img-preview');
+        img.src = url;
+        img.style.display = 'block';
+      }
+
+      // POPULATE REVIEW
+      function populateReview() {
+        const title = document.getElementById('blog-title').value.trim();
+        const desc = document.getElementById('blog-desc').value.trim();
+        const cat = document.getElementById('blog-category').value;
+        const tags = document.getElementById('blog-tags').value.trim();
+        const ctaText = document.getElementById('cta-text').value.trim();
+        const ctaLink = document.getElementById('cta-link').value.trim();
+        const founderName = document.getElementById('founder-name').value.trim();
+        const founderRole = document.getElementById('founder-role').value.trim();
+        const founderNote = document.getElementById('founder-note').value.trim();
+        const content = quill ? quill.root.innerHTML : '';
+
+        document.getElementById('review-title').textContent = title || '—';
+        document.getElementById('review-desc').textContent = desc || '—';
+        document.getElementById('review-meta').textContent = [cat, tags].filter(Boolean).join(' · ') || '—';
+        document.getElementById('review-content').innerHTML = content || '<em style="color:var(--admin-muted)">No content yet</em>';
+
+        if (coverUrl) {
+          document.getElementById('review-cover-img').src = coverUrl;
+          document.getElementById('review-cover-card').style.display = 'block';
+        } else {
+          document.getElementById('review-cover-card').style.display = 'none';
+        }
+
+        if (founderName || founderNote) {
+          const founderCard = document.getElementById('review-founder-card');
+          founderCard.style.display = 'block';
+          document.getElementById('review-founder').innerHTML = `
+            ${founderUrl ? `<img src="${founderUrl}" alt="Founder" />` : ''}
+            <div class="review-founder-info">
+              <h4>${founderName || 'Founder'}</h4>
+              <p style="color:var(--admin-gold);font-size:0.82rem;margin-bottom:0.5rem">${founderRole || ''}</p>
+              <p>${founderNote || ''}</p>
+            </div>
+          `;
+        } else {
+          document.getElementById('review-founder-card').style.display = 'none';
+        }
+
+        if (ctaText || ctaLink) {
+          document.getElementById('review-cta-card').style.display = 'block';
+          document.getElementById('review-cta').textContent = `${ctaText} → ${ctaLink}`;
+        } else {
+          document.getElementById('review-cta-card').style.display = 'none';
+        }
+      }
+
+      // UPLOAD FILE
+      async function uploadFile(file, bucket, folder) {
+        const ext = file.name.split('.').pop();
+        const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await sb.storage.from(bucket).upload(path, file, { upsert: true });
+        if (error) throw error;
+        const { data } = sb.storage.from(bucket).getPublicUrl(path);
+        return data.publicUrl;
+      }
+
+      // STRIP ADMIN COLORS FROM CONTENT
+      function cleanContent(html) {
+        if (!html) return html;
+        return html
+          .replace(/color:\s*rgb\(255,\s*255,\s*255\)/gi, '')
+          .replace(/color:\s*#fff(fff)?;?/gi, '')
+          .replace(/color:\s*white;?/gi, '');
+      }
+
+      // BUILD POST DATA
+      async function buildData(status) {
+        let uploadedCoverUrl = coverUrl;
+        if (coverFile && coverFile instanceof File) {
+          uploadedCoverUrl = await uploadFile(coverFile, 'images', 'blog/covers');
+        }
+        let uploadedFounderUrl = founderUrl;
+        if (founderFile && founderFile instanceof File) {
+          uploadedFounderUrl = await uploadFile(founderFile, 'images', 'blog/founders');
+        }
+        return {
+          title: document.getElementById('blog-title').value.trim(),
+          short_description: document.getElementById('blog-desc').value.trim(),
+          subtitle: document.getElementById('blog-subtitle').value.trim(),
+          read_time: document.getElementById('blog-read-time').value.trim(),
+          category: document.getElementById('blog-category').value,
+          tags: document.getElementById('blog-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+          cover_url: uploadedCoverUrl || null,
+          founder_name: document.getElementById('founder-name').value.trim(),
+          founder_role: document.getElementById('founder-role').value.trim(),
+          founder_note: document.getElementById('founder-note').value.trim(),
+          founder_image_url: uploadedFounderUrl || null,
+          content: cleanContent(quill ? quill.root.innerHTML : ''),
+          cta_text: document.getElementById('cta-text').value.trim(),
+          cta_link: document.getElementById('cta-link').value.trim(),
+          status
+        };
+      }
+
+      // SAVE POST
+      async function savePost(status) {
+        const title = document.getElementById('blog-title').value.trim();
+        if (status === 'published' && !title) {
+          showToast('Blog title is required', true);
+          goToStep(3);
+          return;
+        }
+        try {
+          const data = await buildData(status);
+          let result;
+          if (editingId) {
+            result = await sb.from('blog_posts').update(data).eq('id', editingId);
+          } else {
+            result = await sb.from('blog_posts').insert(data).select().single();
+            if (result.data) editingId = result.data.id;
+          }
+          if (result.error) throw result.error;
+
+          if (status === 'published') {
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-success').classList.add('active');
+            document.getElementById('action-bar').innerHTML = '';
+            document.querySelectorAll('.step-item').forEach(s => s.classList.add('done'));
+          } else {
+            showToast(status === 'draft' ? 'Draft saved!' : 'Post scheduled!');
+          }
+        } catch (e) {
+          console.error(e);
+          showToast('Failed to save. Please try again.', true);
+        }
+      }
+
+      // AUTO SAVE
+      function startAutoSave() {
+        autoSaveTimer = setInterval(async () => {
+          const title = document.getElementById('blog-title').value.trim();
+          if (!title) return;
+          try {
+            const data = await buildData('draft');
+            if (editingId) {
+              await sb.from('blog_posts').update(data).eq('id', editingId);
+            } else {
+              const { data: newPost } = await sb.from('blog_posts').insert(data).select().single();
+              if (newPost) editingId = newPost.id;
+            }
+            showToast('Auto-saved ✓');
+          } catch (e) {}
+        }, 45000);
+      }
+
+      function startNew() {
+        editingId = null;
+        coverFile = null; coverUrl = null;
+        founderFile = null; founderUrl = null;
+        document.getElementById('page-title').textContent = 'New Blog Post';
+        document.querySelectorAll('input[type="text"], textarea, select').forEach(el => {
+          if (el.type !== 'file') el.value = el.tagName === 'SELECT' ? el.options[0].value : '';
+        });
+        if (quill) quill.setContents([]);
+        document.getElementById('cover-preview-wrap').style.display = 'none';
+        document.getElementById('cover-input').value = '';
+        goToStep(1);
+      }
+
+      guardPage();
+    </script>
+  </body>
+</html>

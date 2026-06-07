@@ -120,17 +120,15 @@
       <section id="product-detail" class="shop-detail-section section-container hidden">
         <button id="shop-back" class="btn btn-primary">← Back to Shop Finds</button>
         <article class="shop-detail-card">
-          <div>
-            <div class="shop-detail-meta" id="detail-category"></div>
-            <h2 id="detail-title"></h2>
-            <p id="detail-description" class="shop-detail-copy"></p>
-            <div class="shop-detail-content" id="detail-content"></div>
-            <div class="shop-detail-bottom">
-              <p class="shop-detail-price" id="detail-price"></p>
-              <div class="shop-detail-actions" id="detail-actions"></div>
-            </div>
-          </div>
+          <div class="shop-detail-meta" id="detail-category"></div>
+          <h2 id="detail-title"></h2>
+          <p id="detail-description" class="shop-detail-copy"></p>
           <img id="detail-image" class="shop-detail-image" src="" alt="" />
+          <div class="shop-detail-info">
+            <p class="shop-detail-price" id="detail-price"></p>
+            <div class="shop-detail-actions" id="detail-actions"></div>
+          </div>
+          <div class="shop-detail-content" id="detail-content"></div>
         </article>
       </section>
     </main>
@@ -158,8 +156,6 @@
       </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-    <script src="supabase.js"></script>
     <script src="script.js"></script>
   </body>
 </html>

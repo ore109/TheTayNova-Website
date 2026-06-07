@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Add Product — TayNova CMS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" />
+    <style>
+      :root {
+        --admin-black: #151216;
+        --admin-card: rgba(255,255,255,0.08);
+        --admin-card-strong: rgba(255,255,255,0.12);
+        --admin-gold: #c9a227;
+        --admin-white: #ffffff;
+        --admin-muted: rgba(255,255,255,0.66);
+        --admin-border: rgba(255,255,255,0.12);
+        --admin-danger: #e74c3c;
+        --admin-success: #2ecc71;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--admin-white);
+        background: radial-gradient(circle at top right, rgba(201,162,39,0.12), transparent 30%),
+          linear-gradient(135deg, #100e12, var(--admin-black));
+        min-height: 100vh;
+      }
+      button { border: none; font: inherit; cursor: pointer; }
+      img { display: block; max-width: 100%; }
+      a { text-decoration: none; color: inherit; }
+      .hidden { display: none !important; }
+
+      .auth-check { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; }
+      .auth-card {
+        width: min(480px,100%); padding: 2rem; border: 1px solid var(--admin-border);
+        border-radius: 28px; background: var(--admin-card); backdrop-filter: blur(18px); text-align: center;
+      }
+      .auth-card h1 { font-size: clamp(2rem,6vw,3rem); margin-bottom: 0.75rem; }
+      .auth-card p { color: var(--admin-muted); line-height: 1.7; }
+
+      .dashboard-shell { min-height: 100vh; padding-left: 280px; }
+      .admin-sidebar {
+        position: fixed; inset: 0 auto 0 0; width: 280px;
+        display: flex; flex-direction: column; gap: 2rem; padding: 1.5rem;
+        border-right: 1px solid var(--admin-border);
+        background: rgba(18,15,20,0.86); backdrop-filter: blur(22px);
+        box-shadow: 24px 0 80px rgba(0,0,0,0.18); z-index: 100;
+      }
+      .sidebar-brand { display: grid; justify-items: center; gap: 0.85rem; padding: 0.75rem 0 1.25rem; border-bottom: 1px solid var(--admin-border); text-align: center; }
+      .sidebar-brand img { width: 58px; height: 58px; object-fit: contain; }
+      .sidebar-brand h2 { font-size: 1.05rem; letter-spacing: 0.04em; }
+      .admin-nav { display: grid; gap: 0.45rem; }
+      .admin-nav a { display: flex; align-items: center; min-height: 46px; padding: 0.85rem 1rem; border-radius: 16px; color: var(--admin-muted); font-weight: 700; transition: color 0.2s, background 0.2s, transform 0.2s; }
+      .admin-nav a:hover, .admin-nav a.active { color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px); }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-gold); }
+      .logout-btn { margin-top: auto; width: 100%; border-radius: 999px; padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-gold); font-weight: 800; }
+
+      .page-main { padding: clamp(1.5rem,4vw,3rem); max-width: 960px; }
+      .page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+      .back-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1rem; border-radius: 999px; background: rgba(255,255,255,0.08); color: var(--admin-muted); font-size: 0.9rem; font-weight: 600; transition: background 0.2s, color 0.2s; }
+      .back-btn:hover { background: rgba(255,255,255,0.14); color: var(--admin-white); }
+      .page-header h1 { font-size: clamp(1.5rem,3vw,2.2rem); flex: 1; }
+
+      /* MODE TOGGLE */
+      .mode-toggle { display: flex; gap: 0; margin-bottom: 2rem; border: 1px solid var(--admin-border); border-radius: 999px; overflow: hidden; width: fit-content; }
+      .mode-btn { padding: 0.75rem 1.5rem; font-weight: 700; font-size: 0.9rem; color: var(--admin-muted); background: transparent; transition: background 0.2s, color 0.2s; }
+      .mode-btn.active { background: var(--admin-gold); color: var(--admin-black); }
+
+      /* STEPPER */
+      .stepper { display: flex; margin-bottom: 2.5rem; border-radius: 18px; overflow: hidden; border: 1px solid var(--admin-border); }
+      .step-item { flex: 1; text-align: center; padding: 0.85rem 0.5rem; font-size: 0.78rem; font-weight: 700; color: var(--admin-muted); background: rgba(255,255,255,0.04); border-right: 1px solid var(--admin-border); transition: background 0.2s, color 0.2s; }
+      .step-item:last-child { border-right: none; }
+      .step-item.active { background: rgba(201,162,39,0.18); color: var(--admin-gold); }
+      .step-item.done { background: rgba(46,204,113,0.08); color: var(--admin-success); }
+
+      .step-panel { display: none; }
+      .step-panel.active { display: block; }
+
+      /* FORM */
+      .form-group { margin-bottom: 1.5rem; }
+      .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--admin-muted); margin-bottom: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; }
+      .form-group input, .form-group select, .form-group textarea {
+        width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--admin-border); border-radius: 14px;
+        background: rgba(255,255,255,0.06); color: var(--admin-white); font: inherit; font-size: 0.95rem; outline: none;
+        transition: border-color 0.2s, background 0.2s;
+      }
+      .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--admin-gold); background: rgba(255,255,255,0.1); }
+      .form-group select option { background: #1a161e; }
+      .form-group textarea { resize: vertical; min-height: 100px; }
+      .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .form-hint { font-size: 0.8rem; color: var(--admin-muted); margin-top: 0.35rem; }
+      .form-error { font-size: 0.8rem; color: var(--admin-danger); margin-top: 0.35rem; display: none; }
+      .form-error.show { display: block; }
+      .required-star { color: var(--admin-gold); }
+
+      /* CHIPS */
+      .chips-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+      .chip { padding: 0.4rem 0.85rem; border-radius: 999px; border: 1px solid var(--admin-border); background: rgba(255,255,255,0.06); color: var(--admin-muted); font-size: 0.82rem; cursor: pointer; transition: all 0.2s; }
+      .chip:hover { border-color: var(--admin-gold); color: var(--admin-white); }
+      .chip.selected { background: rgba(201,162,39,0.18); border-color: var(--admin-gold); color: var(--admin-gold); font-weight: 700; }
+
+      /* PRICE PREVIEW */
+      .price-preview { border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; background: rgba(255,255,255,0.04); margin-top: 1rem; }
+      .price-preview-label { font-size: 0.78rem; color: var(--admin-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.75rem; font-weight: 700; }
+      .price-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+      .price-final { font-size: 1.5rem; font-weight: 800; color: var(--admin-white); }
+      .price-original { font-size: 1rem; color: var(--admin-muted); text-decoration: line-through; }
+      .price-badge { padding: 0.3rem 0.65rem; border-radius: 999px; background: rgba(201,162,39,0.2); color: var(--admin-gold); font-size: 0.78rem; font-weight: 800; }
+
+      /* UPLOAD */
+      .upload-zone { border: 2px dashed var(--admin-border); border-radius: 18px; padding: 2.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: rgba(255,255,255,0.03); position: relative; }
+      .upload-zone:hover, .upload-zone.dragover { border-color: var(--admin-gold); background: rgba(201,162,39,0.06); }
+      .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+      .upload-zone strong { display: block; margin: 0.5rem 0 0.25rem; }
+      .upload-zone p { color: var(--admin-muted); font-size: 0.88rem; }
+      .upload-icon { font-size: 2.5rem; }
+      .img-preview-wrap { margin-top: 1.25rem; position: relative; display: none; }
+      .img-preview-wrap img { width: 100%; max-height: 280px; object-fit: contain; border-radius: 16px; }
+      .img-remove-btn { position: absolute; top: 10px; right: 10px; padding: 0.4rem 0.75rem; border-radius: 999px; background: rgba(0,0,0,0.7); color: white; font-size: 0.8rem; font-weight: 700; }
+
+      /* REVIEW */
+      .review-grid { display: grid; gap: 1.25rem; }
+      .review-card { border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; background: rgba(255,255,255,0.04); }
+      .review-label { font-size: 0.75rem; font-weight: 800; color: var(--admin-gold); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem; }
+      .review-value { font-size: 0.95rem; line-height: 1.6; }
+      .review-img { width: 100%; max-height: 220px; object-fit: contain; border-radius: 14px; }
+
+      /* PRODUCT CARD PREVIEW */
+      .product-card-preview { border: 1px solid var(--admin-border); border-radius: 20px; overflow: hidden; background: var(--admin-card); max-width: 280px; }
+      .product-card-preview img { width: 100%; height: 180px; object-fit: contain; }
+      .product-card-preview-body { padding: 1rem; }
+      .product-card-preview h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; }
+      .product-card-preview .cat { font-size: 0.75rem; color: var(--admin-gold); margin-bottom: 0.5rem; }
+
+      /* CSV MODE */
+      .csv-section { margin-bottom: 2rem; }
+      .csv-section h3 { font-size: 1.1rem; margin-bottom: 0.75rem; }
+      .csv-section p { color: var(--admin-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem; }
+      .csv-table-wrap { overflow-x: auto; border: 1px solid var(--admin-border); border-radius: 16px; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+      th { padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--admin-gold); background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--admin-border); white-space: nowrap; }
+      td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); color: var(--admin-muted); vertical-align: top; }
+      tr:last-child td { border-bottom: none; }
+      tr:hover td { background: rgba(255,255,255,0.03); }
+      td img { width: 48px; height: 48px; object-fit: contain; border-radius: 8px; }
+      .csv-status { display: inline-flex; padding: 0.2rem 0.5rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+      .csv-ok { background: rgba(46,204,113,0.18); color: var(--admin-success); }
+      .csv-error { background: rgba(231,76,60,0.18); color: var(--admin-danger); }
+      .csv-summary { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+      .csv-stat { padding: 0.65rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.06); font-size: 0.85rem; }
+      .csv-stat strong { color: var(--admin-gold); }
+
+      /* QUILL */
+      .ql-toolbar.ql-snow { border: 1px solid var(--admin-border) !important; border-bottom: none !important; background: rgba(255,255,255,0.06) !important; border-radius: 16px 16px 0 0; position: sticky; top: 0; z-index: 10; }
+      .ql-container.ql-snow { border: 1px solid var(--admin-border) !important; border-radius: 0 0 16px 16px; background: rgba(255,255,255,0.04); min-height: 180px; font-family: inherit; }
+      .ql-editor { color: #ffffff !important; min-height: 180px; line-height: 1.8; padding: 1.25rem !important; caret-color: #ffffff; }
+      .ql-editor p, .ql-editor li { color: #ffffff !important; }
+      .ql-snow .ql-stroke { stroke: var(--admin-muted) !important; }
+      .ql-snow .ql-fill { fill: var(--admin-muted) !important; }
+      .ql-snow .ql-picker { color: var(--admin-muted) !important; }
+      .ql-snow .ql-picker-options { background: #1e1a22 !important; border-color: var(--admin-border) !important; }
+
+      /* ACTION BAR */
+      .action-bar { position: sticky; bottom: 0; display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end; padding: 1.25rem 0; margin-top: 2rem; border-top: 1px solid var(--admin-border); background: linear-gradient(to top, rgba(16,14,18,0.98), transparent); backdrop-filter: blur(12px); }
+      .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.85rem 1.5rem; border-radius: 999px; font-weight: 700; font-size: 0.9rem; transition: transform 0.2s, opacity 0.2s; cursor: pointer; }
+      .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+      .btn-ghost { background: rgba(255,255,255,0.08); color: var(--admin-white); }
+      .btn-draft { background: rgba(255,255,255,0.12); color: var(--admin-white); }
+      .btn-primary { background: var(--admin-gold); color: var(--admin-black); }
+      .btn-success-solid { background: var(--admin-success); color: #000; }
+
+      .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem; border-radius: 14px; font-weight: 700; z-index: 400; border: 1px solid; transform: translateY(100px); opacity: 0; transition: transform 0.3s, opacity 0.3s; }
+      .toast.show { transform: translateY(0); opacity: 1; }
+
+      .success-screen { text-align: center; padding: 4rem 2rem; }
+      .success-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+      .success-screen h2 { font-size: 2rem; margin-bottom: 0.75rem; }
+      .success-screen p { color: var(--admin-muted); margin-bottom: 2rem; line-height: 1.7; }
+      .success-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+      @media (max-width: 760px) {
+        .dashboard-shell { padding-left: 0; padding-bottom: 88px; }
+        .admin-sidebar { inset: auto 0 0 0; width: 100%; height: auto; flex-direction: row; align-items: center; gap: 0.65rem; padding: 0.65rem; border-top: 1px solid var(--admin-border); border-right: none; overflow-x: auto; }
+        .sidebar-brand { display: none; }
+        .admin-nav { display: flex; gap: 0.45rem; flex: 1; overflow-x: auto; }
+        .admin-nav a { min-height: 42px; white-space: nowrap; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
+        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-gold); }
+        .logout-btn { width: auto; flex: 0 0 auto; margin: 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; }
+        .form-row { grid-template-columns: 1fr; }
+        .action-bar { justify-content: stretch; }
+        .action-bar .btn { flex: 1; justify-content: center; }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="auth-check" id="checking">
+      <div class="auth-card">
+        <h1>Checking Access</h1>
+        <p>Verifying your private TayNova admin session...</p>
+      </div>
+    </section>
+
+    <div class="dashboard-shell hidden" id="dashboard-shell">
+      <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+          <img src="/assets/images/logo/logo.png" alt="TayNova Logo" />
+          <h2>TayNova Admin</h2>
+        </div>
+        <nav class="admin-nav">
+          <a href="/admin/dashboard.html">Home</a>
+          <a href="/admin/blogs.html">Blog</a>
+          <a href="/admin/products.html" class="active">Products</a>
+          <a href="/admin/ebooks.html">Ebooks</a>
+          <a href="/admin/inspiration.html">Inspiration</a>
+          <a href="/admin/content.html">Content</a>
+        </nav>
+        <button class="logout-btn" id="logout">Logout</button>
+      </aside>
+
+      <main class="page-main">
+        <div class="page-header">
+          <a href="/admin/products.html" class="back-btn">← Back</a>
+          <h1 id="page-title">Add Product</h1>
+        </div>
+
+        <!-- MODE TOGGLE -->
+        <div class="mode-toggle" id="mode-toggle">
+          <button class="mode-btn active" data-mode="single" onclick="switchMode('single')">➕ Single Product</button>
+          <button class="mode-btn" data-mode="csv" onclick="switchMode('csv')">📋 CSV Bulk Upload</button>
+        </div>
+
+        <!-- ===== SINGLE PRODUCT MODE ===== -->
+        <div id="single-mode">
+          <div class="stepper">
+            <div class="step-item active" data-step="1">1. Info</div>
+            <div class="step-item" data-step="2">2. Media</div>
+            <div class="step-item" data-step="3">3. Taxonomy</div>
+            <div class="step-item" data-step="4">4. Pricing</div>
+            <div class="step-item" data-step="5">5. Review</div>
+          </div>
+
+          <!-- STEP 1: INFO -->
+          <div class="step-panel active" id="panel-1">
+            <div class="form-group">
+              <label>Product Name <span class="required-star">*</span></label>
+              <input type="text" id="p-name" placeholder="e.g. Ninja Blast Portable Blender" />
+              <div class="form-error" id="err-name">Product name is required</div>
+            </div>
+            <div class="form-group">
+              <label>Product Link <span class="required-star">*</span></label>
+              <input type="url" id="p-link" placeholder="https://amzn.to/..." />
+              <div class="form-error" id="err-link">Product link is required</div>
+            </div>
+            <div class="form-group">
+              <label>Product Image URL</label>
+              <input type="url" id="p-img-url" placeholder="https://m.media-amazon.com/images/..." oninput="previewImageUrl()" />
+              <div class="form-hint">Paste an Amazon or external image URL</div>
+              <div id="img-url-preview" style="margin-top:0.75rem;display:none">
+                <img id="img-url-preview-img" src="" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Product Description <span class="required-star">*</span></label>
+              <div id="desc-editor"></div>
+            </div>
+          </div>
+
+          <!-- STEP 2: MEDIA -->
+          <div class="step-panel" id="panel-2">
+            <div class="form-group">
+              <label>Main Product Image (Upload)</label>
+              <div class="upload-zone" id="img-zone">
+                <input type="file" id="img-input" accept="image/jpeg,image/png,image/webp" />
+                <div class="upload-icon">🖼️</div>
+                <strong>Upload Product Image</strong>
+                <p>JPG, PNG, WEBP · Click or drag & drop</p>
+              </div>
+              <div class="img-preview-wrap" id="img-preview-wrap">
+                <img id="img-preview" src="" alt="Product" />
+                <button class="img-remove-btn" onclick="removeImg()">✕ Remove</button>
+              </div>
+              <div class="form-hint" style="margin-top:0.75rem">Or use an image URL from Step 1 — no upload needed!</div>
+            </div>
+          </div>
+
+          <!-- STEP 3: TAXONOMY -->
+          <div class="step-panel" id="panel-3">
+            <div class="form-row">
+              <div class="form-group">
+                <label>🏠 Home Category <span class="required-star">*</span></label>
+                <select id="p-category" onchange="updateSubcategories()">
+                  <option value="">Select category...</option>
+                  <option>🏠 HOME</option>
+                  <option>🏡 HOME DECOR</option>
+                  <option>🧺 HOME ORGANIZATION</option>
+                  <option>💻 HOME OFFICE</option>
+                  <option>🎙️ CREATOR SETUP</option>
+                  <option>🌿 LIFESTYLE</option>
+                  <option>🎒 SCHOOL & DORM</option>
+                  <option>🌞 OUTDOOR & TRAVEL</option>
+                  <option>♻️ SUSTAINABILITY</option>
+                  <option>🎄 SEASONAL</option>
+                </select>
+                <div class="form-error" id="err-cat">Category is required</div>
+              </div>
+              <div class="form-group">
+                <label>📦 Subcategory <span class="required-star">*</span></label>
+                <select id="p-subcategory">
+                  <option value="">Select subcategory...</option>
+                </select>
+                <div class="form-error" id="err-subcat">Subcategory is required</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>🎨 Style Tags <span class="required-star">*</span></label>
+              <div class="chips-wrap" id="style-chips"></div>
+              <div class="form-error" id="err-style">At least one style tag is required</div>
+            </div>
+
+            <div class="form-group">
+              <label>🧃 Product Type <span class="required-star">*</span></label>
+              <div class="chips-wrap" id="type-chips"></div>
+              <div class="form-error" id="err-type">At least one product type is required</div>
+            </div>
+
+            <div class="form-group">
+              <label>🏷️ Search Tags</label>
+              <input type="text" id="p-tags" placeholder="kitchen essentials, cozy home, smoothie blender..." />
+              <div class="form-hint">Separate tags with commas</div>
+            </div>
+          </div>
+
+          <!-- STEP 4: PRICING -->
+          <div class="step-panel" id="panel-4">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Product Price (USD) <span class="required-star">*</span></label>
+                <input type="number" id="p-price" placeholder="49.99" min="0" step="0.01" oninput="updatePricePreview()" />
+                <div class="form-error" id="err-price">Valid price is required</div>
+              </div>
+              <div class="form-group">
+                <label>Discount %</label>
+                <input type="number" id="p-discount" placeholder="0" min="0" max="100" step="1" oninput="updatePricePreview()" />
+              </div>
+            </div>
+            <div class="price-preview" id="price-preview">
+              <div class="price-preview-label">Price Preview</div>
+              <div class="price-row">
+                <span class="price-final" id="preview-final">$0.00</span>
+                <span class="price-original hidden" id="preview-original"></span>
+                <span class="price-badge hidden" id="preview-badge"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 5: REVIEW -->
+          <div class="step-panel" id="panel-5">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
+              <div>
+                <div class="review-label" style="font-size:0.75rem;font-weight:800;color:var(--admin-gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.75rem">Product Preview</div>
+                <div class="product-card-preview" id="review-card-preview">
+                  <div style="width:100%;height:180px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;color:var(--admin-muted);font-size:2rem" id="review-preview-placeholder">🛍️</div>
+                  <div class="product-card-preview-body">
+                    <div class="cat" id="review-preview-cat">—</div>
+                    <h3 id="review-preview-name">—</h3>
+                    <div class="price-row" style="margin-top:0.5rem">
+                      <span class="price-final" style="font-size:1rem" id="review-preview-price">—</span>
+                      <span class="price-badge hidden" id="review-preview-badge"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="review-grid">
+                <div class="review-card">
+                  <div class="review-label">Product Link</div>
+                  <div class="review-value" id="review-link" style="color:var(--admin-gold);word-break:break-all">—</div>
+                </div>
+                <div class="review-card">
+                  <div class="review-label">Taxonomy</div>
+                  <div class="review-value" id="review-taxonomy" style="color:var(--admin-muted)">—</div>
+                </div>
+                <div class="review-card">
+                  <div class="review-label">Style & Type</div>
+                  <div class="review-value" id="review-tags" style="color:var(--admin-muted)">—</div>
+                </div>
+              </div>
+            </div>
+            <div class="review-card" style="border:1px solid var(--admin-border);border-radius:16px;padding:1.25rem;background:rgba(255,255,255,0.04)">
+              <div class="review-label">Description Preview</div>
+              <div id="review-desc" style="font-size:0.9rem;line-height:1.7;color:var(--admin-muted);margin-top:0.5rem"></div>
+            </div>
+          </div>
+
+          <!-- STEP 6: SUCCESS -->
+          <div class="step-panel" id="panel-success">
+            <div class="success-screen">
+              <div class="success-icon">🎉</div>
+              <h2>Product Published!</h2>
+              <p>Your product is now live on TayNova.</p>
+              <div class="success-actions">
+                <a href="/admin/products.html" class="btn btn-ghost">← Back to Products</a>
+                <button class="btn btn-primary" onclick="startNew()">＋ Add Another</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar" id="action-bar"></div>
+        </div>
+
+        <!-- ===== CSV MODE ===== -->
+        <div id="csv-mode" class="hidden">
+          <div class="csv-section">
+            <h3>📋 CSV Bulk Upload</h3>
+            <p>Upload a CSV file with your products. The system will automatically map columns and preview all products before publishing.</p>
+            <p style="margin-bottom:0.5rem"><strong style="color:var(--admin-gold)">Required columns:</strong> Product Name, Product Description, Product Price, Product Image URL, Product Link, Home Category, Subcategory, Style Tag, Product Type, Search Tags</p>
+            <p><strong style="color:var(--admin-muted)">Optional:</strong> Product ID, Discount %</p>
+          </div>
+
+          <div class="csv-section">
+            <div class="upload-zone" id="csv-zone" style="margin-bottom:1rem">
+              <input type="file" id="csv-input" accept=".csv" onchange="handleCSV(event)" />
+              <div class="upload-icon">📄</div>
+              <strong>Upload CSV File</strong>
+              <p>Click or drag & drop your .csv file here</p>
+            </div>
+          </div>
+
+          <div id="csv-preview-section" class="hidden">
+            <div class="csv-summary" id="csv-summary"></div>
+            <div class="csv-table-wrap">
+              <table id="csv-table">
+                <thead id="csv-thead"></thead>
+                <tbody id="csv-tbody"></tbody>
+              </table>
+            </div>
+            <div class="action-bar">
+              <button class="btn btn-ghost" onclick="clearCSV()">✕ Clear</button>
+              <button class="btn btn-draft" onclick="saveCSV('draft')">💾 Save All as Draft</button>
+              <button class="btn btn-primary" onclick="saveCSV('published')" id="csv-publish-btn">🚀 Publish All Valid</button>
+            </div>
+          </div>
+
+          <div id="csv-success" class="hidden">
+            <div class="success-screen">
+              <div class="success-icon">🎉</div>
+              <h2 id="csv-success-msg">Products Imported!</h2>
+              <p id="csv-success-sub">Your products are now live on TayNova.</p>
+              <div class="success-actions">
+                <a href="/admin/products.html" class="btn btn-ghost">← View Products</a>
+                <button class="btn btn-primary" onclick="clearCSV()">📋 Upload Another CSV</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const SUPABASE_URL = 'https://ngnricijtqlikjxrbtlr.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI';
+      const ADMIN_EMAIL = 'oreoluwaoluwadare2@gmail.com';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true }
+      });
+
+      // exchange rate: NGN per 1 USD (adjust as needed)
+      const NGN_PER_USD = 1500;
+
+      function toNGN(usd) { return parseFloat(usd) * NGN_PER_USD; }
+      function toUSD(ngn) { return parseFloat(ngn) / NGN_PER_USD; }
+      function fmtNGN(n) { if (n === null || n === undefined || isNaN(n)) return '—'; return '₦' + Number(n).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+      function fmtUSD(n) { if (n === null || n === undefined || isNaN(n)) return '—'; return '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+      let currentStep = 1;
+      const TOTAL_STEPS = 5;
+      let editingId = null;
+      let imgFile = null;
+      let imgUrl = null;
+      let quill = null;
+      let selectedStyles = [];
+      let selectedTypes = [];
+      let csvData = [];
+
+      const STYLE_TAGS = ['Minimalist','Boho','Scandinavian','Japandi','Farmhouse','Coastal','Modern Luxury','Industrial','Cozy','Warm & Homely','Small Space','Tiny Apartment','Functional','Pinterest Aesthetic','Clean Girl','Neutral Decor','Soft Luxury','Creator Aesthetic','Cozy Creator','Modern Kitchen','Healthy Kitchen','Minimal Desk','Compact Living','Eco Friendly','Seasonal','Budget-Friendly'];
+      const PRODUCT_TYPES = ['Portable Blender','Travel Blender','Smoothie Blender','Personal Blender','Mini Countertop Blender','Food Processor','Coffee Grinder','Spice Grinder','Kitchen Gadget','Desk','Office Chair','Accent Chair','Microphone','Ring Light','Tripod Stand','Floating Shelf','Artificial Plant','Desk Organizer','Storage Organizer','Wall Decor','Lighting','Self Care Product','Travel Accessory','Backpack','Tote Bag','Dorm Essential','Podcast Equipment','Meal Prep Tool','Kitchen Storage','Drinkware','Appliance','Furniture','Decor Item','Storage Solution','Tech Gadget','Textiles','Lifestyle Essential','DIY Kit','Smart Device'];
+
+      const SUBCATEGORIES = {
+        '🏠 HOME': ['Living Room','Bedroom','Kitchen & Dining','Bathroom','Entryway & Hallway','Outdoor & Patio','Nursery & Kids','Small Space Living'],
+        '🏡 HOME DECOR': ['Wall Decor','Decorative Accessories','Artificial Plants','Shelving','Mirrors','Lighting Decor','Textiles & Soft Furnishing','Seasonal Decor'],
+        '🧺 HOME ORGANIZATION': ['Storage Solutions','Closet Organization','Kitchen Organization','Bathroom Organization','Desk Organization','Pantry Organization','Cable Management','Small Space Storage'],
+        '💻 HOME OFFICE': ['Desk Setup','Office Furniture','Desk Organization','Podcast Setup','YouTube Setup','Productivity Accessories','Lighting','Seating'],
+        '🎙️ CREATOR SETUP': ['Podcast Setup','YouTube Equipment','Recording Gear','Lighting','Tripods & Mounts','Audio Equipment','Content Creation Accessories'],
+        '🌿 LIFESTYLE': ['Wellness Essentials','Everyday Carry','Bags & Backpacks','Travel Essentials','Gym Essentials','Self Care','Kitchen Wellness','Healthy Living'],
+        '🎒 SCHOOL & DORM': ['Dorm Decor','Study Setup','Desk Essentials','Dorm Storage','College Kitchen','Organization','Dorm Lighting'],
+        '🌞 OUTDOOR & TRAVEL': ['Picnic Essentials','Outdoor Decor','Travel Accessories','Portable Gear','Backyard Setup','Patio Living'],
+        '♻️ SUSTAINABILITY': ['Eco Kitchen','Reusable Products','Sustainable Decor','Eco Organization','Energy Saving','Reusable Lifestyle'],
+        '🎄 SEASONAL': ['Easter','Christmas','Fall Decor','Spring Decor','Summer Decor','Halloween','Valentine\'s Decor','Cozy Winter']
+      };
+
+      const checking = document.getElementById('checking');
+      const shell = document.getElementById('dashboard-shell');
+      const toast = document.getElementById('toast');
+
+      async function guardPage() {
+        const { data } = await sb.auth.getSession();
+        if (!data.session || data.session.user.email !== ADMIN_EMAIL) {
+          window.location.replace('/admin/index.html'); return;
+        }
+        checking.classList.add('hidden');
+        shell.classList.remove('hidden');
+        initEditor();
+        renderChipGroups();
+        renderActionBar();
+        checkEditMode();
+      }
+
+      document.getElementById('logout').addEventListener('click', async () => {
+        await sb.auth.signOut();
+        window.location.replace('/admin/index.html');
+      });
+
+      function showToast(msg, isError = false) {
+        toast.textContent = msg;
+        toast.style.background = isError ? 'rgba(231,76,60,0.18)' : 'rgba(46,204,113,0.18)';
+        toast.style.borderColor = isError ? 'rgba(231,76,60,0.3)' : 'rgba(46,204,113,0.3)';
+        toast.style.color = isError ? '#e74c3c' : '#2ecc71';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3500);
+      }
+
+      function renderChipGroups() {
+        renderChipGroup('style-chips', STYLE_TAGS, 'style');
+        renderChipGroup('type-chips', PRODUCT_TYPES, 'type');
+      }
+
+      function renderChipGroup(containerId, items, type) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+        items.forEach(item => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'chip';
+          button.textContent = item;
+          button.addEventListener('click', () => toggleChip(button, type));
+          container.appendChild(button);
+        });
+      }
+
+      function switchMode(mode) {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+        document.getElementById('single-mode').classList.toggle('hidden', mode !== 'single');
+        document.getElementById('csv-mode').classList.toggle('hidden', mode !== 'csv');
+      }
+
+      function initEditor() {
+        quill = new Quill('#desc-editor', {
+          theme: 'snow',
+          modules: {
+            toolbar: [
+              [{ header: [1,2,3,false] }],
+              ['bold','italic','underline'],
+              [{ color: [] }],
+              [{ list: 'ordered' }, { list: 'bullet' }],
+              ['link','clean']
+            ]
+          }
+        });
+        quill.format('color', '#ffffff');
+      }
+
+      function updateSubcategories() {
+        const cat = document.getElementById('p-category').value;
+        const sub = document.getElementById('p-subcategory');
+        sub.innerHTML = '<option value="">Select subcategory...</option>';
+        if (SUBCATEGORIES[cat]) {
+          SUBCATEGORIES[cat].forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s; opt.textContent = s;
+            sub.appendChild(opt);
+          });
+        }
+      }
+
+      function toggleChip(el, type) {
+        el.classList.toggle('selected');
+        const val = el.textContent;
+        if (type === 'style') {
+          selectedStyles = selectedStyles.includes(val)
+            ? selectedStyles.filter(s => s !== val)
+            : [...selectedStyles, val];
+        } else {
+          selectedTypes = selectedTypes.includes(val)
+            ? selectedTypes.filter(t => t !== val)
+            : [...selectedTypes, val];
+        }
+      }
+
+      function previewImageUrl() {
+        const url = document.getElementById('p-img-url').value.trim();
+        const wrap = document.getElementById('img-url-preview');
+        const img = document.getElementById('img-url-preview-img');
+        if (url) {
+          img.src = url;
+          wrap.style.display = 'block';
+          imgUrl = url;
+        } else {
+          wrap.style.display = 'none';
+          imgUrl = null;
+        }
+      }
+
+      document.getElementById('img-input').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        imgFile = file;
+        const url = URL.createObjectURL(file);
+        imgUrl = url;
+        document.getElementById('img-preview').src = url;
+        document.getElementById('img-preview-wrap').style.display = 'block';
+      });
+
+      function removeImg() {
+        imgFile = null; imgUrl = null;
+        document.getElementById('img-preview-wrap').style.display = 'none';
+        document.getElementById('img-input').value = '';
+      }
+
+      function updatePricePreview() {
+        const price = parseFloat(document.getElementById('p-price').value) || 0;
+        const discount = parseFloat(document.getElementById('p-discount').value) || 0;
+        const discounted = discount > 0 ? (price - price * discount / 100) : price;
+        // display both NGN and USD (price input is USD)
+        const ngn = toNGN(discounted);
+        document.getElementById('preview-final').textContent = `${fmtNGN(ngn)} · ${fmtUSD(discounted)}`;
+        const origEl = document.getElementById('preview-original');
+        const badgeEl = document.getElementById('preview-badge');
+        if (discount > 0) {
+          origEl.textContent = `${fmtNGN(toNGN(price))} · ${fmtUSD(price)}`;
+          origEl.classList.remove('hidden');
+          badgeEl.textContent = `${discount}% OFF`;
+          badgeEl.classList.remove('hidden');
+        } else {
+          origEl.classList.add('hidden');
+          badgeEl.classList.add('hidden');
+        }
+      }
+
+      function goToStep(n) {
+        if (n < 1 || n > TOTAL_STEPS) return;
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.step-item').forEach(s => {
+          const sn = parseInt(s.dataset.step);
+          s.classList.toggle('active', sn === n);
+          s.classList.toggle('done', sn < n);
+        });
+        document.getElementById(`panel-${n}`).classList.add('active');
+        currentStep = n;
+        renderActionBar();
+        if (n === 5) populateReview();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function validateStep(n) {
+        if (n === 1) {
+          const name = document.getElementById('p-name').value.trim();
+          const link = document.getElementById('p-link').value.trim();
+          if (!name) { document.getElementById('err-name').classList.add('show'); showToast('Product name is required', true); return false; }
+          document.getElementById('err-name').classList.remove('show');
+          if (!link) { document.getElementById('err-link').classList.add('show'); showToast('Product link is required', true); return false; }
+          document.getElementById('err-link').classList.remove('show');
+        }
+        if (n === 3) {
+          const cat = document.getElementById('p-category').value;
+          const sub = document.getElementById('p-subcategory').value;
+          if (!cat) { document.getElementById('err-cat').classList.add('show'); showToast('Category is required', true); return false; }
+          document.getElementById('err-cat').classList.remove('show');
+          if (!sub) { document.getElementById('err-subcat').classList.add('show'); showToast('Subcategory is required', true); return false; }
+          document.getElementById('err-subcat').classList.remove('show');
+          if (!selectedStyles.length) { document.getElementById('err-style').classList.add('show'); showToast('Select at least one style tag', true); return false; }
+          document.getElementById('err-style').classList.remove('show');
+          if (!selectedTypes.length) { document.getElementById('err-type').classList.add('show'); showToast('Select at least one product type', true); return false; }
+          document.getElementById('err-type').classList.remove('show');
+        }
+        if (n === 4) {
+          const price = parseFloat(document.getElementById('p-price').value);
+          const discount = parseFloat(document.getElementById('p-discount').value) || 0;
+          if (isNaN(price) || price < 0) { document.getElementById('err-price').classList.add('show'); showToast('Valid price is required', true); return false; }
+          document.getElementById('err-price').classList.remove('show');
+          if (discount < 0 || discount > 100) { showToast('Discount must be between 0 and 100', true); return false; }
+        }
+        return true;
+      }
+
+      function nextStep() {
+        if (!validateStep(currentStep)) return;
+        goToStep(currentStep + 1);
+      }
+
+      function prevStep() { goToStep(currentStep - 1); }
+
+      function renderActionBar() {
+        const bar = document.getElementById('action-bar');
+        if (currentStep > TOTAL_STEPS) { bar.innerHTML = ''; return; }
+        let html = '';
+        if (currentStep > 1) html += `<button class="btn btn-ghost" onclick="prevStep()">← Back</button>`;
+        html += `<button class="btn btn-draft" onclick="saveProduct('draft')">💾 Save Draft</button>`;
+        if (currentStep < TOTAL_STEPS) html += `<button class="btn btn-primary" onclick="nextStep()">Continue →</button>`;
+        if (currentStep === TOTAL_STEPS) html += `<button class="btn btn-primary" onclick="saveProduct('published')">🚀 Publish Now</button>`;
+        bar.innerHTML = html;
+      }
+
+      function populateReview() {
+        const name = document.getElementById('p-name').value.trim();
+        const link = document.getElementById('p-link').value.trim();
+        const cat = document.getElementById('p-category').value;
+        const sub = document.getElementById('p-subcategory').value;
+        const price = parseFloat(document.getElementById('p-price').value) || 0;
+        const discount = parseFloat(document.getElementById('p-discount').value) || 0;
+        const discounted = discount > 0 ? (price - price * discount / 100).toFixed(2) : price.toFixed(2);
+        const desc = quill ? quill.root.innerHTML : '';
+
+        document.getElementById('review-preview-name').textContent = name || '—';
+        document.getElementById('review-preview-cat').textContent = [cat, sub].filter(Boolean).join(' › ') || '—';
+        // show both NGN and USD
+        const discountedNum = parseFloat(discounted) || 0;
+        document.getElementById('review-preview-price').textContent = `${fmtNGN(toNGN(discountedNum))} · ${fmtUSD(discountedNum)}`;
+        document.getElementById('review-link').textContent = link || '—';
+        document.getElementById('review-taxonomy').textContent = [cat, sub].filter(Boolean).join(' › ') || '—';
+        document.getElementById('review-tags').innerHTML = [...selectedStyles, ...selectedTypes].map(t => `<span style="display:inline-block;padding:0.2rem 0.5rem;border-radius:999px;background:rgba(201,162,39,0.15);color:var(--admin-gold);font-size:0.75rem;margin:0.2rem">${t}</span>`).join('') || '—';
+        document.getElementById('review-desc').innerHTML = desc || '<em>No description</em>';
+
+        const previewBadge = document.getElementById('review-preview-badge');
+        if (discount > 0) { previewBadge.textContent = `${discount}% OFF`; previewBadge.classList.remove('hidden'); }
+        else previewBadge.classList.add('hidden');
+
+        const placeholder = document.getElementById('review-preview-placeholder');
+        const cardPreview = document.getElementById('review-card-preview');
+        const finalImgUrl = imgUrl || document.getElementById('p-img-url').value.trim();
+        if (finalImgUrl) {
+          placeholder.style.display = 'none';
+          const existing = cardPreview.querySelector('img.preview-img');
+          if (!existing) {
+            const img = document.createElement('img');
+            img.className = 'preview-img';
+            img.src = finalImgUrl;
+            img.style.cssText = 'width:100%;height:180px;object-fit:cover';
+            cardPreview.insertBefore(img, cardPreview.firstChild);
+          } else {
+            existing.src = finalImgUrl;
+          }
+        }
+      }
+
+      async function uploadFile(file, bucket, folder) {
+        const ext = file.name.split('.').pop();
+        const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await sb.storage.from(bucket).upload(path, file, { upsert: true });
+        if (error) throw error;
+        const { data } = sb.storage.from(bucket).getPublicUrl(path);
+        return data.publicUrl;
+      }
+
+      async function buildData(status) {
+        let finalImgUrl = document.getElementById('p-img-url').value.trim() || null;
+        if (imgFile && imgFile instanceof File) {
+          finalImgUrl = await uploadFile(imgFile, 'images', 'products');
+        }
+        const price = parseFloat(document.getElementById('p-price').value) || 0;
+        const discount = parseFloat(document.getElementById('p-discount').value) || 0;
+        return {
+          name: document.getElementById('p-name').value.trim(),
+          affiliate_link: document.getElementById('p-link').value.trim(),
+          description: quill ? quill.root.innerHTML : '',
+          image_url: finalImgUrl,
+          category: document.getElementById('p-category').value || 'Uncategorized',
+          subcategory: document.getElementById('p-subcategory').value,
+          style_tags: selectedStyles,
+          product_type: selectedTypes,
+          tags: document.getElementById('p-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+          price,
+          discount,
+          status
+        };
+      }
+
+      async function saveProduct(status) {
+        const btn = event?.target;
+        if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
+        try {
+          const data = await buildData(status);
+          let result;
+          if (editingId) {
+            result = await sb.from('products').update(data).eq('id', editingId);
+          } else {
+            result = await sb.from('products').insert(data).select().single();
+            if (result.data) editingId = result.data.id;
+          }
+          if (result.error) throw result.error;
+          if (status === 'published') {
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-success').classList.add('active');
+            document.getElementById('action-bar').innerHTML = '';
+            document.querySelectorAll('.step-item').forEach(s => s.classList.add('done'));
+          } else {
+            showToast('Draft saved!');
+            if (btn) { btn.textContent = '💾 Save Draft'; btn.disabled = false; }
+          }
+        } catch (e) {
+          console.error(e);
+          showToast('Failed to save. Please try again.', true);
+          if (btn) { btn.textContent = '💾 Save Draft'; btn.disabled = false; }
+        }
+      }
+
+      function checkEditMode() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if (id) {
+          editingId = id;
+          document.getElementById('page-title').textContent = 'Edit Product';
+          loadProduct(id);
+        }
+      }
+
+      async function loadProduct(id) {
+        const { data, error } = await sb.from('products').select('*').eq('id', id).single();
+        if (error || !data) { showToast('Failed to load product', true); return; }
+        document.getElementById('p-name').value = data.name || '';
+        document.getElementById('p-link').value = data.affiliate_link || '';
+        document.getElementById('p-img-url').value = data.image_url || '';
+        if (data.image_url) { imgUrl = data.image_url; previewImageUrl(); }
+        document.getElementById('p-price').value = data.price || '';
+        document.getElementById('p-discount').value = data.discount || '';
+        document.getElementById('p-tags').value = (data.tags || []).join(', ');
+        updatePricePreview();
+        setTimeout(() => { if (quill && data.description) quill.root.innerHTML = data.description; }, 300);
+        if (data.category) {
+          document.getElementById('p-category').value = data.category;
+          updateSubcategories();
+          setTimeout(() => { if (data.subcategory) document.getElementById('p-subcategory').value = data.subcategory; }, 100);
+        }
+        if (data.style_tags) {
+          selectedStyles = data.style_tags;
+          document.querySelectorAll('#style-chips .chip').forEach(c => {
+            if (data.style_tags.includes(c.textContent)) c.classList.add('selected');
+          });
+        }
+        if (data.product_type) {
+          selectedTypes = data.product_type;
+          document.querySelectorAll('#type-chips .chip').forEach(c => {
+            if (data.product_type.includes(c.textContent)) c.classList.add('selected');
+          });
+        }
+      }
+
+      function startNew() {
+        editingId = null; imgFile = null; imgUrl = null;
+        selectedStyles = []; selectedTypes = [];
+        document.getElementById('p-name').value = '';
+        document.getElementById('p-link').value = '';
+        document.getElementById('p-img-url').value = '';
+        document.getElementById('p-price').value = '';
+        document.getElementById('p-discount').value = '';
+        document.getElementById('p-tags').value = '';
+        document.getElementById('img-preview-wrap').style.display = 'none';
+        document.getElementById('img-url-preview').style.display = 'none';
+        document.getElementById('img-input').value = '';
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+        if (quill) quill.setContents([]);
+        goToStep(1);
+      }
+
+      // ===== CSV BULK UPLOAD =====
+      function handleCSV(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const text = ev.target.result;
+          parseCSV(text);
+        };
+        reader.readAsText(file);
+      }
+
+      function parseCSV(text) {
+        const rows = parseDelimitedText(text);
+        if (rows.length < 2) { showToast('CSV appears empty', true); return; }
+        const finalHeaders = rows[0].map(h => h.trim().replace(/"/g, ''));
+
+        csvData = [];
+
+        for (let i = 1; i < rows.length; i++) {
+          const cols = rows[i].map(c => c.trim());
+          if (!cols.some(Boolean)) continue;
+          const row = {};
+          finalHeaders.forEach((h, idx) => { row[h] = cols[idx] || ''; });
+
+          const name = getCSVValue(row, ['Product Name', 'name']);
+          const link = getCSVValue(row, ['Product Link', 'affiliate_link', 'link']);
+          const price = parseFloat(getCSVValue(row, ['Product Price', 'price']).replace(/[$,]/g, '')) || 0;
+          const imgUrl = getCSVValue(row, ['Product Image URL', 'image_url', 'image']);
+          const cat = getCSVValue(row, ['Home Category', 'category']);
+          const sub = getCSVValue(row, ['Subcategory', 'subcategory']);
+          const styleTags = splitCSVList(getCSVValue(row, ['Style Tag', 'style_tags', 'style']));
+          const productType = splitCSVList(getCSVValue(row, ['Product Type', 'product_type', 'type']));
+          const searchTags = splitCSVList(getCSVValue(row, ['Search Tags', 'tags', 'search_tags']));
+          const discount = parseFloat(getCSVValue(row, ['Discount %', 'discount']).replace('%','')) || 0;
+          const desc = getCSVValue(row, ['Product Description', 'description']);
+          const productId = getCSVValue(row, ['Product ID', 'product_id']);
+
+          const rowErrors = [];
+          if (!name) rowErrors.push('Missing name');
+          if (!link) rowErrors.push('Missing link');
+          if (!price) rowErrors.push('Missing price');
+          if (!cat) rowErrors.push('Missing category');
+
+          csvData.push({ name, link, price, imgUrl, cat, sub, styleTags, productType, searchTags, discount, desc, productId, errors: rowErrors, valid: rowErrors.length === 0 });
+        }
+
+        renderCSVPreview(finalHeaders);
+      }
+
+      function detectDelimiter(text) {
+        const firstLine = text.split(/\r?\n/)[0] || '';
+        return (firstLine.match(/\t/g) || []).length > (firstLine.match(/,/g) || []).length ? '\t' : ',';
+      }
+
+      function parseDelimitedText(text) {
+        const delimiter = detectDelimiter(text);
+        const rows = [];
+        let row = [];
+        let field = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < text.length; i++) {
+          const char = text[i];
+          const next = text[i + 1];
+
+          if (char === '"') {
+            if (inQuotes && next === '"') {
+              field += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (char === delimiter && !inQuotes) {
+            row.push(field);
+            field = '';
+          } else if ((char === '\n' || char === '\r') && !inQuotes) {
+            if (char === '\r' && next === '\n') i++;
+            row.push(field);
+            if (row.some(value => value.trim())) rows.push(row);
+            row = [];
+            field = '';
+          } else {
+            field += char;
+          }
+        }
+
+        row.push(field);
+        if (row.some(value => value.trim())) rows.push(row);
+        return rows;
+      }
+
+      function normalizeCSVHeader(header) {
+        return String(header || '')
+          .replace(/[^\p{L}\p{N}%_ ]/gu, '')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .toLowerCase();
+      }
+
+      function getCSVValue(row, names) {
+        const normalized = {};
+        Object.keys(row).forEach(key => {
+          normalized[normalizeCSVHeader(key)] = row[key];
+        });
+        for (const name of names) {
+          const value = normalized[normalizeCSVHeader(name)];
+          if (value !== undefined && value !== null && String(value).trim() !== '') return String(value).trim();
+        }
+        return '';
+      }
+
+      function splitCSVList(value) {
+        return String(value || '').split(',').map(s => s.trim()).filter(Boolean);
+      }
+
+      function renderCSVPreview(headers) {
+        const valid = csvData.filter(r => r.valid).length;
+        const invalid = csvData.length - valid;
+        document.getElementById('csv-summary').innerHTML = `
+          <div class="csv-stat">Total: <strong>${csvData.length}</strong></div>
+          <div class="csv-stat">Valid: <strong style="color:var(--admin-success)">${valid}</strong></div>
+          ${invalid ? `<div class="csv-stat">Errors: <strong style="color:var(--admin-danger)">${invalid}</strong></div>` : ''}
+        `;
+        document.getElementById('csv-thead').innerHTML = `<tr><th>#</th><th>Image</th><th>Name</th><th>Price</th><th>Category</th><th>Style</th><th>Status</th></tr>`;
+        document.getElementById('csv-tbody').innerHTML = csvData.map((row, i) => `
+          <tr>
+            <td style="color:var(--admin-muted)">${i + 1}</td>
+            <td>${row.imgUrl ? `<img src="${row.imgUrl}" onerror="this.style.display='none'" />` : '—'}</td>
+            <td style="color:var(--admin-white);font-weight:600">${row.name || '—'}</td>
+            <td>${fmtNGN(toNGN(row.price))} · ${fmtUSD(row.price)}${row.discount ? ` <span class="price-badge">${row.discount}%</span>` : ''}</td>
+            <td>${[row.cat, row.sub].filter(Boolean).join(' › ') || '—'}</td>
+            <td>${row.styleTags.slice(0,2).map(s => `<span style="display:inline-block;padding:0.15rem 0.4rem;border-radius:999px;background:rgba(201,162,39,0.15);color:var(--admin-gold);font-size:0.7rem;margin:0.1rem">${s}</span>`).join('') || '—'}</td>
+            <td><span class="csv-status ${row.valid ? 'csv-ok' : 'csv-error'}">${row.valid ? '✓ Valid' : '✗ ' + row.errors[0]}</span></td>
+          </tr>
+        `).join('');
+        document.getElementById('csv-preview-section').classList.remove('hidden');
+      }
+
+      async function saveCSV(status) {
+        const toSave = status === 'published' ? csvData.filter(r => r.valid) : csvData;
+        if (!toSave.length) { showToast('No valid products to save', true); return; }
+        const btn = document.getElementById('csv-publish-btn');
+        if (btn) { btn.textContent = `⏳ Saving ${toSave.length} products...`; btn.disabled = true; }
+        try {
+          const rows = toSave.map(r => ({
+            name: r.name,
+            affiliate_link: r.link,
+            description: r.desc,
+            image_url: r.imgUrl || null,
+            category: r.cat || 'Uncategorized',
+            subcategory: r.sub || null,
+            style_tags: r.styleTags,
+            product_type: r.productType,
+            tags: r.searchTags,
+            price: r.price,
+            discount: r.discount || 0,
+            product_id: r.productId || null,
+            status
+          }));
+          const { error } = await sb.from('products').insert(rows);
+          if (error) throw error;
+          document.getElementById('csv-preview-section').classList.add('hidden');
+          document.getElementById('csv-success').classList.remove('hidden');
+          document.getElementById('csv-success-msg').textContent = `${toSave.length} Products ${status === 'published' ? 'Published' : 'Saved as Draft'}!`;
+          document.getElementById('csv-success-sub').textContent = `${toSave.length} products have been successfully imported.`;
+        } catch (e) {
+          console.error(e);
+          showToast('Import failed. Check console for details.', true);
+          if (btn) { btn.textContent = '🚀 Publish All Valid'; btn.disabled = false; }
+        }
+      }
+
+      function clearCSV() {
+        csvData = [];
+        document.getElementById('csv-input').value = '';
+        document.getElementById('csv-preview-section').classList.add('hidden');
+        document.getElementById('csv-success').classList.add('hidden');
+      }
+
+      guardPage();
+    </script>
+  </body>
+</html>

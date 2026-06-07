@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>TayNova Admin Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      :root {
+        --admin-cream: #f5efe6;
+        --admin-black: #151216;
+        --admin-gold: #c9a227;
+        --admin-white: #ffffff;
+        --admin-muted: #8b8492;
+        --admin-border: rgba(255, 255, 255, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: 'Inter', system-ui, sans-serif;
+        color: var(--admin-white);
+        background: var(--admin-black);
+      }
+
+      img {
+        max-width: 100%;
+        display: block;
+      }
+
+      button,
+      input,
+      a {
+        font: inherit;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .admin-shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(420px, 0.9fr);
+      }
+
+      .admin-visual {
+        position: relative;
+        display: grid;
+        align-items: center;
+        padding: clamp(2rem, 5vw, 5rem);
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(10, 8, 12, 0.58), rgba(10, 8, 12, 0.82)), url('/assets/images/inspo/jiop.png') center/cover no-repeat;
+      }
+
+      .admin-visual::before {
+        content: "";
+        position: absolute;
+        inset: -1.5rem;
+        background: inherit;
+        filter: blur(3px);
+        transform: scale(1.02);
+      }
+
+      .admin-visual::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 30% 40%, rgba(201, 162, 39, 0.18), transparent 34%);
+      }
+
+      .admin-brand-panel {
+        position: relative;
+        z-index: 1;
+        max-width: 520px;
+        text-align: center;
+      }
+
+      .admin-brand-panel h1 {
+        margin: 0;
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(4rem, 10vw, 8rem);
+        line-height: 0.95;
+        letter-spacing: -0.04em;
+        color: var(--admin-white);
+      }
+
+      .admin-brand-panel h2 {
+        margin: 1rem 0 0;
+        color: var(--admin-gold);
+        font-size: clamp(1.15rem, 2vw, 1.6rem);
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .admin-brand-panel p {
+        margin: 1rem 0 0;
+        color: rgba(255, 255, 255, 0.82);
+        font-family: Georgia, "Times New Roman", serif;
+        font-style: italic;
+        font-size: clamp(1rem, 2vw, 1.35rem);
+        line-height: 1.6;
+      }
+
+      .admin-login-panel {
+        display: grid;
+        place-items: center;
+        padding: clamp(1.5rem, 4vw, 4rem);
+        background:
+          radial-gradient(circle at top right, rgba(201, 162, 39, 0.16), transparent 34%),
+          linear-gradient(180deg, #1b171d, #100e12);
+      }
+
+      .admin-card {
+        width: min(430px, 100%);
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+        border: 1px solid var(--admin-border);
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.09);
+        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.32);
+        backdrop-filter: blur(22px);
+      }
+
+      .admin-logo {
+        width: 64px;
+        height: 64px;
+        object-fit: contain;
+        margin-bottom: 1.5rem;
+      }
+
+      .admin-card h1 {
+        margin: 0 0 0.65rem;
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2rem, 4vw, 2.75rem);
+        line-height: 1.05;
+      }
+
+      .admin-card .intro {
+        margin: 0 0 2rem;
+        color: var(--admin-muted);
+        line-height: 1.7;
+      }
+
+      .admin-field {
+        display: grid;
+        gap: 0.55rem;
+        margin-bottom: 1rem;
+      }
+
+      .admin-field label {
+        color: rgba(255, 255, 255, 0.84);
+        font-size: 0.88rem;
+        font-weight: 700;
+      }
+
+      .admin-field input {
+        width: 100%;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        border-radius: 16px;
+        padding: 1rem 1.05rem;
+        color: var(--admin-white);
+        background: rgba(255, 255, 255, 0.08);
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .admin-field input:focus {
+        border-color: rgba(201, 162, 39, 0.72);
+        box-shadow: 0 0 0 4px rgba(201, 162, 39, 0.1);
+      }
+
+      .field-error,
+      .admin-error {
+        min-height: 1.25rem;
+        margin: 0;
+        color: #f5b8b8;
+        font-size: 0.85rem;
+        line-height: 1.4;
+      }
+
+      .admin-error {
+        margin: 0.25rem 0 1rem;
+      }
+
+      .admin-submit {
+        width: 100%;
+        border: none;
+        border-radius: 999px;
+        padding: 1rem 1.5rem;
+        color: var(--admin-black);
+        background: var(--admin-gold);
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+      }
+
+      .admin-submit:hover,
+      .admin-submit:focus-visible {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 40px rgba(201, 162, 39, 0.22);
+      }
+
+      .admin-submit:disabled {
+        cursor: wait;
+        opacity: 0.7;
+      }
+
+      .forgot-link {
+        display: block;
+        width: fit-content;
+        margin: 1.15rem auto 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.92rem;
+        text-decoration: none;
+      }
+
+      .forgot-link:hover,
+      .forgot-link:focus-visible {
+        color: var(--admin-gold);
+      }
+
+      .private-note {
+        margin: 1.5rem 0 0;
+        color: rgba(255, 255, 255, 0.46);
+        font-size: 0.8rem;
+        line-height: 1.6;
+        text-align: center;
+      }
+
+      @media (max-width: 980px) {
+        .admin-shell {
+          grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1fr);
+        }
+      }
+
+      @media (max-width: 760px) {
+        .admin-shell {
+          grid-template-columns: 1fr;
+        }
+
+        .admin-visual {
+          min-height: 38vh;
+          padding: 2rem 1.5rem;
+        }
+
+        .admin-brand-panel {
+          margin: 0 auto;
+          text-align: center;
+        }
+
+        .admin-login-panel {
+          padding: 1.5rem;
+        }
+
+        .admin-card {
+          border-radius: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="admin-shell">
+      <section class="admin-visual" aria-label="TayNova private admin brand panel">
+        <div class="admin-brand-panel">
+          <h1>TayNova</h1>
+          <h2>Admin Operating System</h2>
+          <p>Simple Style. Cozy Spaces. Smart Finds.</p>
+        </div>
+      </section>
+
+      <section class="admin-login-panel" aria-label="TayNova admin login">
+        <form class="admin-card" id="admin-login-form" novalidate>
+          <img src="/assets/images/logo/logo.png" alt="TayNova Logo" class="admin-logo" />
+          <h1>Welcome back, Oreoluwa</h1>
+          <p class="intro">Private access to the TayNova creator operating system.</p>
+
+          <div class="admin-field">
+            <label for="admin-email">Email</label>
+            <input id="admin-email" type="email" autocomplete="email" required />
+            <p class="field-error" id="email-error"></p>
+          </div>
+
+          <div class="admin-field">
+            <label for="admin-password">Password</label>
+            <input id="admin-password" type="password" autocomplete="current-password" required />
+            <p class="field-error" id="password-error"></p>
+          </div>
+
+          <p class="admin-error" id="login-error" aria-live="polite"></p>
+          <button type="submit" class="admin-submit" id="admin-submit">Login to Dashboard</button>
+          <a href="mailto:oreoluwaoluwadare2@gmail.com?subject=TayNova%20Admin%20Password%20Reset" class="forgot-link">Forgot password?</a>
+          <p class="private-note">Authorized TayNova admin access only.</p>
+        </form>
+      </section>
+    </main>
+
+    <script>
+      const SUPABASE_URL = 'https://ngnricijtqlikjxrbtlr.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI';
+      const ADMIN_EMAIL = 'oreoluwaoluwadare2@gmail.com';
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: {
+          persistSession: true,
+          storage: window.localStorage,
+          autoRefreshToken: true
+        }
+      });
+
+      const form = document.getElementById('admin-login-form');
+      const emailInput = document.getElementById('admin-email');
+      const passwordInput = document.getElementById('admin-password');
+      const emailError = document.getElementById('email-error');
+      const passwordError = document.getElementById('password-error');
+      const loginError = document.getElementById('login-error');
+      const submitButton = document.getElementById('admin-submit');
+
+      function clearErrors() {
+        emailError.textContent = '';
+        passwordError.textContent = '';
+        loginError.textContent = '';
+      }
+
+      function validateForm() {
+        clearErrors();
+        let valid = true;
+
+        if (!emailInput.value.trim()) {
+          emailError.textContent = 'Email is required.';
+          valid = false;
+        }
+
+        if (!passwordInput.value.trim()) {
+          passwordError.textContent = 'Password is required.';
+          valid = false;
+        }
+
+        return valid;
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (!validateForm()) return;
+
+        submitButton.disabled = true;
+        submitButton.textContent = 'Checking access...';
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: emailInput.value.trim(),
+          password: passwordInput.value
+        });
+
+        if (error || !data.session || data.user.email !== ADMIN_EMAIL) {
+          if (data.session) {
+            await supabaseClient.auth.signOut();
+          }
+          loginError.textContent = 'Invalid email or password';
+          submitButton.disabled = false;
+          submitButton.textContent = 'Login to Dashboard';
+          return;
+        }
+
+        window.location.href = '/admin/dashboard.html';
+      });
+    </script>
+  </body>
+</html>

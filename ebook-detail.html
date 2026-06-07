@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Ebook Detail — TayNova</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a href="index.html" class="brand-logo-link">
+          <div class="brand-lockup">
+            <img src="/assets/images/logo/logo.png" alt="TayNova Logo" class="brand-logo" />
+            <h1 class="brand-name">TayNova</h1>
+          </div>
+        </a>
+        <nav class="nav-primary" aria-label="Primary navigation">
+          <ul class="nav-list">
+            <ul class="nav-list">
+              <li><a href="index.html">Home</a></li>
+              <li><a href="blog.html">Blog</a></li>
+              <li><a href="shop.html">Shop Finds</a></li>
+              <li><a href="ebooks.html">Ebooks</a></li>
+              <li><a href="content.html">Content</a></li>
+              <li><a href="inspiration.html">Inspos Gallery</a></li>
+              <li><a href="collab.html">Collab</a></li>
+              <li><a href="about.html">About</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <div style="max-width:1200px;margin:0 auto;padding:1.5rem 2rem 0">
+      <a href="javascript:history.back()" style="color:var(--color-gold);font-weight:600;font-size:0.9rem">← Back</a>
+    </div>
+    <main>
+      <section id="ebook-detail" class="ebook-detail-section section-container">
+        <button id="ebook-back" class="btn btn-primary">← Back</button>
+        <article class="ebook-detail-card">
+          <img id="detail-ebook-image" src="" alt="" class="ebook-detail-image" />
+          <div class="ebook-detail-content">
+            <h2 id="detail-ebook-title"></h2>
+            <p id="detail-ebook-description" class="ebook-detail-copy"></p>
+            <div class="ebook-detail-meta">
+              <span class="ebook-price" id="detail-ebook-price"></span>
+            </div>
+            <div class="ebook-detail-actions" id="detail-ebook-actions"></div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+  <div class="footer-grid">
+    <div class="footer-column footer-copy"><p>© TayNova 2026</p></div>
+    <div class="footer-column footer-social">
+      <ul>
+        <li><a href="https://www.pinterest.com/TayNova06" target="_blank" rel="noreferrer"><img src="/assets/images/icons/pin.png" alt="Pinterest" /></a></li>
+        <li><a href="https://www.instagram.com/__tay__nova/" target="_blank" rel="noreferrer"><img src="/assets/images/icons/instas.png" alt="Instagram" /></a></li>
+        <li><a href="https://www.youtube.com/@taynova09" target="_blank" rel="noreferrer"><img src="/assets/images/icons/youtube-removebg-preview.png" alt="YouTube" /></a></li>
+        <li><a href="https://selar.com/m/tay-nova1" target="_blank" rel="noreferrer"><img src="/assets/images/icons/selar.png" alt="Selar" /></a></li>
+        <li><a href="https://wa.me/2348124085593" target="_blank" rel="noreferrer"><img src="/assets/images/icons/whatsapp.png" alt="WhatsApp" /></a></li>
+        <li><a href="mailto:oreoluwaoluwadare2@gmail.com"><img src="/assets/images/icons/gmail.png" alt="Email" /></a></li>
+      </ul>
+    </div>
+    <div class="footer-column footer-policy"><a href="#">Privacy Policy</a></div>
+  </div>
+</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script src="supabase.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
