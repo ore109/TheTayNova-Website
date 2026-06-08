@@ -239,7 +239,7 @@ function filterBlogPosts() {
   const category = getActiveCategory();
 
   const filtered = blogPosts.filter((post) => {
-    const matchesSearch = post.title.toLowerCase().includes(searchValue) || post.excerpt.toLowerCase().includes(searchValue);
+    const matchesSearch = post.title.toLowerCase().includes(searchValue) || (post.short_description || '').toLowerCase().includes(searchValue);
     const matchesCategory = category === 'All' || post.category === category;
     return matchesSearch && matchesCategory;
   });
@@ -265,9 +265,7 @@ if (blogGrid && searchInput) {
   })();
 }
 
-if (blogBackButton) {
-  blogBackButton.addEventListener('click', () => history.back());
-}
+if (blogBackButton) blogBackButton.addEventListener('click', () => window.location.href = 'blog.html');
 
 if (document.body.classList.contains('inspo-page')) {
   const inspoToggleButtons = document.querySelectorAll('.view-toggle .toggle-pill');
@@ -698,7 +696,6 @@ function renderShopCards(products) {
       </div>
       <div class="shop-card-body">
         <h3>${product.name}</h3>
-        <p>${product.description}</p>
         <div class="shop-card-footer">
           <div style="text-align:center;margin-top:auto;padding-top:1rem">
             <a class="btn btn-read" href="${detailPath}" style="display:inline-flex;justify-content:center">Read More</a>
@@ -747,7 +744,8 @@ function filterShopProducts() {
   const { search, category, subcategory, price, type } = getShopFilters();
 
   const filtered = shopProducts.filter((product) => {
-    const matchesSearch = [product.name, product.category, product.subcategory, product.type, product.description]
+    const matchesSearch = [product.name, product.category, product.subcategory, product.description]
+      .filter(Boolean)
       .some((value) => value.toLowerCase().includes(search));
 
     const matchesCategory = category === 'All' || product.category === category;
@@ -788,9 +786,7 @@ if (shopGrid && shopSearchInput) {
   }
 });
 
-if (shopBackButton) {
-  shopBackButton.addEventListener('click', () => history.back());
-}
+if (shopBackButton) shopBackButton.addEventListener('click', () => window.location.href = 'shop.html');
 
 let ebookData = [];
 
@@ -896,7 +892,7 @@ function filterEbooks() {
   const activeCategory = getActiveEbookCategory();
 
   const filtered = ebookData.filter((ebook) => {
-    const matchesSearch = ebook.title.toLowerCase().includes(searchValue) || ebook.description.toLowerCase().includes(searchValue);
+    const matchesSearch = ebook.title.toLowerCase().includes(searchValue) || (ebook.description ? ebook.description.toLowerCase().includes(searchValue) : false);
     const matchesCategory = activeCategory === 'All' || ebook.category === activeCategory;
     return matchesSearch && matchesCategory;
   });
@@ -922,9 +918,7 @@ ebookFilterButtons.forEach((button) => {
   });
 });
 
-if (ebookBackButton) {
-  ebookBackButton.addEventListener('click', () => history.back());
-}
+if (ebookBackButton) ebookBackButton.addEventListener('click', () => window.location.href = 'ebooks.html');
 
 async function loadBlogCategories() {
   if (!window.supabaseClient) return;
