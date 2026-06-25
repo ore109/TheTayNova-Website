@@ -13,7 +13,7 @@
         --admin-black: #151216;
         --admin-card: rgba(255,255,255,0.08);
         --admin-card-strong: rgba(255,255,255,0.12);
-        --admin-gold: #c9a227;
+        --admin-purple: #D6B46C ;
         --admin-white: #ffffff;
         --admin-muted: rgba(255,255,255,0.66);
         --admin-border: rgba(255,255,255,0.12);
@@ -55,8 +55,8 @@
       .admin-nav { display: grid; gap: 0.45rem; }
       .admin-nav a { display: flex; align-items: center; min-height: 46px; padding: 0.85rem 1rem; border-radius: 16px; color: var(--admin-muted); font-weight: 700; transition: color 0.2s, background 0.2s, transform 0.2s; }
       .admin-nav a:hover, .admin-nav a.active { color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px); }
-      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-gold); }
-      .logout-btn { margin-top: auto; width: 100%; border-radius: 999px; padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-gold); font-weight: 800; }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-purple); }
+      .logout-btn { margin-top: auto; width: 100%; border-radius: 999px; padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-purple); font-weight: 800; }
 
       .page-main { padding: clamp(1.5rem,4vw,3rem); max-width: 960px; }
       .page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
@@ -67,13 +67,13 @@
       /* MODE TOGGLE */
       .mode-toggle { display: flex; gap: 0; margin-bottom: 2rem; border: 1px solid var(--admin-border); border-radius: 999px; overflow: hidden; width: fit-content; }
       .mode-btn { padding: 0.75rem 1.5rem; font-weight: 700; font-size: 0.9rem; color: var(--admin-muted); background: transparent; transition: background 0.2s, color 0.2s; }
-      .mode-btn.active { background: var(--admin-gold); color: var(--admin-black); }
+      .mode-btn.active { background: var(--admin-purple); color: var(--admin-black); }
 
       /* STEPPER */
       .stepper { display: flex; margin-bottom: 2.5rem; border-radius: 18px; overflow: hidden; border: 1px solid var(--admin-border); }
       .step-item { flex: 1; text-align: center; padding: 0.85rem 0.5rem; font-size: 0.78rem; font-weight: 700; color: var(--admin-muted); background: rgba(255,255,255,0.04); border-right: 1px solid var(--admin-border); transition: background 0.2s, color 0.2s; }
       .step-item:last-child { border-right: none; }
-      .step-item.active { background: rgba(201,162,39,0.18); color: var(--admin-gold); }
+      .step-item.active { background: rgba(201,162,39,0.18); color: var(--admin-purple); }
       .step-item.done { background: rgba(46,204,113,0.08); color: var(--admin-success); }
 
       .step-panel { display: none; }
@@ -87,20 +87,20 @@
         background: rgba(255,255,255,0.06); color: var(--admin-white); font: inherit; font-size: 0.95rem; outline: none;
         transition: border-color 0.2s, background 0.2s;
       }
-      .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--admin-gold); background: rgba(255,255,255,0.1); }
+      .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--admin-purple); background: rgba(255,255,255,0.1); }
       .form-group select option { background: #1a161e; }
       .form-group textarea { resize: vertical; min-height: 100px; }
       .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
       .form-hint { font-size: 0.8rem; color: var(--admin-muted); margin-top: 0.35rem; }
       .form-error { font-size: 0.8rem; color: var(--admin-danger); margin-top: 0.35rem; display: none; }
       .form-error.show { display: block; }
-      .required-star { color: var(--admin-gold); }
+      .required-star { color: var(--admin-purple); }
 
       /* CHIPS */
       .chips-wrap { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
       .chip { padding: 0.4rem 0.85rem; border-radius: 999px; border: 1px solid var(--admin-border); background: rgba(255,255,255,0.06); color: var(--admin-muted); font-size: 0.82rem; cursor: pointer; transition: all 0.2s; }
-      .chip:hover { border-color: var(--admin-gold); color: var(--admin-white); }
-      .chip.selected { background: rgba(201,162,39,0.18); border-color: var(--admin-gold); color: var(--admin-gold); font-weight: 700; }
+      .chip:hover { border-color: var(--admin-purple); color: var(--admin-white); }
+      .chip.selected { background: rgba(201,162,39,0.18); border-color: var(--admin-purple); color: var(--admin-purple); font-weight: 700; }
 
       /* PRICE PREVIEW */
       .price-preview { border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; background: rgba(255,255,255,0.04); margin-top: 1rem; }
@@ -108,11 +108,11 @@
       .price-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
       .price-final { font-size: 1.5rem; font-weight: 800; color: var(--admin-white); }
       .price-original { font-size: 1rem; color: var(--admin-muted); text-decoration: line-through; }
-      .price-badge { padding: 0.3rem 0.65rem; border-radius: 999px; background: rgba(201,162,39,0.2); color: var(--admin-gold); font-size: 0.78rem; font-weight: 800; }
+      .price-badge { padding: 0.3rem 0.65rem; border-radius: 999px; background: rgba(201,162,39,0.2); color: var(--admin-purple); font-size: 0.78rem; font-weight: 800; }
 
       /* UPLOAD */
       .upload-zone { border: 2px dashed var(--admin-border); border-radius: 18px; padding: 2.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: rgba(255,255,255,0.03); position: relative; }
-      .upload-zone:hover, .upload-zone.dragover { border-color: var(--admin-gold); background: rgba(201,162,39,0.06); }
+      .upload-zone:hover, .upload-zone.dragover { border-color: var(--admin-purple); background: rgba(201,162,39,0.06); }
       .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
       .upload-zone strong { display: block; margin: 0.5rem 0 0.25rem; }
       .upload-zone p { color: var(--admin-muted); font-size: 0.88rem; }
@@ -124,7 +124,7 @@
       /* REVIEW */
       .review-grid { display: grid; gap: 1.25rem; }
       .review-card { border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; background: rgba(255,255,255,0.04); }
-      .review-label { font-size: 0.75rem; font-weight: 800; color: var(--admin-gold); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem; }
+      .review-label { font-size: 0.75rem; font-weight: 800; color: var(--admin-purple); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem; }
       .review-value { font-size: 0.95rem; line-height: 1.6; }
       .review-img { width: 100%; max-height: 220px; object-fit: contain; border-radius: 14px; }
 
@@ -133,7 +133,7 @@
       .product-card-preview img { width: 100%; height: 180px; object-fit: contain; }
       .product-card-preview-body { padding: 1rem; }
       .product-card-preview h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; }
-      .product-card-preview .cat { font-size: 0.75rem; color: var(--admin-gold); margin-bottom: 0.5rem; }
+      .product-card-preview .cat { font-size: 0.75rem; color: var(--admin-purple); margin-bottom: 0.5rem; }
 
       /* CSV MODE */
       .csv-section { margin-bottom: 2rem; }
@@ -141,7 +141,7 @@
       .csv-section p { color: var(--admin-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem; }
       .csv-table-wrap { overflow-x: auto; border: 1px solid var(--admin-border); border-radius: 16px; }
       table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-      th { padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--admin-gold); background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--admin-border); white-space: nowrap; }
+      th { padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--admin-purple); background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--admin-border); white-space: nowrap; }
       td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); color: var(--admin-muted); vertical-align: top; }
       tr:last-child td { border-bottom: none; }
       tr:hover td { background: rgba(255,255,255,0.03); }
@@ -151,7 +151,7 @@
       .csv-error { background: rgba(231,76,60,0.18); color: var(--admin-danger); }
       .csv-summary { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
       .csv-stat { padding: 0.65rem 1rem; border-radius: 12px; background: rgba(255,255,255,0.06); font-size: 0.85rem; }
-      .csv-stat strong { color: var(--admin-gold); }
+      .csv-stat strong { color: var(--admin-purple); }
 
       /* QUILL */
       .ql-toolbar.ql-snow { border: 1px solid var(--admin-border) !important; border-bottom: none !important; background: rgba(255,255,255,0.06) !important; border-radius: 16px 16px 0 0; position: sticky; top: 0; z-index: 10; }
@@ -170,7 +170,7 @@
       .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
       .btn-ghost { background: rgba(255,255,255,0.08); color: var(--admin-white); }
       .btn-draft { background: rgba(255,255,255,0.12); color: var(--admin-white); }
-      .btn-primary { background: var(--admin-gold); color: var(--admin-black); }
+      .btn-primary { background: var(--admin-purple); color: var(--admin-black); }
       .btn-success-solid { background: var(--admin-success); color: #000; }
 
       .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem; border-radius: 14px; font-weight: 700; z-index: 400; border: 1px solid; transform: translateY(100px); opacity: 0; transition: transform 0.3s, opacity 0.3s; }
@@ -188,7 +188,7 @@
         .sidebar-brand { display: none; }
         .admin-nav { display: flex; gap: 0.45rem; flex: 1; overflow-x: auto; }
         .admin-nav a { min-height: 42px; white-space: nowrap; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
-        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-gold); }
+        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-purple); }
         .logout-btn { width: auto; flex: 0 0 auto; margin: 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; }
         .form-row { grid-template-columns: 1fr; }
         .action-bar { justify-content: stretch; }
@@ -362,7 +362,7 @@
           <div class="step-panel" id="panel-5">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem">
               <div>
-                <div class="review-label" style="font-size:0.75rem;font-weight:800;color:var(--admin-gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.75rem">Product Preview</div>
+                <div class="review-label" style="font-size:0.75rem;font-weight:800;color:var(--admin-purple);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.75rem">Product Preview</div>
                 <div class="product-card-preview" id="review-card-preview">
                   <div style="width:100%;height:180px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;color:var(--admin-muted);font-size:2rem" id="review-preview-placeholder">🛍️</div>
                   <div class="product-card-preview-body">
@@ -378,7 +378,7 @@
               <div class="review-grid">
                 <div class="review-card">
                   <div class="review-label">Product Link</div>
-                  <div class="review-value" id="review-link" style="color:var(--admin-gold);word-break:break-all">—</div>
+                  <div class="review-value" id="review-link" style="color:var(--admin-purple);word-break:break-all">—</div>
                 </div>
                 <div class="review-card">
                   <div class="review-label">Taxonomy</div>
@@ -417,7 +417,7 @@
           <div class="csv-section">
             <h3>📋 CSV Bulk Upload</h3>
             <p>Upload a CSV file with your products. The system will automatically map columns and preview all products before publishing.</p>
-            <p style="margin-bottom:0.5rem"><strong style="color:var(--admin-gold)">Required columns:</strong> Product Name, Product Description, Product Price, Product Image URL, Product Link, Home Category, Subcategory, Style Tag, Product Type, Search Tags</p>
+            <p style="margin-bottom:0.5rem"><strong style="color:var(--admin-purple)">Required columns:</strong> Product Name, Product Description, Product Price, Product Image URL, Product Link, Home Category, Subcategory, Style Tag, Product Type, Search Tags</p>
             <p><strong style="color:var(--admin-muted)">Optional:</strong> Product ID, Discount %</p>
           </div>
 
@@ -733,7 +733,7 @@
         document.getElementById('review-preview-price').textContent = `${fmtNGN(toNGN(discountedNum))} · ${fmtUSD(discountedNum)}`;
         document.getElementById('review-link').textContent = link || '—';
         document.getElementById('review-taxonomy').textContent = [cat, sub].filter(Boolean).join(' › ') || '—';
-        document.getElementById('review-tags').innerHTML = [...selectedStyles, ...selectedTypes].map(t => `<span style="display:inline-block;padding:0.2rem 0.5rem;border-radius:999px;background:rgba(201,162,39,0.15);color:var(--admin-gold);font-size:0.75rem;margin:0.2rem">${t}</span>`).join('') || '—';
+        document.getElementById('review-tags').innerHTML = [...selectedStyles, ...selectedTypes].map(t => `<span style="display:inline-block;padding:0.2rem 0.5rem;border-radius:999px;background:rgba(201,162,39,0.15);color:var(--admin-purple);font-size:0.75rem;margin:0.2rem">${t}</span>`).join('') || '—';
         document.getElementById('review-desc').innerHTML = desc || '<em>No description</em>';
 
         const previewBadge = document.getElementById('review-preview-badge');
@@ -1009,7 +1009,7 @@
             <td style="color:var(--admin-white);font-weight:600">${row.name || '—'}</td>
             <td>${fmtNGN(toNGN(row.price))} · ${fmtUSD(row.price)}${row.discount ? ` <span class="price-badge">${row.discount}%</span>` : ''}</td>
             <td>${[row.cat, row.sub].filter(Boolean).join(' › ') || '—'}</td>
-            <td>${row.styleTags.slice(0,2).map(s => `<span style="display:inline-block;padding:0.15rem 0.4rem;border-radius:999px;background:rgba(201,162,39,0.15);color:var(--admin-gold);font-size:0.7rem;margin:0.1rem">${s}</span>`).join('') || '—'}</td>
+            <td>${row.styleTags.slice(0,2).map(s => `<span style="display:inline-block;padding:0.15rem 0.4rem;border-radius:999px;background:rgba(201,162,39,0.15);color:var(--admin-purple);font-size:0.7rem;margin:0.1rem">${s}</span>`).join('') || '—'}</td>
             <td><span class="csv-status ${row.valid ? 'csv-ok' : 'csv-error'}">${row.valid ? '✓ Valid' : '✗ ' + row.errors[0]}</span></td>
           </tr>
         `).join('');

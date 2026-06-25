@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Inspiration — TayNova CMS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      :root{--admin-black:#151216;--admin-card:rgba(255,255,255,0.08);--admin-purple:#D6B46C ;--admin-white:#fff;--admin-muted:rgba(255,255,255,0.66);--admin-border:rgba(255,255,255,0.12);--admin-danger:#e74c3c}
+      *{box-sizing:border-box}
+      body{margin:0;min-height:100vh;font-family:Inter,system-ui,sans-serif;color:var(--admin-white);background:radial-gradient(circle at top right, rgba(201,162,39,0.12), transparent),linear-gradient(135deg,#100e12,var(--admin-black))}
+      img{display:block;max-width:100%}button{font:inherit;border:none;cursor:pointer}.hidden{display:none!important}
+      .dashboard-shell{min-height:100vh;padding-left:280px}
+      .admin-sidebar{position:fixed;inset:0 auto 0 0;width:280px;display:flex;flex-direction:column;gap:2rem;padding:1.5rem;border-right:1px solid var(--admin-border);background:rgba(18,15,20,0.86);backdrop-filter:blur(22px)}
+      .sidebar-brand{display:grid;justify-items:center;gap:.85rem;padding:.75rem 0 1.25rem;border-bottom:1px solid var(--admin-border);text-align:center}.admin-nav{display:grid;gap:.45rem}.admin-nav a{display:flex;align-items:center;min-height:46px;padding:.85rem 1rem;border-radius:16px;color:var(--admin-muted);text-decoration:none;font-weight:700}.admin-nav a:hover,.admin-nav a:focus,.admin-nav a.active{color:var(--admin-white);background:rgba(201,162,39,0.14);transform:translateX(2px)}.admin-nav a.active{box-shadow:inset 3px 0 0 var(--admin-purple)}
+      .logout-btn{margin-top:auto;width:100%;border-radius:999px;padding:.9rem 1.2rem;color:#111;background:var(--admin-purple);font-weight:800}
+      .dashboard-main{padding:clamp(1.25rem,3vw,2.25rem)}.dashboard-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.25rem}
+      .tab-bar { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem; border-bottom:1px solid var(--admin-border); padding-bottom:0.75rem; }
+      .tab-pill { padding:0.55rem 1.1rem; border-radius:999px; background:transparent; color:var(--admin-muted); font-weight:600; font-size:0.9rem; transition:background 0.2s, color 0.2s; }
+      .tab-pill:hover { color:var(--admin-white); }
+      .tab-pill.active { background:rgba(201,162,39,0.18); color:var(--admin-purple); }
+      .page-main { padding: clamp(1.5rem,4vw,3rem); }
+      .page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:0.5rem; flex-wrap:wrap; }
+      .page-header h1 { font-size: clamp(1.8rem,4vw,2.8rem); }
+      .page-subtitle { color:var(--admin-muted); margin-bottom:2rem; font-size:0.95rem; }
+      .actions-menu button { width:100%; padding:0.75rem 1rem; text-align:left; color:var(--admin-white); font-size:0.9rem; background:transparent; }
+      .actions-menu button:hover { background:rgba(255,255,255,0.08); }
+      .sanctuary-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1.25rem; }
+      .sanctuary-card { overflow: visible !important; position: relative; }
+      .sanctuary-card .actions-wrap { position: relative; z-index: 100; }
+      .sanctuary-card .actions-dropdown { z-index: 9999 !important; }
+      .sanctuary-card { border:1px solid var(--admin-border); border-radius:20px; background:var(--admin-card); padding:1rem; backdrop-filter:blur(12px); }
+      
+      /* Masonry */
+      .masonry{column-gap:1rem}.masonry.cols-4{column-count:4}.masonry.cols-3{column-count:4}.masonry.cols-2{column-count:2}.masonry.cols-1{column-count:1}
+      @media(max-width:1200px){.masonry.cols-4{column-count:3}}@media(max-width:900px){.masonry.cols-4,.masonry.cols-3{column-count:2}}@media(max-width:560px){.masonry{column-count:1}}
+
+      
+      .card{position:relative;display:inline-block;width:100%;margin:0 0 1rem;border-radius:16px;overflow:visible;background:rgba(255,255,255,0.04);border:1px solid var(--admin-border);box-shadow:0 18px 40px rgba(0,0,0,0.32);backdrop-filter:blur(10px)}
+      .card:has(.actions-dropdown:not(.hidden)){z-index:100}
+      .card-media{border-radius:16px 16px 0 0;overflow:hidden;position:relative;width:100%;aspect-ratio:3/4;background:#0b0b0b}
+      .card-media img,.card-media video{width:100%;height:100%;object-fit:cover;display:block}
+      .card-body{padding:.8rem .9rem}
+      .card-title{font-weight:800;margin:0 0 .35rem}
+      .card-meta{color:var(--admin-muted);font-size:.85rem;display:flex;gap:.5rem;flex-wrap:wrap}
+      .badge{display:inline-flex;align-items:center;padding:.25rem .5rem;border-radius:999px;font-weight:800;font-size:.75rem}
+      .badge.featured{background:var(--admin-purple);color:#111}
+      .badge.status{background:rgba(255,255,255,0.06);color:var(--admin-white)}
+
+      /* Published grid: 5 columns with responsive fallbacks */
+      #published-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1.25rem}
+      @media(max-width:1200px){#published-grid{grid-template-columns:repeat(4,1fr)}}
+      @media(max-width:900px){#published-grid{grid-template-columns:repeat(3,1fr)}}
+      @media(max-width:560px){#published-grid{grid-template-columns:repeat(1,1fr)}}
+
+      .modal{position:fixed;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.6),rgba(0,0,0,0.8));display:grid;place-items:center;padding:2rem;z-index:400}.modal-card{width:min(980px,98%);max-height:92vh;overflow:auto;border-radius:18px;padding:1.25rem;background:var(--admin-card);border:1px solid var(--admin-border)}.stepper{display:flex;gap:.5rem;margin-bottom:1rem}.step{flex:1;padding:.6rem;border-radius:12px;text-align:center;background:rgba(255,255,255,0.03);font-weight:700;color:var(--admin-muted)}.step.active{background:rgba(201,162,39,0.14);color:var(--admin-purple)}.upload-zone{border:2px dashed var(--admin-border);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;background:rgba(255,255,255,0.02);position:relative}.upload-zone.dragover{border-color:var(--admin-purple);background:rgba(201,162,39,0.03)}.preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem;margin-top:.8rem}.preview-item{position:relative;border-radius:10px;overflow:hidden;background:#0b0b0b}
+
+      .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.8rem}.form-group{margin-bottom:.6rem}label{display:block;color:var(--admin-muted);font-weight:700;font-size:.8rem;margin-bottom:.35rem}input[type=text],select{width:100%;padding:.7rem;border-radius:10px;border:1px solid var(--admin-border);background:rgba(255,255,255,0.04);color:var(--admin-white)}
+
+      /* Buttons - unify with other admin pages */
+      .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.75rem 1.25rem;border-radius:999px;font-weight:700;font-size:.9rem;transition:transform .2s,opacity .2s}
+      .btn:hover{transform:translateY(-1px);opacity:.9}
+      .btn-ghost{background:rgba(255,255,255,0.08);color:var(--admin-white)}
+      .btn-primary{background:var(--admin-purple);color:var(--admin-black);font-weight:800}
+      .btn-danger{background:rgba(231,76,60,0.18);color:var(--admin-danger)}
+      .btn-new{display:inline-flex;align-items:center;gap:.5rem;padding:.85rem 1.5rem;border-radius:999px;background:var(--admin-purple);color:var(--admin-black);font-weight:800;font-size:.95rem}
+
+      .action-bar{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem}
+
+      /* product-style actions (replicated from products.html) */
+      .actions-wrap { position: relative; }
+      .actions-btn { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.08); color: var(--admin-white); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 700; }
+      .actions-btn:hover { background: rgba(255,255,255,0.16); }
+      .actions-dropdown { position: absolute; top: 100%; right: 0; margin-top: 4px; min-width: 140px; border: 1px solid var(--admin-border); border-radius: 14px; background: #1e1a22; box-shadow: 0 20px 50px rgba(0,0,0,0.4); z-index: 9999; overflow: hidden; }
+      .actions-dropdown button { width: 100%; padding: 0.75rem 1rem; text-align: left; color: var(--admin-white); font-size: 0.9rem; background: transparent; transition: background 0.15s; }
+      .actions-dropdown button:hover { background: rgba(255,255,255,0.08); }
+      .actions-dropdown button.danger { color: var(--admin-danger); }
+      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+      .modal-box { width: min(620px,95%); max-height: 88vh; overflow-y: auto; border: 1px solid var(--admin-border); border-radius: 24px; background: #1a161e; padding: 0; }
+      .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--admin-border); position: sticky; top: 0; background: #1a161e; z-index: 1; }
+      .modal-head h3 { font-size: 1.1rem; }
+      .modal-body { padding: 1.5rem; }
+      .confirm-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9001; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+      .confirm-box { width: min(420px,100%); border: 1px solid var(--admin-border); border-radius: 24px; background: #1a161e; padding: 2rem; text-align: center; }
+      .confirm-box h3 { font-size: 1.2rem; margin-bottom: 0.75rem; }
+      .confirm-box p { color: var(--admin-muted); margin-bottom: 1.5rem; line-height: 1.6; }
+      .confirm-actions { display: flex; gap: 0.75rem; justify-content: center; }
+      .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem; border-radius: 14px; font-weight: 700; z-index: 500; border: 1px solid; transform: translateY(100px); opacity: 0; transition: transform 0.3s, opacity 0.3s; }
+      .toast.show { transform: translateY(0); opacity: 1; }
+    
+     @keyframes bounceIn {
+      0% { transform: scale(0.3); opacity: 0; }
+      50% { transform: scale(1.1); }
+      70% { transform: scale(0.95); }
+      100% { transform: scale(1); opacity: 1; } }
+
+    </style>
+  </head>
+  <body>
+    <main class="dashboard-shell hidden" id="shell">
+      <aside class="admin-sidebar">
+        <div class="sidebar-brand"><img src="/assets/images/logo/logo.png" alt="TayNova Logo" /><h2>TayNova Admin</h2></div>
+        <nav class="admin-nav">
+          <a href="/admin/dashboard.html">Home</a>
+          <a href="/admin/blogs.html">Blog</a>
+          <a href="/admin/products.html">Products</a>
+          <a href="/admin/ebooks.html">Ebooks</a>
+          <a href="/admin/inspiration.html" class="active">Inspiration</a>
+          <a href="/admin/content.html">Content</a>
+        </nav>
+        <button class="logout-btn" id="logout">Logout</button>
+      </aside>
+
+      <section class="page-main">
+        <div class="page-header">
+          <div>
+            <h1>Inspiration Media</h1>
+            <p style="color:var(--admin-muted);margin-top:6px">Manage inspiration images and videos — upload, tag, feature, and publish.</p>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <a href="/admin/inspiration-create.html" class="btn-new">＋ New Media</a>
+            <div id="current-date" style="color:var(--admin-muted)"></div>
+          </div>
+        </div>
+
+        <div id="success-banner" style="display:none;margin-bottom:1rem;padding:1rem;border-radius:12px;background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.12);color:var(--admin-white);align-items:center;justify-content:space-between;display:flex">
+          <div id="success-banner-content" style="display:flex;gap:0.75rem;align-items:center"></div>
+          <button class="btn btn-ghost" id="success-banner-close">Close</button>
+        </div>
+
+        <div class="tab-bar" role="tablist">
+          <button class="tab-pill active" data-tab="creative">Creative View</button>
+          <button class="tab-pill" data-tab="sanctuary">Sanctuary View</button>
+          <button class="tab-pill" data-tab="featured">Featured</button>
+          <button class="tab-pill" data-tab="drafts">Drafts</button>
+          <button class="tab-pill" data-tab="published">Published</button>
+        </div>
+
+        <div id="tab-content">
+          <section id="creative" class="tab-panel"><div id="masonry" class="masonry cols-4"></div></section>
+          <section id="sanctuary" class="tab-panel hidden"><div id="sanctuary-grid" class="sanctuary-grid"></div></section>
+          <section id="featured" class="tab-panel hidden"><div id="featured-grid" class="masonry cols-3"></div></section>
+          <section id="drafts" class="tab-panel hidden"><div id="drafts-grid" class="masonry cols-3"></div></section>
+          <section id="published" class="tab-panel hidden"><div id="published-grid"></div></section>
+        </div>
+      </section>
+    </main>
+    <!-- Sanctuary modal -->
+    <div id="sanctuary-modal" class="modal hidden">
+      <div class="modal-card">
+        <h3 id="sanctuary-modal-title">New Sanctuary</h3>
+        <div style="display:grid;gap:.8rem;margin-top:1rem">
+          <input id="sanctuary-name" placeholder="Sanctuary name" />
+          <textarea id="sanctuary-intro" placeholder="Editorial intro (rich text)" rows="5"></textarea>
+          <div>
+            <div style="color:var(--admin-muted);font-size:.9rem;margin-bottom:6px">Cover image (choose from existing media)</div>
+            <select id="sanctuary-cover-select"><option value="">Choose media...</option></select>
+          </div>
+        </div>
+        <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem">
+          <button class="btn btn-ghost" id="sanctuary-cancel">Cancel</button>
+          <button class="btn btn-primary" id="sanctuary-save">Save</button>
+        </div>
+      </div>
+    </div>
+
+      <!-- PREVIEW MODAL -->
+      <div class="modal-overlay hidden" id="preview-modal">
+        <div class="modal-box">
+          <div class="modal-head">
+            <h3 id="preview-title">Inspiration Preview</h3>
+            <button onclick="closePreview()" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);color:var(--admin-white);font-size:1rem;border:none;cursor:pointer">✕</button>
+          </div>
+          <div class="modal-body" id="preview-body"></div>
+        </div>
+      </div>
+
+      <!-- CONFIRM DELETE -->
+      <div class="confirm-modal hidden" id="confirm-modal">
+        <div class="confirm-box">
+          <h3>Delete Inspiration?</h3>
+          <p>Are you sure you want to permanently delete this item? This action cannot be undone.</p>
+          <div class="confirm-actions">
+            <button class="btn btn-ghost" id="confirm-cancel">Cancel</button>
+            <button class="btn btn-danger" id="confirm-delete">Delete</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+
+    <div style="background:rgba(255,255,255,0.04);border:1px solid var(--admin-border);border-radius:20px;padding:1.5rem;margin-bottom:2rem;text-align:left">
+      <div style="font-size:0.75rem;font-weight:800;color:var(--admin-purple);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.75rem">Upload Summary</div>
+      <div id="success-summary" style="color:var(--admin-muted);font-size:0.9rem;line-height:1.8"></div>
+    </div>
+
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="/admin/inspiration.html" class="btn" style="background:rgba(255,255,255,0.08);color:var(--admin-white)">← Back to Library</a>
+      <button class="btn primary" id="upload-more-btn">➕ Upload More</button>
+      <a href="/inspiration.html" target="_blank" class="btn" style="background:rgba(201,162,39,0.18);color:var(--admin-purple)">🌐 View Live →</a>
+    </div>
+  </div>
+</div>
+
+      <script>
+      const SUPABASE_URL = 'https://ngnricijtqlikjxrbtlr.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI';
+      const ADMIN_EMAIL = 'oreoluwaoluwadare2@gmail.com';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true,storage:window.localStorage,autoRefreshToken:false}});
+
+      async function guard(){ const { data } = await sb.auth.getSession(); if(!data.session || data.session.user.email !== ADMIN_EMAIL){ window.location.replace('/admin/index.html'); return } document.getElementById('shell').classList.remove('hidden'); document.getElementById('current-date').textContent = new Intl.DateTimeFormat('en',{weekday:'short',month:'short',day:'numeric'}).format(new Date()); init(); }
+
+
+      const state = { items:[], sanctuaries:[] };
+      function el(q){return document.querySelector(q)} function elAll(q){return Array.from(document.querySelectorAll(q))}
+
+      // Tabs (use same behavior as other pages)
+      elAll('.tab-pill').forEach(t=>t.addEventListener('click',()=>{ elAll('.tab-pill').forEach(x=>x.classList.remove('active')); t.classList.add('active'); const key=t.dataset.tab; elAll('.tab-panel').forEach(p=>p.classList.add('hidden')); el('#'+key).classList.remove('hidden'); if(typeof renderFiltered === 'function') renderFiltered(key); }))
+
+      // Renders a list of items into the given container selector (default: #masonry)
+      function renderMasonry(targetSelector = '#masonry', items = state.items){
+        const wrap = el(targetSelector);
+        if(!wrap) return;
+        wrap.innerHTML = '';
+
+        items = items || [];
+        items.forEach(item=>{
+          const elCard = document.createElement('div');
+          elCard.className = 'card';
+          elCard.innerHTML = `
+            <div class="card-media">${item.file_type==='video'
+              ?`<video src="${item.file_url}" muted loop playsinline autoplay></video>`
+              :`<img src="${item.file_url}" alt="${escapeHtml(item.title||'')}">`}
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">${escapeHtml(item.title||'Untitled')}</h3>
+              <p style="color:var(--admin-muted);font-size:0.82rem;margin:0.25rem 0 0.5rem">${escapeHtml(item.sanctuary||'')}${item.sanctuary&&item.style_tags?.length?' · ':''}${(item.style_tags||[]).slice(0,2).join(', ')}</p>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem">
+                <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                  ${item.featured?'<span class="badge featured">⭐ Featured</span>':''}
+                  <span class="badge status" style="background:${item.status==='published'?'rgba(46,204,113,0.18)':'rgba(255,255,255,0.06)'};color:${item.status==='published'?'#2ecc71':'var(--admin-muted)'}">
+                    ${(item.status||'draft').toUpperCase()}
+                  </span>
+                </div>
+                <div style="font-size:0.75rem;color:var(--admin-muted);margin-top:0.35rem">${item.created_at ? new Intl.DateTimeFormat('en',{month:'short',day:'numeric',year:'numeric'}).format(new Date(item.created_at)) : ''}</div>
+                <div class="actions-wrap">
+                  <button class="actions-btn" onclick="event.stopPropagation();toggleMenu('${item.id}')">⋮</button>
+                  <div class="actions-dropdown hidden" id="menu-${item.id}">
+                    <button onclick="viewInspo('${item.id}')">👁️ View</button>
+                    <button onclick="openEditModal('${item.id}')">✏️ Edit</button>
+                    <button onclick="archiveInspo('${item.id}','${item.status}')">${item.status==='archived'?'🔄 Restore':'📦 Archive'}</button>
+                    <button class="danger" onclick="promptDelete('${item.id}')">🗑️ Delete</button>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+          wrap.appendChild(elCard);
+        });
+
+        // handled globally via product-style handlers
+      }
+
+      // Render filtered views (published, featured, drafts)
+      function renderFiltered(key){
+        if(key === 'creative') return renderMasonry('#masonry');
+        if(key === 'published'){
+          const items = (state.items||[]).filter(i=> (i.status||'draft') === 'published');
+          return renderMasonry('#published-grid', items);
+        }
+        if(key === 'featured'){
+          const items = (state.items||[]).filter(i=> i.featured);
+          return renderMasonry('#featured-grid', items);
+        }
+        if(key === 'drafts'){
+          const items = (state.items||[]).filter(i=> (i.status||'draft') === 'draft');
+          return renderMasonry('#drafts-grid', items);
+        }
+        if(key === 'sanctuary') return renderSanctuaries();
+      }
+
+      // Product-like action handlers for Inspiration items
+      function toggleMenu(id){
+        const menu = document.getElementById(`menu-${id}`);
+        document.querySelectorAll('.actions-dropdown').forEach(m=>{ if(m.id !== `menu-${id}`) m.classList.add('hidden'); });
+        if(menu) menu.classList.toggle('hidden');
+      }
+      document.addEventListener('click', e=>{ if(!e.target.closest || !e.target.closest('.actions-wrap')){ document.querySelectorAll('.actions-dropdown').forEach(m=>m.classList.add('hidden')); } });
+
+      function viewInspo(id){
+        document.querySelectorAll('.actions-dropdown').forEach(m=>m.classList.add('hidden'));
+        const it = state.items.find(x=>x.id===id); if(!it) return;
+        document.getElementById('preview-title').textContent = it.title || 'Inspiration Preview';
+        const media = it.file_type === 'video' ? `<video src="${it.file_url}" controls style="width:100%;max-height:320px;object-fit:cover;border-radius:12px;margin-bottom:1rem"></video>` : `<img src="${it.file_url}" style="width:100%;max-height:320px;object-fit:cover;border-radius:12px;margin-bottom:1rem" onerror="this.style.display='none'" />`;
+        document.getElementById('preview-body').innerHTML = `${media}<h3 style="margin:0.25rem 0">${escapeHtml(it.title||'—')}</h3>${it.sanctuary?`<div style="color:var(--admin-muted);margin-bottom:0.5rem">${escapeHtml(it.sanctuary)}</div>`:''}${Array.isArray(it.style_tags)&&it.style_tags.length?`<div class="style-tags" style="margin-top:0.5rem">${it.style_tags.map(t=>`<span class="style-tag">${escapeHtml(t)}</span>`).join('')}</div>`:''}`;
+        document.getElementById('preview-modal').classList.remove('hidden');
+      }
+      function closePreview(){ document.getElementById('preview-modal').classList.add('hidden'); }
+
+      function openEditModal(id) {
+  document.querySelectorAll('.actions-dropdown').forEach(m=>m.classList.add('hidden'));
+  const it = state.items.find(x=>x.id===id); if(!it) return;
+  
+  document.getElementById('preview-title').textContent = 'Edit: ' + (it.title || 'Untitled');
+  document.getElementById('preview-body').innerHTML = `
+    <div style="margin-bottom:1rem">
+      ${it.file_type==='video'
+        ?`<video src="${it.file_url}" controls style="width:100%;max-height:220px;border-radius:12px"></video>`
+        :`<img src="${it.file_url}" style="width:100%;max-height:220px;object-fit:cover;border-radius:12px">`}
+    </div>
+    <div class="form-group" style="margin-bottom:0.75rem">
+      <label style="display:block;color:var(--admin-muted);font-size:0.8rem;font-weight:700;margin-bottom:0.35rem">TITLE</label>
+      <input type="text" id="edit-title" value="${escapeHtml(it.title||'')}" style="width:100%;padding:0.75rem;border-radius:10px;border:1px solid var(--admin-border);background:rgba(255,255,255,0.06);color:var(--admin-white)" />
+    </div>
+    <div class="form-group" style="margin-bottom:0.75rem">
+      <label style="display:block;color:var(--admin-muted);font-size:0.8rem;font-weight:700;margin-bottom:0.35rem">SANCTUARY</label>
+      <select id="edit-sanctuary" style="width:100%;padding:0.75rem;border-radius:10px;border:1px solid var(--admin-border);background:rgba(255,255,255,0.06);color:var(--admin-white)">
+        <option value="">No sanctuary</option>
+        ${state.sanctuaries.map(s=>`<option value="${escapeHtml(s.name)}" ${it.sanctuary===s.name?'selected':''}>${escapeHtml(s.name)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:0.75rem">
+      <label style="display:block;color:var(--admin-muted);font-size:0.8rem;font-weight:700;margin-bottom:0.35rem">STATUS</label>
+      <select id="edit-status" style="width:100%;padding:0.75rem;border-radius:10px;border:1px solid var(--admin-border);background:rgba(255,255,255,0.06);color:var(--admin-white)">
+        <option value="draft" ${it.status==='draft'?'selected':''}>Draft</option>
+        <option value="published" ${it.status==='published'?'selected':''}>Published</option>
+        <option value="archived" ${it.status==='archived'?'selected':''}>Archived</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem">
+      <input type="checkbox" id="edit-featured" ${it.featured?'checked':''} />
+      <label for="edit-featured" style="color:var(--admin-muted);font-size:0.9rem">Featured on homepage</label>
+    </div>
+    <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closePreview()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditInspo('${id}')">✅ Save Changes</button>
+    </div>
+  `;
+  document.getElementById('preview-modal').classList.remove('hidden');
+}
+
+async function saveEditInspo(id) {
+  const title = document.getElementById('edit-title').value.trim();
+  const sanctuary = document.getElementById('edit-sanctuary').value;
+  const status = document.getElementById('edit-status').value;
+  const featured = document.getElementById('edit-featured').checked;
+
+  if (!title) { showToast('Title required', true); return; }
+
+  const { error } = await sb.from('inspiration').update({
+    title, sanctuary: sanctuary || null, status, featured
+  }).eq('id', id);
+
+  if (error) { showToast('Failed to save', true); return; }
+  showToast('Changes saved ✓');
+  closePreview();
+  await loadItems();
+}
+
+      async function archiveInspo(id, status){ document.querySelectorAll('.actions-dropdown').forEach(m=>m.classList.add('hidden')); const newStatus = status === 'archived' ? 'draft' : 'archived'; const { error } = await sb.from('inspiration').update({ status: newStatus }).eq('id', id); if(error){ showToast('Failed to update', true); return; } showToast(newStatus === 'archived' ? 'Item archived' : 'Item restored'); await loadItems(); }
+
+      let deleteTargetId = null;
+      function promptDelete(id){ document.querySelectorAll('.actions-dropdown').forEach(m=>m.classList.add('hidden')); deleteTargetId = id; document.getElementById('confirm-modal').classList.remove('hidden'); }
+      document.getElementById('confirm-cancel').addEventListener('click', ()=>{ document.getElementById('confirm-modal').classList.add('hidden'); deleteTargetId = null; });
+      document.getElementById('confirm-delete').addEventListener('click', async ()=>{ if(!deleteTargetId) return; const { error } = await sb.from('inspiration').delete().eq('id', deleteTargetId); document.getElementById('confirm-modal').classList.add('hidden'); deleteTargetId = null; if(error){ showToast('Failed to delete', true); return; } showToast('Item deleted'); await loadItems(); });
+
+      function showToast(msg, isError){ const t = document.getElementById('toast'); t.textContent = msg; t.style.borderColor = isError ? 'var(--admin-danger)' : 'rgba(255,255,255,0.08)'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2500); }
+
+      function escapeHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+      // load items and sanctuaries
+      async function loadItems(){ const { data } = await sb.from('inspiration').select('*').order('created_at',{ascending:false}); state.items = data||[]; const active = document.querySelector('.tab-pill.active')?.dataset.tab || 'creative'; renderFiltered(active); }
+      async function loadSanctuaries(){ const { data } = await sb.from('sanctuaries').select('*').order('name'); state.sanctuaries = data||[]; populateSanctuarySelect(); renderSanctuaries(); }
+      function populateSanctuarySelect(){ const sel = el('#sanctuary-select'); if(!sel) return; sel.innerHTML = '<option value="">Select sanctuary...</option>' + (state.sanctuaries||[]).map(s=>`<option value="${s.name}">${escapeHtml(s.name)}</option>`).join('') }
+      function renderSanctuaries(){
+  const g = el('#sanctuary-grid');
+  if(!g) return;
+  g.innerHTML = '';
+  g.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1.25rem';
+
+  (state.sanctuaries||[]).forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'sanctuary-card';
+    card.innerHTML = `
+      <div style="aspect-ratio:3/2;border-radius:10px;overflow:hidden;background:#0b0b0b;margin-bottom:0.75rem">
+        <img src="${s.cover_url||'/assets/images/inspo/1.jpg'}" 
+          style="width:100%;height:100%;object-fit:cover" 
+          onerror="this.src='/assets/images/inspo/1.jpg'" />
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-weight:800;font-size:1rem;margin-bottom:0.25rem">${escapeHtml(s.name)}</div>
+          <div style="font-size:0.8rem;color:var(--admin-muted)">${s.media_count||0} Nooks</div>
+        </div>
+        <div class="actions-wrap">
+          <button class="actions-btn" onclick="event.stopPropagation();toggleSanctuaryMenu('${s.id}')">⋮</button>
+          <div class="actions-dropdown hidden" id="smenu-${s.id}">
+            <button onclick="openSanctuaryEdit('${s.id}')">✏️ Edit</button>
+            <button class="danger" onclick="promptDeleteSanctuary('${s.id}','${escapeHtml(s.name)}')">🗑️ Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
+    g.appendChild(card);
+  });
+}
+
+      // subscribe realtime
+      function subscribeRealtime(){ sb.channel('inspo-ch').on('postgres_changes',{event:'*',schema:'public',table:'inspiration'},()=>loadItems()).subscribe(); }
+
+      // init
+      async function init(){ await Promise.all([loadItems(), loadSanctuaries()]); subscribeRealtime(); }
+
+      // show success banner when redirected from create page
+      function showSuccessFromQuery(){ try{ const p=new URLSearchParams(location.search); if(!p.get('published')) return; const count = p.get('count')||'1'; const content = document.getElementById('success-banner-content'); const banner = document.getElementById('success-banner'); content.innerHTML = `<div style="font-weight:800">🎉</div><div><strong>${count} item${count==='1'?'':'s'} published</strong><div style="color:var(--admin-muted)">Inspiration uploaded successfully.</div></div>`; banner.style.display='flex'; document.getElementById('success-banner-close').addEventListener('click',()=>banner.style.display='none'); // remove query params
+          history.replaceState(null,'',location.pathname);
+        }catch(e){}
+      }
+
+      function toggleSanctuaryMenu(id){
+  const menu = document.getElementById(`smenu-${id}`);
+  document.querySelectorAll('.actions-dropdown').forEach(m => {
+    if(m.id !== `smenu-${id}`) m.classList.add('hidden');
+  });
+  if(menu) menu.classList.toggle('hidden');
+}
+
+function openSanctuaryEdit(id){
+  document.querySelectorAll('.actions-dropdown').forEach(m=>m.classList.add('hidden'));
+  const s = state.sanctuaries.find(x=>x.id===id);
+  if(!s) return;
+
+  let modalEl = document.getElementById('sanctuary-edit-modal');
+  if(!modalEl){
+    modalEl = document.createElement('div');
+    modalEl.id = 'sanctuary-edit-modal';
+    modalEl.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9000;display:flex;align-items:center;justify-content:center;padding:1rem';
+    document.body.appendChild(modalEl);
+  }
+
+  modalEl.innerHTML = `
+    <div style="width:min(560px,100%);background:#1a161e;border:1px solid var(--admin-border);border-radius:24px;overflow:hidden;max-height:90vh;overflow-y:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--admin-border);position:sticky;top:0;background:#1a161e;z-index:1">
+        <h3 style="font-size:1.1rem;font-weight:800">Edit Sanctuary</h3>
+        <button onclick="closeSanctuaryEdit()" style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.08);color:var(--admin-white);font-size:1rem;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:1.5rem">
+        <div style="margin-bottom:1.25rem">
+          <div style="font-size:0.78rem;font-weight:700;color:var(--admin-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">Current Cover</div>
+          <div style="aspect-ratio:3/2;border-radius:12px;overflow:hidden;background:#0b0b0b;margin-bottom:0.75rem">
+            <img id="sanctuary-edit-cover-img" src="${s.cover_url||'/assets/images/inspo/1.jpg'}" style="width:100%;height:100%;object-fit:cover" onerror="this.src='/assets/images/inspo/1.jpg'" />
+          </div>
+        </div>
+        <div style="margin-bottom:1.25rem">
+          <div style="font-size:0.78rem;font-weight:700;color:var(--admin-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">Upload New Cover Image</div>
+          <label style="display:flex;align-items:center;gap:0.75rem;padding:0.85rem;border:1px dashed var(--admin-border);border-radius:12px;cursor:pointer;background:rgba(255,255,255,0.03)">
+            <span style="font-size:1.25rem">📁</span>
+            <span style="color:var(--admin-muted);font-size:0.9rem">Click to upload JPG, PNG, WEBP</span>
+            <input type="file" id="sanctuary-cover-upload" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="previewSanctuaryCover(this)" />
+          </label>
+        </div>
+        <div style="margin-bottom:1.25rem">
+          <div style="font-size:0.78rem;font-weight:700;color:var(--admin-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">Or Choose from Uploaded Media</div>
+          <select id="sanctuary-cover-from-media" style="width:100%;padding:0.75rem;border-radius:10px;border:1px solid var(--admin-border);background:rgba(255,255,255,0.06);color:var(--admin-white)" onchange="selectMediaAsCover(this.value)">
+            <option value="">Select existing media...</option>
+            ${(state.items||[]).filter(i=>i.file_type==='image'&&i.status==='published').map(i=>`<option value="${i.file_url}">${escapeHtml(i.title||i.file_url)}</option>`).join('')}
+          </select>
+        </div>
+        <div style="margin-bottom:1.25rem">
+          <div style="font-size:0.78rem;font-weight:700;color:var(--admin-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">Sanctuary Name *</div>
+          <input type="text" id="sanctuary-edit-name" value="${escapeHtml(s.name)}" style="width:100%;padding:0.85rem 1rem;border:1px solid var(--admin-border);border-radius:12px;background:rgba(255,255,255,0.06);color:var(--admin-white);font-size:0.95rem;outline:none;font-family:inherit" />
+        </div>
+        <div style="margin-bottom:1.5rem">
+          <div style="font-size:0.78rem;font-weight:700;color:var(--admin-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">Editorial Intro</div>
+          <textarea id="sanctuary-edit-intro" rows="4" style="width:100%;padding:0.85rem 1rem;border:1px solid var(--admin-border);border-radius:12px;background:rgba(255,255,255,0.06);color:var(--admin-white);font-size:0.95rem;outline:none;resize:vertical;font-family:inherit">${escapeHtml(s.intro||'')}</textarea>
+        </div>
+        <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+          <button onclick="closeSanctuaryEdit()" style="padding:0.85rem 1.5rem;border-radius:999px;background:rgba(255,255,255,0.08);color:var(--admin-white);font-weight:700;cursor:pointer;border:none;font-family:inherit">Cancel</button>
+          <button onclick="saveSanctuaryEdit('${id}')" style="padding:0.85rem 1.5rem;border-radius:999px;background:var(--admin-purple);color:#111;font-weight:800;cursor:pointer;border:none;font-family:inherit">✅ Save Changes</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  modalEl.style.display = 'flex';
+  window._sanctuaryNewCoverUrl = s.cover_url || '';
+  window._sanctuaryNewCoverFile = null;
+}
+
+function previewSanctuaryCover(input){
+  const file = input.files && input.files[0];
+  if(!file) return;
+  window._sanctuaryNewCoverFile = file;
+  const url = URL.createObjectURL(file);
+  window._sanctuaryNewCoverUrl = url;
+  const img = document.getElementById('sanctuary-edit-cover-img');
+  if(img) img.src = url;
+  const sel = document.getElementById('sanctuary-cover-from-media');
+  if(sel) sel.value = '';
+}
+
+function selectMediaAsCover(url){
+  if(!url) return;
+  window._sanctuaryNewCoverUrl = url;
+  window._sanctuaryNewCoverFile = null;
+  const img = document.getElementById('sanctuary-edit-cover-img');
+  if(img) img.src = url;
+  const input = document.getElementById('sanctuary-cover-upload');
+  if(input) input.value = '';
+}
+
+function closeSanctuaryEdit(){
+  const modal = document.getElementById('sanctuary-edit-modal');
+  if(modal) modal.style.display = 'none';
+  window._sanctuaryNewCoverUrl = null;
+  window._sanctuaryNewCoverFile = null;
+}
+
+async function saveSanctuaryEdit(id){
+  const name = document.getElementById('sanctuary-edit-name')?.value.trim();
+  const intro = document.getElementById('sanctuary-edit-intro')?.value.trim();
+  if(!name){ showToast('Sanctuary name required', true); return; }
+
+  let coverUrl = window._sanctuaryNewCoverUrl || null;
+
+  if(window._sanctuaryNewCoverFile){
+    try{
+      const file = window._sanctuaryNewCoverFile;
+      const ext = file.name.split('.').pop();
+      const path = `sanctuaries/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: upErr } = await sb.storage.from('images').upload(path, file, { upsert: true });
+      if(upErr) throw upErr;
+      const { data } = sb.storage.from('images').getPublicUrl(path);
+      coverUrl = data.publicUrl;
+    }catch(e){
+      showToast('Cover upload failed', true); return;
+    }
+  }
+
+  const updates = { name, intro: intro || null };
+  if(coverUrl) updates.cover_url = coverUrl;
+
+  const { error } = await sb.from('sanctuaries').update(updates).eq('id', id);
+  if(error){ showToast('Failed to save sanctuary', true); return; }
+  showToast('Sanctuary updated ✓');
+  closeSanctuaryEdit();
+  await loadSanctuaries();
+}
+
+let deleteSanctuaryTargetId = null;
+function promptDeleteSanctuary(id, name){
+  document.querySelectorAll('.actions-dropdown').forEach(m=>m.classList.add('hidden'));
+  deleteSanctuaryTargetId = id;
+
+  let confirmEl = document.getElementById('sanctuary-confirm-modal');
+  if(!confirmEl){
+    confirmEl = document.createElement('div');
+    confirmEl.id = 'sanctuary-confirm-modal';
+    confirmEl.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9001;display:flex;align-items:center;justify-content:center;padding:1rem';
+    document.body.appendChild(confirmEl);
+  }
+
+  confirmEl.innerHTML = `
+    <div style="width:min(420px,100%);background:#1a161e;border:1px solid var(--admin-border);border-radius:24px;padding:2rem;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">🗑️</div>
+      <h3 style="font-size:1.2rem;margin-bottom:0.75rem">Delete Sanctuary?</h3>
+      <p style="color:var(--admin-muted);margin-bottom:1.5rem;line-height:1.6">"${escapeHtml(name)}" will be deleted. Media inside it will not be deleted.</p>
+      <div style="display:flex;gap:0.75rem;justify-content:center">
+        <button onclick="document.getElementById('sanctuary-confirm-modal').style.display='none'" style="padding:0.85rem 1.5rem;border-radius:999px;background:rgba(255,255,255,0.08);color:var(--admin-white);font-weight:700;cursor:pointer;border:none;font-family:inherit">Cancel</button>
+        <button onclick="confirmDeleteSanctuary()" style="padding:0.85rem 1.5rem;border-radius:999px;background:rgba(231,76,60,0.2);color:#e74c3c;font-weight:800;cursor:pointer;border:none;font-family:inherit">Delete</button>
+      </div>
+    </div>
+  `;
+  confirmEl.style.display = 'flex';
+}
+
+async function confirmDeleteSanctuary(){
+  if(!deleteSanctuaryTargetId) return;
+  const { error } = await sb.from('sanctuaries').delete().eq('id', deleteSanctuaryTargetId);
+  document.getElementById('sanctuary-confirm-modal').style.display = 'none';
+  deleteSanctuaryTargetId = null;
+  if(error){ showToast('Failed to delete', true); return; }
+  showToast('Sanctuary deleted');
+  await loadSanctuaries();
+}
+
+
+
+      // logout
+      el('#logout').addEventListener('click',async ()=>{ await sb.auth.signOut(); window.location.replace('/admin/index.html') })
+
+      guard();
+      // show any success banner after guard+init loads
+
+    </script>
+  </body>
+</html>

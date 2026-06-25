@@ -13,7 +13,7 @@
         --admin-black: #151216;
         --admin-card: rgba(255,255,255,0.08);
         --admin-card-strong: rgba(255,255,255,0.12);
-        --admin-gold: #c9a227;
+        --admin-purple: #D6B46C ;
         --admin-white: #ffffff;
         --admin-muted: rgba(255,255,255,0.66);
         --admin-border: rgba(255,255,255,0.12);
@@ -68,10 +68,10 @@
       .admin-nav a:hover, .admin-nav a.active {
         color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px);
       }
-      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-gold); }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-purple); }
       .logout-btn {
         margin-top: auto; width: 100%; border-radius: 999px;
-        padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-gold); font-weight: 800;
+        padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-purple); font-weight: 800;
       }
 
       /* PAGE */
@@ -102,7 +102,7 @@
         transition: background 0.2s, color 0.2s;
       }
       .step-item:last-child { border-right: none; }
-      .step-item.active { background: rgba(201,162,39,0.18); color: var(--admin-gold); }
+      .step-item.active { background: rgba(201,162,39,0.18); color: var(--admin-purple); }
       .step-item.done { background: rgba(46,204,113,0.08); color: var(--admin-success); }
 
       /* STEP PANELS */
@@ -128,7 +128,7 @@
       .form-group input:focus,
       .form-group select:focus,
       .form-group textarea:focus {
-        border-color: var(--admin-gold); background: rgba(255,255,255,0.1);
+        border-color: var(--admin-purple); background: rgba(255,255,255,0.1);
       }
       .form-group select option { background: #1a161e; }
       .form-group textarea { resize: vertical; min-height: 100px; }
@@ -145,7 +145,7 @@
         background: rgba(255,255,255,0.03); position: relative;
       }
       .upload-zone:hover, .upload-zone.dragover {
-        border-color: var(--admin-gold); background: rgba(201,162,39,0.06);
+        border-color: var(--admin-purple); background: rgba(201,162,39,0.06);
       }
       .upload-zone input[type="file"] {
         position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
@@ -248,7 +248,7 @@
         padding: 1.25rem; background: rgba(255,255,255,0.04);
       }
       .review-label {
-        font-size: 0.75rem; font-weight: 800; color: var(--admin-gold);
+        font-size: 0.75rem; font-weight: 800; color: var(--admin-purple);
         letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem;
       }
       .review-value { font-size: 0.95rem; line-height: 1.6; color: var(--admin-white); }
@@ -285,9 +285,9 @@
       .btn:hover { transform: translateY(-2px); opacity: 0.9; }
       .btn-ghost { background: rgba(255,255,255,0.08); color: var(--admin-white); }
       .btn-draft { background: rgba(255,255,255,0.12); color: var(--admin-white); }
-      .btn-primary { background: var(--admin-gold); color: var(--admin-black); }
+      .btn-primary { background: var(--admin-purple); color: var(--admin-black); }
       .btn-schedule { background: rgba(52,152,219,0.2); color: #3498db; }
-      .btn-publish { background: var(--admin-gold); color: var(--admin-black); }
+      .btn-publish { background: var(--admin-purple); color: var(--admin-black); }
 
       /* TOAST */
       .toast {
@@ -318,7 +318,7 @@
         .sidebar-brand { display: none; }
         .admin-nav { display: flex; gap: 0.45rem; flex: 1; overflow-x: auto; }
         .admin-nav a { min-height: 42px; white-space: nowrap; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
-        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-gold); }
+        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-purple); }
         .logout-btn { width: auto; flex: 0 0 auto; margin: 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; }
         .form-row { grid-template-columns: 1fr; }
         .founder-layout { grid-template-columns: 1fr; }
@@ -328,9 +328,9 @@
         .step-item { min-width: calc(50% - 1px); border-bottom: 1px solid var(--admin-border); }
       }
       .ql-editor { 
-  padding: 2rem !important; 
-  font-size: 1rem !important; 
-  line-height: 1.9 !important;
+        padding: 2rem !important; 
+        font-size: 1rem !important; 
+        line-height: 1.9 !important;
       }
       .ql-editor h1 { font-size: 1.8rem !important; margin: 1.5rem 0 0.75rem !important; }
       .ql-editor h2 { font-size: 1.4rem !important; margin: 1.25rem 0 0.6rem !important; }
@@ -338,7 +338,7 @@
       .ql-editor ul, .ql-editor ol { padding-left: 1.5rem !important; margin-bottom: 1rem !important; }
       .ql-editor li { margin-bottom: 0.4rem !important; line-height: 1.8 !important; }
       .ql-editor blockquote { 
-        border-left: 3px solid var(--admin-gold) !important; 
+        border-left: 3px solid var(--admin-purple) !important; 
         padding: 0.75rem 1.25rem !important;
         margin: 1.25rem 0 !important;
         background: rgba(201,162,39,0.06) !important;
@@ -350,6 +350,106 @@
       .ql-font span[data-value="cambria"]::before { content: 'Cambria'; font-family: Cambria, serif; }
       .ql-font span[data-value="georgia"]::before { content: 'Georgia'; font-family: Georgia, serif; }
       .ql-font span[data-value="times-new-roman"]::before { content: 'Times New Roman'; font-family: 'Times New Roman', serif; }
+
+      .ql-tooltip input {
+        color: #000 !important;
+        background: #fff !important;
+      }
+
+      .ql-tooltip a.ql-action,
+      .ql-tooltip a.ql-remove {
+        color: #7c3aed !important;
+      }
+
+      .ql-tooltip {
+        background: #1e1a22 !important;
+        border: 1px solid var(--admin-border) !important;
+        border-radius: 12px !important;
+        color: var(--admin-white) !important;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5) !important;
+        padding: 0.75rem 1rem !important;
+      }
+    
+      .ql-tooltip input[type=text] {
+        background: rgba(255,255,255,0.1) !important;
+        border: 1px solid var(--admin-border) !important;
+        border-radius: 8px !important;
+        color: var(--admin-white) !important;
+        padding: 0.4rem 0.75rem !important;
+      }
+    
+      .ql-tooltip a {
+        color: var(--admin-purple) !important;
+      }
+
+      /* Gallery block styles (editor) */
+      .gallery-block {
+        margin: 1.5rem 0;
+        border-radius: 16px;
+        overflow: visible;
+        border: 1px dashed rgba(201,162,39,0.3);
+        background: rgba(245,239,230,0.06);
+        padding: 0.75rem;
+      }
+      .gallery-grid { display: grid; gap: 0.5rem; }
+      .gallery-grid.count-1 { grid-template-columns: 1fr; }
+      .gallery-grid.count-2 { grid-template-columns: 1fr 1fr; }
+      .gallery-grid.count-3 { grid-template-columns: 1fr 1fr 1fr; }
+      .gallery-cell { position: relative; aspect-ratio: 16/9;  min-height: 120px; border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.06);}
+      .gallery-cell img, .gallery-cell video { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .gallery-cell-remove { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.7); color: white; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
+      .gallery-add-btn { position: relative; aspect-ratio: 16/9; border-radius: 12px; border: 2px dashed var(--admin-purple); background: transparent; color: var(--admin-purple); font-size: 2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; overflow: hidden; pointer-events: auto; }
+      .gallery-add-btn:hover { background: rgba(201,162,39,0.08); }
+      .gallery-file-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+      .gallery-caption { width: 100%; margin-top: 0.5rem; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); font-size: 0.82rem; padding: 0.35rem 0; outline: none; font-style: italic; }
+      .ql-gallery {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        width: auto !important;
+        padding: 0 0.7rem !important;
+        color: var(--admin-purple) !important;
+        font-weight: 800;
+        white-space: nowrap;
+        cursor: pointer;
+        overflow: hidden;
+      }
+      .gallery-toolbar-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+      .gallery-spinner,
+      .gallery-error {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .gallery-spinner::before {
+        content: "";
+        width: 28px;
+        height: 28px;
+        border: 3px solid rgba(255,255,255,0.28);
+        border-top-color: var(--admin-purple);
+        border-radius: 50%;
+        animation: gallerySpin 0.8s linear infinite;
+      }
+      .gallery-error {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        color: var(--admin-danger);
+        text-align: center;
+        font-size: 0.82rem;
+        background: rgba(231,76,60,0.12);
+      }
+      .gallery-retry-btn {
+        padding: 0.35rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(231,76,60,0.2);
+        color: #ffaaa0;
+        font-weight: 800;
+        font-size: 0.75rem;
+      }
+      @keyframes gallerySpin { to { transform: rotate(360deg); } }
     </style>
   </head>
   <body>
@@ -388,10 +488,9 @@
           <div class="step-item active" data-step="1">1. Setup</div>
           <div class="step-item" data-step="2">2. Cover</div>
           <div class="step-item" data-step="3">3. Title</div>
-          <div class="step-item" data-step="4">4. Founder</div>
-          <div class="step-item" data-step="5">5. Write</div>
-          <div class="step-item" data-step="6">6. Review</div>
-          <div class="step-item" data-step="7">7. Publish</div>
+          <div class="step-item" data-step="4">4. Write</div>
+          <div class="step-item" data-step="5">5. Review</div>
+          <div class="step-item" data-step="6">6. Publish</div>
         </div>
 
         <!-- STEP 1: SETUP -->
@@ -456,39 +555,8 @@
           </div>
         </div>
 
-        <!-- STEP 4: FOUNDER -->
+        <!-- STEP 4: WRITE -->
         <div class="step-panel" id="panel-4">
-          <p style="color:var(--admin-muted);margin-bottom:1.5rem;line-height:1.7;">
-            Add a personal founder note that appears below the blog hero before the article content. This is optional.
-          </p>
-          <div class="founder-layout">
-            <div class="founder-img-wrap">
-              <div class="founder-img-placeholder" id="founder-placeholder">👤</div>
-              <img class="founder-img-preview" id="founder-img-preview" src="" alt="Founder" />
-              <button class="btn-upload-founder">
-                <input type="file" id="founder-img-input" accept="image/jpeg,image/png,image/webp" />
-                📷 Upload Photo
-              </button>
-            </div>
-            <div>
-              <div class="form-group">
-                <label>Founder Name</label>
-                <input type="text" id="founder-name" placeholder="Oreoluwa" />
-              </div>
-              <div class="form-group">
-                <label>Founder Role</label>
-                <input type="text" id="founder-role" placeholder="Founder of TayNova" />
-              </div>
-              <div class="form-group">
-                <label>Founder Note</label>
-                <textarea id="founder-note" rows="5" placeholder="A personal note from the founder..."></textarea>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- STEP 5: WRITE -->
-        <div class="step-panel" id="panel-5">
           <div class="form-group">
             <label>Blog Content</label>
             <div class="editor-wrap">
@@ -510,8 +578,8 @@
           </div>
         </div>
 
-        <!-- STEP 6: REVIEW -->
-        <div class="step-panel" id="panel-6">
+        <!-- STEP 5: REVIEW -->
+        <div class="step-panel" id="panel-5">
           <div class="review-grid">
             <div class="review-card" id="review-cover-card" style="display:none">
               <div class="review-label">Cover Image</div>
@@ -544,8 +612,8 @@
           </div>
         </div>
 
-        <!-- STEP 7: PUBLISH -->
-        <div class="step-panel" id="panel-7">
+        <!-- STEP 6: PUBLISH -->
+        <div class="step-panel" id="panel-6">
           <div style="text-align:center;padding:3rem 1rem">
             <div style="font-size:3.5rem;margin-bottom:1.5rem">🚀</div>
             <h2 style="font-size:1.8rem;margin-bottom:0.75rem">Ready to Publish?</h2>
@@ -584,12 +652,45 @@
       const SUPABASE_URL = 'https://ngnricijtqlikjxrbtlr.supabase.co';
       const SUPABASE_KEY = 'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI';
       const ADMIN_EMAIL = 'oreoluwaoluwadare2@gmail.com';
-      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-        auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true }
-      });
+      // create Supabase client, retry briefly if the CDN hasn't initialized window.supabase yet
+      let sb = null;
+      function createClientSafely(retries = 3, delay = 250) {
+        return new Promise((resolve, reject) => {
+          let attempts = 0;
+          const tryCreate = () => {
+            attempts += 1;
+            try {
+              if (window.supabase && typeof window.supabase.createClient === 'function') {
+                const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                  auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true }
+                });
+                resolve(client);
+                return;
+              }
+            } catch (e) {
+              // fallthrough to retry
+            }
+            if (attempts >= retries) return reject(new Error('Supabase SDK not available'));
+            setTimeout(tryCreate, delay);
+          };
+          tryCreate();
+        });
+      }
+
+      (async () => {
+        try {
+          sb = await createClientSafely(6, 300);
+          // once the client is ready, run the auth guard
+          guardPage();
+        } catch (e) {
+          console.error('Failed to initialize Supabase client', e);
+          // if client cannot be initialized, redirect to login
+          try { window.location.replace('/admin/index.html'); } catch (ignored) {}
+        }
+      })();
 
       let currentStep = 1;
-      const TOTAL_STEPS = 7;
+      const TOTAL_STEPS = 6;
       let editingId = null;
       let coverFile = null;
       let coverUrl = null;
@@ -604,16 +705,38 @@
 
       // AUTH
       async function guardPage() {
-        const { data } = await sb.auth.getSession();
-        if (!data.session || data.session.user.email !== ADMIN_EMAIL) {
-          window.location.replace('/admin/index.html'); return;
+        try {
+          if (!sb) {
+            console.warn('Supabase client not ready yet — retrying guard in 300ms');
+            setTimeout(guardPage, 300);
+            return;
+          }
+          console.log('guardPage: checking session');
+          const { data } = await sb.auth.getSession();
+          const session = data && data.session ? data.session : null;
+          console.log('guardPage: session=', session);
+          if (!session || session.user?.email !== ADMIN_EMAIL) {
+            console.warn('guardPage: unauthenticated or wrong user — redirecting');
+            window.location.replace('/admin/index.html');
+            return;
+          }
+
+          // show the dashboard and hide the checking UI
+          const checkingEl = document.getElementById('checking');
+          if (checkingEl) checkingEl.classList.add('hidden');
+          const shellEl = document.getElementById('dashboard-shell');
+          if (shellEl) shellEl.classList.remove('hidden');
+
+          // initialize editor and page behaviour
+          initEditor();
+          renderActionBar();
+          checkEditMode();
+          startAutoSave();
+        } catch (err) {
+          console.error('guardPage error', err);
+          // on any auth error, redirect to login
+          window.location.replace('/admin/index.html');
         }
-        checking.classList.add('hidden');
-        shell.classList.remove('hidden');
-        initEditor();
-        renderActionBar();
-        checkEditMode();
-        startAutoSave();
       }
 
       document.getElementById('logout').addEventListener('click', async () => {
@@ -633,34 +756,217 @@
 
       // INIT EDITOR
       function initEditor() {
-       quill = new Quill('#quill-editor', {
-        theme: 'snow',
-        modules: {
-          toolbar: [
-            [{ font: ['', 'serif', 'monospace', 'cambria', 'georgia', 'times-new-roman'] }],
-            [{ header: [1, 2, 3, false] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ color: [] }, { background: [] }],
-            [{ align: [] }],
-            [{ list: 'ordered' }, { list: 'bullet' }],
-            ['blockquote', 'code-block'],
-            ['link', 'image'],
-            ['clean']
-          ]
-        }
-    });
-        
+  // Temporarily show panel-4 so Quill can initialize
+  const panel4 = document.getElementById('panel-4');
+   const originalDisplay = panel4 ? panel4.style.display : '';
+  if (panel4) panel4.style.display = 'block';
 
-        // Strip default color when not manually set
-        quill.on('text-change', () => {
-          const delta = quill.getContents();
-          delta.ops.forEach(op => {
-            if (op.attributes && op.attributes.color === '#ffffff') {
-              delete op.attributes.color;
-            }
-          });
-        });
+  quill = new Quill('#quill-editor', {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        [{ font: ['', 'serif', 'monospace', 'cambria', 'georgia', 'times-new-roman'] }],
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ color: [] }, { background: [] }],
+        [{ align: [] }],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['blockquote', 'code-block'],
+        ['link'],
+        ['clean']
+      ]
+    }
+  });
+
+if (panel4) { panel4.style.display = originalDisplay; panel4.style.visibility = ''; }
+  // Hide panel-4 again
+  if (panel4 && currentStep !== 4) panel4.style.display = '';
+
+  // Add Gallery button to toolbar
+  try {
+    const toolbarEl = document.querySelector('.ql-toolbar');
+    if (toolbarEl) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ql-gallery';
+      btn.title = 'Insert Gallery Block';
+      btn.textContent = '🖼️ Gallery';
+      btn.style.cssText = 'padding:0 8px;color:var(--admin-purple);font-weight:800;font-size:0.85rem;cursor:pointer;background:transparent;border:none';
+      btn.addEventListener('click', () => insertGalleryBlock());
+      toolbarEl.appendChild(btn);
+    }
+  } catch (e) { console.warn('Gallery button error', e); }
+}
+
+function insertGalleryBlock() {
+  if (!quill) return;
+  const range = quill.getSelection(true);
+  const index = range ? range.index : quill.getLength();
+
+  // Insert the gallery block as a DOM element directly
+  const block = document.createElement('div');
+  block.className = 'gallery-block';
+  block.contentEditable = 'false';
+  block.dataset.gallery = 'true';
+  block.innerHTML = `
+    <div class="gallery-grid count-1" id="gallery-grid-${Date.now()}">
+      <div class="gallery-add-btn" onclick="triggerGalleryUpload(this)">
+        <span style="font-size:2rem;pointer-events:none">+</span>
+      </div>
+    </div>
+    <input class="gallery-caption" type="text" placeholder="Add caption..." />
+  `;
+
+  // Insert after current line
+  const [line] = quill.getLine(index);
+  const lineNode = line ? line.domNode : null;
+  if (lineNode && lineNode.parentNode === quill.root) {
+    lineNode.after(block);
+  } else {
+    quill.root.appendChild(block);
+  }
+
+  // Add empty paragraph after gallery
+  const p = document.createElement('p');
+  p.innerHTML = '<br>';
+  block.after(p);
+}
+
+function triggerGalleryUpload(addBtn) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/jpeg,image/png,image/webp,video/mp4';
+  input.style.cssText = 'position:fixed;left:-9999px;top:0';
+  input.addEventListener('change', () => {
+    const file = input.files && input.files[0];
+    if (file) {
+      const block = addBtn.closest('.gallery-block');
+      addMediaToGallery(block, file);
+    }
+    input.remove();
+  });
+  document.body.appendChild(input);
+  input.click();
+}
+
+async function addMediaToGallery(block, file) {
+  if (!block) return;
+
+  // Validate
+  if (!['image/jpeg','image/png','image/webp','video/mp4'].includes(file.type)) {
+    showToast('Only JPG, PNG, WEBP or MP4 allowed', true); return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    showToast('File must be under 10MB', true); return;
+  }
+
+  const grid = block.querySelector('.gallery-grid');
+  const cells = grid.querySelectorAll('.gallery-cell');
+  if (cells.length >= 3) {
+    showToast('Max 3 media per gallery block', true); return;
+  }
+
+  // Create cell with local preview immediately
+  const localUrl = URL.createObjectURL(file);
+  const isVideo = file.type === 'video/mp4';
+  const cell = document.createElement('div');
+  cell.className = 'gallery-cell';
+  cell.innerHTML = isVideo
+    ? `<video src="${localUrl}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover"></video>`
+    : `<img src="${localUrl}" alt="gallery" style="width:100%;height:100%;object-fit:cover" />`;
+
+  // Insert before add button
+  const addBtn = grid.querySelector('.gallery-add-btn');
+  if (addBtn) grid.insertBefore(cell, addBtn); else grid.appendChild(cell);
+
+  // Update grid count class
+  updateGalleryGrid(block);
+
+  // Show uploading indicator
+  const spinner = document.createElement('div');
+  spinner.className = 'gallery-spinner';
+  spinner.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;border-radius:12px';
+  spinner.innerHTML = '<div style="width:28px;height:28px;border:3px solid rgba(255,255,255,0.3);border-top-color:var(--admin-purple);border-radius:50%;animation:gallerySpin 0.8s linear infinite"></div>';
+  cell.style.position = 'relative';
+  cell.appendChild(spinner);
+
+  try {
+    const bucket = isVideo ? 'videos' : 'images';
+    const folder = isVideo ? 'blog/gallery' : 'blog/gallery';
+    const url = await uploadFile(file, bucket, folder);
+
+    // Replace with final URL
+    cell.innerHTML = isVideo
+      ? `<video src="${url}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover"></video>`
+      : `<img src="${url}" alt="gallery" style="width:100%;height:100%;object-fit:cover" />`;
+
+    // Add remove button
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'gallery-cell-remove';
+    removeBtn.textContent = '✕';
+    removeBtn.onclick = () => { cell.remove(); updateGalleryGrid(block); };
+    cell.style.position = 'relative';
+    cell.appendChild(removeBtn);
+
+    URL.revokeObjectURL(localUrl);
+    showToast('Media uploaded ✓');
+  } catch (err) {
+    console.error(err);
+    cell.remove();
+    URL.revokeObjectURL(localUrl);
+    showToast('Upload failed — please retry', true);
+  }
+
+  updateGalleryGrid(block);
+}
+
+function updateGalleryGrid(block) {
+  if (!block) return;
+  const grid = block.querySelector('.gallery-grid');
+  if (!grid) return;
+  const cells = grid.querySelectorAll('.gallery-cell');
+  const count = cells.length;
+
+  grid.classList.remove('count-1','count-2','count-3');
+  grid.classList.add(`count-${Math.max(1, Math.min(count + (count < 3 ? 1 : 0), 3))}`);
+
+  let addBtn = grid.querySelector('.gallery-add-btn');
+  if (count < 3) {
+    if (!addBtn) {
+      addBtn = document.createElement('div');
+      addBtn.className = 'gallery-add-btn';
+      addBtn.innerHTML = '<span style="font-size:2rem;pointer-events:none">+</span>';
+      addBtn.onclick = () => triggerGalleryUpload(addBtn);
+      grid.appendChild(addBtn);
+    }
+  } else {
+    if (addBtn) addBtn.remove();
+  }
+}
+
+function prepareLoadedGalleryBlocks() {
+  if (!quill) return;
+  quill.root.querySelectorAll('.gallery-block').forEach(block => {
+    block.contentEditable = 'false';
+    updateGalleryGrid(block);
+    block.querySelectorAll('.gallery-cell').forEach(cell => {
+      if (!cell.querySelector('.gallery-cell-remove')) {
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'gallery-cell-remove';
+        removeBtn.textContent = '✕';
+        removeBtn.onclick = () => { cell.remove(); updateGalleryGrid(block); };
+        cell.style.position = 'relative';
+        cell.appendChild(removeBtn);
       }
+    });
+    block.querySelectorAll('.gallery-add-btn').forEach(btn => {
+      btn.onclick = () => triggerGalleryUpload(btn);
+    });
+  });
+}
+
 
       // CHECK EDIT MODE
       function checkEditMode() {
@@ -682,9 +988,9 @@
         document.getElementById('blog-desc').value = data.short_description || '';
         document.getElementById('blog-subtitle').value = data.subtitle || '';
         document.getElementById('blog-read-time').value = data.read_time || '';
-        document.getElementById('founder-name').value = data.founder_name || '';
-        document.getElementById('founder-role').value = data.founder_role || '';
-        document.getElementById('founder-note').value = data.founder_note || '';
+        const fnEl = document.getElementById('founder-name'); if (fnEl) fnEl.value = data.founder_name || '';
+        const frEl = document.getElementById('founder-role'); if (frEl) frEl.value = data.founder_role || '';
+        const fnoteEl = document.getElementById('founder-note'); if (fnoteEl) fnoteEl.value = data.founder_note || '';
         document.getElementById('cta-text').value = data.cta_text || '';
         document.getElementById('cta-link').value = data.cta_link || '';
         if (data.cover_url) {
@@ -696,7 +1002,10 @@
           showFounderPreview(founderUrl);
         }
         setTimeout(() => {
-          if (quill && data.content) quill.root.innerHTML = data.content;
+          if (quill && data.content) {
+            quill.root.innerHTML = data.content;
+            prepareLoadedGalleryBlocks();
+          }
         }, 300);
       }
 
@@ -713,7 +1022,7 @@
         if (panel) panel.classList.add('active');
         currentStep = n;
         renderActionBar();
-        if (n === 6) populateReview();
+        if (n === 5) populateReview();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
@@ -756,13 +1065,16 @@
       }
 
       // COVER IMAGE
-      document.getElementById('cover-input').addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        coverFile = file;
-        coverUrl = URL.createObjectURL(file);
-        showCoverPreview(coverUrl);
-      });
+      const coverInputEl = document.getElementById('cover-input');
+      if (coverInputEl) {
+        coverInputEl.addEventListener('change', e => {
+          const file = e.target.files[0];
+          if (!file) return;
+          coverFile = file;
+          coverUrl = URL.createObjectURL(file);
+          showCoverPreview(coverUrl);
+        });
+      }
 
       function showCoverPreview(url) {
         document.getElementById('cover-preview-img').src = url;
@@ -778,32 +1090,25 @@
 
       // DRAG & DROP COVER
       const coverZone = document.getElementById('cover-zone');
-      coverZone.addEventListener('dragover', e => { e.preventDefault(); coverZone.classList.add('dragover'); });
-      coverZone.addEventListener('dragleave', () => coverZone.classList.remove('dragover'));
-      coverZone.addEventListener('drop', e => {
-        e.preventDefault(); coverZone.classList.remove('dragover');
-        const file = e.dataTransfer.files[0];
-        if (file) {
-          coverFile = file;
-          coverUrl = URL.createObjectURL(file);
-          showCoverPreview(coverUrl);
-        }
-      });
+      if (coverZone) {
+        coverZone.addEventListener('dragover', e => { e.preventDefault(); coverZone.classList.add('dragover'); });
+        coverZone.addEventListener('dragleave', () => coverZone.classList.remove('dragover'));
+        coverZone.addEventListener('drop', e => {
+          e.preventDefault(); coverZone.classList.remove('dragover');
+          const file = e.dataTransfer.files[0];
+          if (file) {
+            coverFile = file;
+            coverUrl = URL.createObjectURL(file);
+            showCoverPreview(coverUrl);
+          }
+        });
+      }
 
       // FOUNDER IMAGE
-      document.getElementById('founder-img-input').addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        founderFile = file;
-        founderUrl = URL.createObjectURL(file);
-        showFounderPreview(founderUrl);
-      });
-
+      // Founder section removed — keep placeholders safe if elements exist
       function showFounderPreview(url) {
-        document.getElementById('founder-placeholder').style.display = 'none';
-        const img = document.getElementById('founder-img-preview');
-        img.src = url;
-        img.style.display = 'block';
+        const ph = document.getElementById('founder-placeholder'); if (ph) ph.style.display = 'none';
+        const img = document.getElementById('founder-img-preview'); if (img) { img.src = url; img.style.display = 'block'; }
       }
 
       // POPULATE REVIEW
@@ -814,15 +1119,19 @@
         const tags = document.getElementById('blog-tags').value.trim();
         const ctaText = document.getElementById('cta-text').value.trim();
         const ctaLink = document.getElementById('cta-link').value.trim();
-        const founderName = document.getElementById('founder-name').value.trim();
-        const founderRole = document.getElementById('founder-role').value.trim();
-        const founderNote = document.getElementById('founder-note').value.trim();
+        // Founder fields removed — skip if not present
+        const founderNameEl = document.getElementById('founder-name');
+        const founderName = founderNameEl ? founderNameEl.value.trim() : '';
+        const founderRoleEl = document.getElementById('founder-role');
+        const founderRole = founderRoleEl ? founderRoleEl.value.trim() : '';
+        const founderNoteEl = document.getElementById('founder-note');
+        const founderNote = founderNoteEl ? founderNoteEl.value.trim() : '';
         const content = quill ? quill.root.innerHTML : '';
 
         document.getElementById('review-title').textContent = title || '—';
         document.getElementById('review-desc').textContent = desc || '—';
         document.getElementById('review-meta').textContent = [cat, tags].filter(Boolean).join(' · ') || '—';
-        document.getElementById('review-content').innerHTML = content || '<em style="color:var(--admin-muted)">No content yet</em>';
+        document.getElementById('review-content').innerHTML = cleanContent(content) || '<em style="color:var(--admin-muted)">No content yet</em>';
 
         if (coverUrl) {
           document.getElementById('review-cover-img').src = coverUrl;
@@ -831,20 +1140,8 @@
           document.getElementById('review-cover-card').style.display = 'none';
         }
 
-        if (founderName || founderNote) {
-          const founderCard = document.getElementById('review-founder-card');
-          founderCard.style.display = 'block';
-          document.getElementById('review-founder').innerHTML = `
-            ${founderUrl ? `<img src="${founderUrl}" alt="Founder" />` : ''}
-            <div class="review-founder-info">
-              <h4>${founderName || 'Founder'}</h4>
-              <p style="color:var(--admin-gold);font-size:0.82rem;margin-bottom:0.5rem">${founderRole || ''}</p>
-              <p>${founderNote || ''}</p>
-            </div>
-          `;
-        } else {
-          document.getElementById('review-founder-card').style.display = 'none';
-        }
+        // Hide founder review card (founder step removed)
+        const founderCard = document.getElementById('review-founder-card'); if (founderCard) founderCard.style.display = 'none';
 
         if (ctaText || ctaLink) {
           document.getElementById('review-cta-card').style.display = 'block';
@@ -867,7 +1164,25 @@
       // STRIP ADMIN COLORS FROM CONTENT
       function cleanContent(html) {
         if (!html) return html;
-        return html
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
+
+        wrapper.querySelectorAll('.gallery-block').forEach(block => {
+          block.setAttribute('contenteditable', 'false');
+          block.querySelectorAll('.gallery-add-btn, .gallery-cell-remove, .gallery-spinner, .gallery-error').forEach(el => el.remove());
+          block.querySelectorAll('.gallery-cell.is-uploading, .gallery-cell.is-error').forEach(el => el.remove());
+          block.querySelectorAll('.gallery-caption').forEach(input => {
+            input.setAttribute('value', input.value || input.getAttribute('value') || '');
+          });
+          const grid = block.querySelector('.gallery-grid');
+          if (grid) {
+            const cells = grid.querySelectorAll('.gallery-cell').length;
+            grid.classList.remove('count-1', 'count-2', 'count-3');
+            grid.classList.add(`count-${Math.max(1, Math.min(cells, 3))}`);
+          }
+        });
+
+        return wrapper.innerHTML
           .replace(/color:\s*rgb\(255,\s*255,\s*255\)/gi, '')
           .replace(/color:\s*#fff(fff)?;?/gi, '')
           .replace(/color:\s*white;?/gi, '');
@@ -879,10 +1194,6 @@
         if (coverFile && coverFile instanceof File) {
           uploadedCoverUrl = await uploadFile(coverFile, 'images', 'blog/covers');
         }
-        let uploadedFounderUrl = founderUrl;
-        if (founderFile && founderFile instanceof File) {
-          uploadedFounderUrl = await uploadFile(founderFile, 'images', 'blog/founders');
-        }
         return {
           title: document.getElementById('blog-title').value.trim(),
           short_description: document.getElementById('blog-desc').value.trim(),
@@ -891,10 +1202,10 @@
           category: document.getElementById('blog-category').value,
           tags: document.getElementById('blog-tags').value.split(',').map(t => t.trim()).filter(Boolean),
           cover_url: uploadedCoverUrl || null,
-          founder_name: document.getElementById('founder-name').value.trim(),
-          founder_role: document.getElementById('founder-role').value.trim(),
-          founder_note: document.getElementById('founder-note').value.trim(),
-          founder_image_url: uploadedFounderUrl || null,
+          founder_name: null,
+          founder_role: null,
+          founder_note: null,
+          founder_image_url: null,
           content: cleanContent(quill ? quill.root.innerHTML : ''),
           cta_text: document.getElementById('cta-text').value.trim(),
           cta_link: document.getElementById('cta-link').value.trim(),
@@ -967,7 +1278,7 @@
         goToStep(1);
       }
 
-      guardPage();
+      // guardPage is invoked after Supabase client initializes
     </script>
   </body>
 </html>

@@ -13,7 +13,7 @@
         --admin-black: #151216;
         --admin-card: rgba(255,255,255,0.08);
         --admin-card-strong: rgba(255,255,255,0.12);
-        --admin-gold: #c9a227;
+        --admin-purple: #D6B46C ;
         --admin-white: #ffffff;
         --admin-muted: rgba(255,255,255,0.66);
         --admin-border: rgba(255,255,255,0.12);
@@ -38,8 +38,8 @@
       .admin-nav { display: grid; gap: 0.45rem; }
       .admin-nav a { display: flex; align-items: center; min-height: 46px; padding: 0.85rem 1rem; border-radius: 16px; color: var(--admin-muted); font-weight: 700; transition: color 0.2s, background 0.2s, transform 0.2s; }
       .admin-nav a:hover, .admin-nav a.active { color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px); }
-      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-gold); }
-      .logout-btn { margin-top: auto; width: 100%; border-radius: 999px; padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-gold); font-weight: 800; }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-purple); }
+      .logout-btn { margin-top: auto; width: 100%; border-radius: 999px; padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-purple); font-weight: 800; }
       .page-main { padding: clamp(1.5rem,4vw,3rem); max-width: 860px; }
       .page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
       .back-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1rem; border-radius: 999px; background: rgba(255,255,255,0.08); color: var(--admin-muted); font-size: 0.9rem; font-weight: 600; transition: background 0.2s, color 0.2s; }
@@ -48,23 +48,23 @@
       .stepper { display: flex; margin-bottom: 2.5rem; border-radius: 18px; overflow: hidden; border: 1px solid var(--admin-border); }
       .step-item { flex: 1; text-align: center; padding: 0.85rem 0.5rem; font-size: 0.78rem; font-weight: 700; color: var(--admin-muted); background: rgba(255,255,255,0.04); border-right: 1px solid var(--admin-border); transition: background 0.2s, color 0.2s; }
       .step-item:last-child { border-right: none; }
-      .step-item.active { background: rgba(201,162,39,0.18); color: var(--admin-gold); }
+      .step-item.active { background: rgba(201,162,39,0.18); color: var(--admin-purple); }
       .step-item.done { background: rgba(46,204,113,0.08); color: var(--admin-success); }
       .step-panel { display: none; }
       .step-panel.active { display: block; }
       .form-group { margin-bottom: 1.5rem; }
       .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--admin-muted); margin-bottom: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; }
       .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--admin-border); border-radius: 14px; background: rgba(255,255,255,0.06); color: var(--admin-white); font: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s, background 0.2s; }
-      .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--admin-gold); background: rgba(255,255,255,0.1); }
+      .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--admin-purple); background: rgba(255,255,255,0.1); }
       .form-group select option { background: #1a161e; }
       .form-group textarea { resize: vertical; min-height: 90px; }
       .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
       .form-hint { font-size: 0.8rem; color: var(--admin-muted); margin-top: 0.35rem; }
       .form-error { font-size: 0.8rem; color: var(--admin-danger); margin-top: 0.35rem; display: none; }
       .form-error.show { display: block; }
-      .required-star { color: var(--admin-gold); }
+      .required-star { color: var(--admin-purple); }
       .upload-zone { border: 2px dashed var(--admin-border); border-radius: 18px; padding: 3rem 2rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: rgba(255,255,255,0.03); position: relative; }
-      .upload-zone:hover, .upload-zone.dragover { border-color: var(--admin-gold); background: rgba(201,162,39,0.06); }
+      .upload-zone:hover, .upload-zone.dragover { border-color: var(--admin-purple); background: rgba(201,162,39,0.06); }
       .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
       .upload-zone strong { display: block; margin: 0.5rem 0 0.25rem; }
       .upload-zone p { color: var(--admin-muted); font-size: 0.88rem; }
@@ -82,19 +82,19 @@
       .ql-snow .ql-picker-options { background: #1e1a22 !important; border-color: var(--admin-border) !important; }
       .review-grid { display: grid; gap: 1.25rem; }
       .review-card { border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; background: rgba(255,255,255,0.04); }
-      .review-label { font-size: 0.75rem; font-weight: 800; color: var(--admin-gold); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem; }
+      .review-label { font-size: 0.75rem; font-weight: 800; color: var(--admin-purple); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem; }
       .review-value { font-size: 0.95rem; line-height: 1.6; }
       .review-cover { width: 100%; max-height: 280px; object-fit: contain; border-radius: 14px; }
       .ebook-cta-preview { border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.5rem; background: rgba(201,162,39,0.06); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
       .ebook-cta-price { font-size: 1.5rem; font-weight: 800; }
-      .btn-cta-preview { padding: 0.75rem 1.5rem; border-radius: 999px; background: var(--admin-gold); color: var(--admin-black); font-weight: 800; font-size: 0.9rem; }
+      .btn-cta-preview { padding: 0.75rem 1.5rem; border-radius: 999px; background: var(--admin-purple); color: var(--admin-black); font-weight: 800; font-size: 0.9rem; }
       .action-bar { position: sticky; bottom: 0; display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end; padding: 1.25rem 0; margin-top: 2rem; border-top: 1px solid var(--admin-border); background: linear-gradient(to top, rgba(16,14,18,0.98), transparent); backdrop-filter: blur(12px); }
       .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.85rem 1.5rem; border-radius: 999px; font-weight: 700; font-size: 0.9rem; transition: transform 0.2s, opacity 0.2s; cursor: pointer; }
       .btn:hover { transform: translateY(-2px); opacity: 0.9; }
       .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
       .btn-ghost { background: rgba(255,255,255,0.08); color: var(--admin-white); }
       .btn-draft { background: rgba(255,255,255,0.12); color: var(--admin-white); }
-      .btn-primary { background: var(--admin-gold); color: var(--admin-black); }
+      .btn-primary { background: var(--admin-purple); color: var(--admin-black); }
       .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem; border-radius: 14px; font-weight: 700; z-index: 400; border: 1px solid; transform: translateY(100px); opacity: 0; transition: transform 0.3s, opacity 0.3s; }
       .toast.show { transform: translateY(0); opacity: 1; }
       .success-screen { text-align: center; padding: 4rem 2rem; }
@@ -108,7 +108,7 @@
         .sidebar-brand { display: none; }
         .admin-nav { display: flex; gap: 0.45rem; flex: 1; overflow-x: auto; }
         .admin-nav a { min-height: 42px; white-space: nowrap; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
-        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-gold); }
+        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-purple); }
         .logout-btn { width: auto; flex: 0 0 auto; margin: 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; }
         .form-row { grid-template-columns: 1fr; }
         .action-bar { justify-content: stretch; }
@@ -176,14 +176,21 @@
               <label>Category</label>
               <select id="eb-category">
                 <option value="">Select category...</option>
-                <option>Home & Living</option>
-                <option>Lifestyle</option>
-                <option>Organization</option>
-                <option>Wellness</option>
-                <option>Sustainability</option>
-                <option>Creator Life</option>
-                <option>Budgeting</option>
-                <option>Self Development</option>
+                <option value="Home & Living">
+                Home & Living
+                </option>
+
+                <option value="Creator Life">
+                Creator Life
+                </option>
+
+                <option value="Freebies">
+                Freebies
+                </option>
+
+                <option value="Templates">
+                Templates
+                </option>
               </select>
             </div>
             <div class="form-group">
@@ -436,7 +443,8 @@
 
       function cleanContent(html) {
         if (!html) return html;
-        return html.replace(/color:\s*rgb\(255,\s*255,\s*255\)/gi,'').replace(/color:\s*#fff(fff)?;?/gi,'').replace(/color:\s*white;?/gi,'');
+        // Only remove color if it was set by the dark theme default, not by user
+        return html;
       }
 
       async function buildData(status) {

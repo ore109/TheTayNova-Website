@@ -605,7 +605,9 @@ if (document.body.classList.contains('inspo-page')) {
         activeFilters[type] = activeFilters[type].filter((item) => item !== value);
         const selectElement = document.querySelector(`.inspo-filters select[data-filter-type="${type}"]`);
         if (selectElement) selectElement.value = '';
-        renderMediaGrid(applyInspoFilters(inspoMediaItems));
+        const filteredItems = applyInspoFilters(inspoMediaItems);
+window._allInspoItems = filteredItems;
+renderMediaGrid(filteredItems);
         updateFilterTags();
       });
     });
@@ -620,7 +622,9 @@ if (document.body.classList.contains('inspo-page')) {
       select.value = '';
     });
     updateFilterTags();
-    renderMediaGrid(applyInspoFilters(inspoMediaItems));
+    const filteredItems = applyInspoFilters(inspoMediaItems);
+window._allInspoItems = filteredItems;
+renderMediaGrid(filteredItems);
     if (sanctuaryDetail) sanctuaryDetail.classList.add('hidden');
     if (sanctuaryGrid) sanctuaryGrid.classList.remove('hidden');
   }
@@ -631,7 +635,9 @@ if (document.body.classList.contains('inspo-page')) {
     activeFilters[type] = value ? [value] : [];
 
     selectedSanctuary = null;
-    renderMediaGrid(applyInspoFilters(inspoMediaItems));
+    const filteredItems = applyInspoFilters(inspoMediaItems);
+window._allInspoItems = filteredItems;
+renderMediaGrid(filteredItems);
     updateFilterTags();
     if (sanctuaryDetail) sanctuaryDetail.classList.add('hidden');
     if (sanctuaryGrid) sanctuaryGrid.classList.remove('hidden');
@@ -658,7 +664,9 @@ if (document.body.classList.contains('inspo-page')) {
 
   renderSanctuaryGrid();
   updateFilterTags();
-  renderMediaGrid(applyInspoFilters(inspoMediaItems));
+  const filteredItems = applyInspoFilters(inspoMediaItems);
+window._allInspoItems = filteredItems;
+renderMediaGrid(filteredItems);
   setView('creative');
 }
 

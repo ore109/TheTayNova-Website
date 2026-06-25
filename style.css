@@ -1,9 +1,9 @@
 :root {
   --color-beige: #f5efe6;
   --color-black: #1a1a1a;
-  --color-gold: #c9a227;
+  --color-gold: #e6a71f ;
   --color-white: #ffffff;
-  --color-purple: #7c3aed;
+  --color-purple: #e6a71f ;
   --color-muted: #6b6475;
   --color-footer: #151216;
   --radius: 28px;
@@ -123,7 +123,7 @@ a {
 
 .nav-list a:hover,
 .nav-list a:focus-visible {
-  color: var(--color-gold);
+  color: var(--color-purple);
   transform: translateY(-1px);
 }
 
@@ -228,7 +228,7 @@ body.ebooks-page .hero-copy {
 }
 
 .btn-secondary {
-  background: var(--color-gold);
+  background: var(--color-purple);
   color: var(--color-black);
 }
 
@@ -322,13 +322,13 @@ body.ebooks-page .section-title {
 
 .product-card .price {
   margin: 0 1.5rem;
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-weight: 600;
 }
 
 .product-card .btn-shop {
   margin: 1rem 1.5rem 1.5rem;
-  background: var(--color-gold);
+  background: var(--color-purple);
   color: var(--color-black);
   padding: 0.75rem 1.5rem;
   border-radius: 20px;
@@ -463,7 +463,7 @@ body.ebooks-page .section-title {
 .filter-pill:hover,
 .filter-pill:focus-visible,
 .filter-pill.active {
-  background: var(--color-gold);
+  background: var(--color-purple);
   color: var(--color-black);
   transform: translateY(-1px);
 }
@@ -485,7 +485,7 @@ body.ebooks-page .section-title {
   font-size: 0.9rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: var(--color-purple);
   margin-bottom: 1rem;
 }
 
@@ -622,7 +622,7 @@ body.ebooks-page .section-title {
 .shop-search-panel input:focus,
 .shop-filter-section select:focus {
   outline: none;
-  border-color: var(--color-gold);
+  border-color: var(--color-purple);
   box-shadow: 0 0 0 2px rgba(215, 180, 105, 0.1);
 }
 
@@ -729,6 +729,13 @@ body.ebooks-page .section-title {
   }
 }
 
+@media (max-width: 768px) {
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .shop-products-section {
   background: var(--color-beige);
   padding: 3rem 1.5rem;
@@ -736,9 +743,8 @@ body.ebooks-page .section-title {
 
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  margin: 2rem 0 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
 }
 
 .shop-card {
@@ -765,15 +771,15 @@ body.ebooks-page .section-title {
 }
 
 .shop-card-body {
-  padding: 1.5rem;
+  padding: 0.85rem;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.5rem;
   flex: 1;
 }
 
 .shop-card h3 {
-  font-size: 1.2rem;
+  font-size: 1.0rem;
   margin: 0;
 }
 
@@ -789,21 +795,21 @@ body.ebooks-page .section-title {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-top: 1.25rem;
+  margin-top: 1.05rem;
 }
 
 .shop-price {
-  font-weight: 700;
+  font-weight: 500;
   color: var(--color-black);
 }
 
 .btn-shop-now {
   background: var(--color-purple);
   color: var(--color-white);
-  padding: 0.85rem 1.5rem;
-  border-radius: 999px;
+  padding: 0.65rem 1.1rem;
+  border-radius: 699px;
   border: none;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
@@ -832,7 +838,7 @@ body.ebooks-page .section-title {
 }
 
 .shop-detail-meta {
-  color: var(--color-gold);
+  color: var(--color-purple);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   font-size: 0.85rem;
@@ -1014,7 +1020,7 @@ body.ebooks-page .section-title {
 
 .ebook-search-area input:focus {
   outline: none;
-  border-color: var(--color-gold);
+  border-color: var(--color-purple);
   box-shadow: 0 0 0 2px rgba(215, 180, 105, 0.1);
 }
 
@@ -1069,7 +1075,7 @@ body.ebooks-page .ebooks-section {
 
 .ebook-search-wrap input:focus {
   outline: none;
-  border-color: var(--color-gold);
+  border-color: var(--color-purple);
   box-shadow: 0 0 0 2px rgba(215, 180, 105, 0.1);
 }
 
@@ -1654,7 +1660,7 @@ body.content-page .section-footer .btn-read {
 }
 
 .inspo-page .media-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .inspo-page .sanctuary-grid {
@@ -1680,9 +1686,9 @@ body.content-page .section-footer .btn-read {
   display: block;
 }
 
-.inspo-page .media-card h3,
+.inspo-page .media-card h4,
 .inspo-page .media-card p,
-.inspo-page .sanctuary-card h3,
+.inspo-page .sanctuary-card h4,
 .inspo-page .sanctuary-card p {
   margin: 0;
   color: var(--color-black);
@@ -1953,7 +1959,7 @@ body.collab-page .hero-copy {
 .founder-name {
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
-  color: var(--color-gold);
+  color: var(--color-purple);
   text-align: left;
   margin: 0;
 }
@@ -2002,7 +2008,7 @@ body.about-page .about-founder-card h2 {
 
 body.about-page .about-founder-card p {
   margin: 0 0 0.35rem;
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
   font-size: 1.05rem;
@@ -2056,7 +2062,7 @@ body.about-page .about-brand-copy h2 {
 body.about-page .about-brand-copy p,
 body.about-page .about-purpose-card p {
   margin: 0 0 1rem;
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
   font-size: 1.1rem;
@@ -2114,7 +2120,7 @@ body.about-page .about-tagline-grid p {
 
 body.about-page .about-tagline-grid p:nth-child(even) {
   transform: translateY(1.5rem);
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-style: italic;
 }
 
@@ -2201,7 +2207,7 @@ body.about-page .about-tagline-section .hero-actions {
 }
 
 .footer-policy a:hover {
-  color: var(--color-gold);
+  color: var(--color-purple);
 }
 
 .privacy-modal {
@@ -2303,7 +2309,7 @@ body.privacy-modal-open {
 
 .privacy-modal h3 {
   margin: 0.65rem 0 1.75rem;
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.08rem;
   font-style: italic;
@@ -2318,7 +2324,7 @@ body.privacy-modal-open {
 }
 
 .privacy-modal a {
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-weight: 700;
 }
 
@@ -2446,7 +2452,7 @@ body.privacy-modal-open {
   .mobile-nav-panel a:hover,
   .mobile-nav-panel a:focus-visible {
     background: rgba(255, 255, 255, 0.78);
-    color: var(--color-gold);
+    color: var(--color-purple);
   }
 
   .mobile-nav-foot {
@@ -2674,4 +2680,11 @@ body.privacy-modal-open {
   color: var(--color-black) !important;
   font-size: 0.95rem;
   line-height: 1.8;
+}
+
+@media (max-width: 900px) {
+  #sanctuary-grid, #sanctuary-results { grid-template-columns: repeat(3,1fr) !important; }
+}
+@media (max-width: 560px) {
+  #sanctuary-grid, #sanctuary-results { grid-template-columns: repeat(2,1fr) !important; }
 }

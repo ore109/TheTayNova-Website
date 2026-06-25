@@ -1,7 +1,7 @@
 :root {
   --color-beige: #f5efe6;
   --color-black: #1a1a1a;
-  --color-gold: #c9a227;
+  --color-purple: #D6B46C ;
   --color-white: #ffffff;
   --color-purple: #7c3aed;
   --color-muted: #6b6475;
@@ -123,7 +123,7 @@ a {
 
 .nav-list a:hover,
 .nav-list a:focus-visible {
-  color: var(--color-gold);
+  color: var(--color-purple);
   transform: translateY(-1px);
 }
 
@@ -228,7 +228,7 @@ body.ebooks-page .hero-copy {
 }
 
 .btn-secondary {
-  background: var(--color-gold);
+  background: var(--color-purple);
   color: var(--color-black);
 }
 
@@ -311,13 +311,13 @@ body.ebooks-page .section-title {
 
 .product-card .price {
   margin: 0 1.5rem;
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-weight: 600;
 }
 
 .product-card .btn-shop {
   margin: 1rem 1.5rem 1.5rem;
-  background: var(--color-gold);
+  background: var(--color-purple);
   color: var(--color-black);
   padding: 0.75rem 1.5rem;
   border-radius: 20px;
@@ -452,7 +452,7 @@ body.ebooks-page .section-title {
 .filter-pill:hover,
 .filter-pill:focus-visible,
 .filter-pill.active {
-  background: var(--color-gold);
+  background: var(--color-purple);
   color: var(--color-black);
   transform: translateY(-1px);
 }
@@ -474,7 +474,7 @@ body.ebooks-page .section-title {
   font-size: 0.9rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: var(--color-purple);
   margin-bottom: 1rem;
 }
 
@@ -611,7 +611,7 @@ body.ebooks-page .section-title {
 .shop-search-panel input:focus,
 .shop-filter-section select:focus {
   outline: none;
-  border-color: var(--color-gold);
+  border-color: var(--color-purple);
   box-shadow: 0 0 0 2px rgba(215, 180, 105, 0.1);
 }
 
@@ -829,7 +829,7 @@ body.ebooks-page .section-title {
 }
 
 .shop-detail-meta {
-  color: var(--color-gold);
+  color: var(--color-purple);
   letter-spacing: 0.15em;
   text-transform: uppercase;
   font-size: 0.85rem;
@@ -989,7 +989,7 @@ body.ebooks-page .section-title {
 
 .ebook-search-area input:focus {
   outline: none;
-  border-color: var(--color-gold);
+  border-color: var(--color-purple);
   box-shadow: 0 0 0 2px rgba(215, 180, 105, 0.1);
 }
 
@@ -1044,7 +1044,7 @@ body.ebooks-page .ebooks-section {
 
 .ebook-search-wrap input:focus {
   outline: none;
-  border-color: var(--color-gold);
+  border-color: var(--color-purple);
   box-shadow: 0 0 0 2px rgba(215, 180, 105, 0.1);
 }
 
@@ -1887,7 +1887,7 @@ body.collab-page .hero-copy {
 .founder-name {
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
-  color: var(--color-gold);
+  color: var(--color-purple);
   text-align: left;
   margin: 0;
 }
@@ -1936,7 +1936,7 @@ body.about-page .about-founder-card h2 {
 
 body.about-page .about-founder-card p {
   margin: 0 0 0.35rem;
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
   font-size: 1.05rem;
@@ -1990,7 +1990,7 @@ body.about-page .about-brand-copy h2 {
 body.about-page .about-brand-copy p,
 body.about-page .about-purpose-card p {
   margin: 0 0 1rem;
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-family: Georgia, "Times New Roman", serif;
   font-style: italic;
   font-size: 1.1rem;
@@ -2048,7 +2048,7 @@ body.about-page .about-tagline-grid p {
 
 body.about-page .about-tagline-grid p:nth-child(even) {
   transform: translateY(1.5rem);
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-style: italic;
 }
 
@@ -2135,7 +2135,7 @@ body.about-page .about-tagline-section .hero-actions {
 }
 
 .footer-policy a:hover {
-  color: var(--color-gold);
+  color: var(--color-purple);
 }
 
 .privacy-modal {
@@ -2237,7 +2237,7 @@ body.privacy-modal-open {
 
 .privacy-modal h3 {
   margin: 0.65rem 0 1.75rem;
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.08rem;
   font-style: italic;
@@ -2252,7 +2252,7 @@ body.privacy-modal-open {
 }
 
 .privacy-modal a {
-  color: var(--color-gold);
+  color: var(--color-purple);
   font-weight: 700;
 }
 
@@ -2380,7 +2380,7 @@ body.privacy-modal-open {
   .mobile-nav-panel a:hover,
   .mobile-nav-panel a:focus-visible {
     background: rgba(255, 255, 255, 0.78);
-    color: var(--color-gold);
+    color: var(--color-purple);
   }
 
   .mobile-nav-foot {

@@ -11,7 +11,7 @@
         --admin-black: #151216;
         --admin-card: rgba(255,255,255,0.08);
         --admin-card-strong: rgba(255,255,255,0.12);
-        --admin-gold: #c9a227;
+        --admin-purple: #D6B46C ;
         --admin-white: #ffffff;
         --admin-muted: rgba(255,255,255,0.66);
         --admin-border: rgba(255,255,255,0.12);
@@ -62,10 +62,10 @@
       .admin-nav a:hover, .admin-nav a.active {
         color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px);
       }
-      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-gold); }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-purple); }
       .logout-btn {
         margin-top: auto; width: 100%; border-radius: 999px;
-        padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-gold); font-weight: 800;
+        padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-purple); font-weight: 800;
       }
 
       .page-main { padding: clamp(1.5rem,4vw,3rem); }
@@ -80,7 +80,7 @@
       .btn-new {
         display: inline-flex; align-items: center; gap: 0.5rem;
         padding: 0.85rem 1.5rem; border-radius: 999px;
-        background: var(--admin-gold); color: var(--admin-black);
+        background: var(--admin-purple); color: var(--admin-black);
         font-weight: 800; font-size: 0.95rem;
         transition: transform 0.2s, opacity 0.2s;
       }
@@ -96,7 +96,7 @@
         transition: background 0.2s, color 0.2s;
       }
       .tab-pill:hover { color: var(--admin-white); }
-      .tab-pill.active { background: rgba(201,162,39,0.18); color: var(--admin-gold); }
+      .tab-pill.active { background: rgba(201,162,39,0.18); color: var(--admin-purple); }
 
       .search-bar {
         margin-bottom: 1rem;
@@ -108,7 +108,7 @@
         font: inherit; font-size: 0.9rem; outline: none;
         transition: border-color 0.2s;
       }
-      .search-bar input:focus { border-color: var(--admin-gold); }
+      .search-bar input:focus { border-color: var(--admin-purple); }
       .search-bar input::placeholder { color: var(--admin-muted); }
 
       .filter-panel {
@@ -128,7 +128,7 @@
         font: inherit; font-size: 0.96rem; font-weight: 800; outline: none;
         transition: border-color 0.2s, background 0.2s;
       }
-      .filter-field select:focus { border-color: var(--admin-gold); background: rgba(255,255,255,0.12); }
+      .filter-field select:focus { border-color: var(--admin-purple); background: rgba(255,255,255,0.12); }
       .filter-field select option { background: #1a161e; color: var(--admin-white); }
       .filter-clear {
         min-height: 54px; padding: 0 1.2rem; border-radius: 14px;
@@ -159,13 +159,13 @@
         justify-content: space-between; gap: 0.5rem; margin-bottom: 0.5rem;
       }
       .card-title { font-size: 0.95rem; font-weight: 700; line-height: 1.4; flex: 1; }
-      .card-category { font-size: 0.75rem; color: var(--admin-gold); margin-bottom: 0.5rem; }
+      .card-category { font-size: 0.75rem; color: var(--admin-purple); margin-bottom: 0.5rem; }
       .card-price-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
       .card-price { font-size: 1rem; font-weight: 800; }
       .card-original-price { font-size: 0.82rem; color: var(--admin-muted); text-decoration: line-through; }
       .discount-badge {
         padding: 0.2rem 0.5rem; border-radius: 999px;
-        background: rgba(201,162,39,0.2); color: var(--admin-gold);
+        background: rgba(201,162,39,0.2); color: var(--admin-purple);
         font-size: 0.72rem; font-weight: 800;
       }
       .card-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem; }
@@ -240,12 +240,12 @@
       .btn:hover { transform: translateY(-1px); opacity: 0.9; }
       .btn-ghost { background: rgba(255,255,255,0.08); color: var(--admin-white); }
       .btn-danger { background: rgba(231,76,60,0.2); color: var(--admin-danger); }
-      .btn-primary { background: var(--admin-gold); color: var(--admin-black); }
+      .btn-primary { background: var(--admin-purple); color: var(--admin-black); }
 
       .style-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
       .style-tag {
         padding: 0.2rem 0.6rem; border-radius: 999px;
-        background: rgba(201,162,39,0.12); color: var(--admin-gold);
+        background: rgba(201,162,39,0.12); color: var(--admin-purple);
         font-size: 0.72rem; font-weight: 600;
       }
 
@@ -266,7 +266,7 @@
         .sidebar-brand { display: none; }
         .admin-nav { display: flex; gap: 0.45rem; flex: 1; overflow-x: auto; }
         .admin-nav a { min-height: 42px; white-space: nowrap; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
-        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-gold); }
+        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-purple); }
         .logout-btn { width: auto; flex: 0 0 auto; margin: 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; }
         .filter-panel { grid-template-columns: 1fr; }
         .filter-clear { width: 100%; }
@@ -599,7 +599,7 @@
         document.getElementById('preview-body').innerHTML = `
           ${p.image_url ? `<img src="${p.image_url}" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;margin-bottom:1.25rem" onerror="this.style.display='none'" />` : ''}
           <h2 style="font-size:1.3rem;margin-bottom:0.5rem">${p.name || '—'}</h2>
-          ${p.category ? `<div style="color:var(--admin-gold);font-size:0.85rem;margin-bottom:0.75rem">${p.category}${p.subcategory ? ' · ' + p.subcategory : ''}</div>` : ''}
+          ${p.category ? `<div style="color:var(--admin-purple);font-size:0.85rem;margin-bottom:0.75rem">${p.category}${p.subcategory ? ' · ' + p.subcategory : ''}</div>` : ''}
           <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap">
             <span style="font-size:1.3rem;font-weight:800">${formatPrice(discounted || p.price)}</span>
             ${discounted ? `<span style="color:var(--admin-muted);text-decoration:line-through;font-size:0.9rem">${formatPrice(p.price)}</span>` : ''}
@@ -608,7 +608,7 @@
           ${p.description ? `<div style="color:var(--admin-muted);line-height:1.7;margin-bottom:1rem;font-size:0.9rem">${p.description}</div>` : ''}
           ${Array.isArray(p.style_tags) && p.style_tags.length ? `<div class="style-tags" style="margin-bottom:0.75rem">${p.style_tags.map(t => `<span class="style-tag">${t}</span>`).join('')}</div>` : ''}
           ${Array.isArray(p.product_type) && p.product_type.length ? `<div style="font-size:0.82rem;color:var(--admin-muted);margin-bottom:1rem">Type: ${p.product_type.join(', ')}</div>` : ''}
-          ${p.affiliate_link ? `<a href="${p.affiliate_link}" target="_blank" rel="noreferrer" style="display:inline-flex;padding:0.75rem 1.5rem;border-radius:999px;background:var(--admin-gold);color:#151216;font-weight:800;font-size:0.9rem;margin-top:0.5rem">Shop Now →</a>` : ''}
+          ${p.affiliate_link ? `<a href="${p.affiliate_link}" target="_blank" rel="noreferrer" style="display:inline-flex;padding:0.75rem 1.5rem;border-radius:999px;background:var(--admin-purple);color:#151216;font-weight:800;font-size:0.9rem;margin-top:0.5rem">Shop Now →</a>` : ''}
         `;
         document.getElementById('preview-modal').classList.remove('hidden');
       }

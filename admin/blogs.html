@@ -6,12 +6,13 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>Blog CMS — TayNova Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" href="/assets/images/logo/logo.png" type="image/png" />
     <style>
       :root {
         --admin-black: #151216;
         --admin-card: rgba(255,255,255,0.08);
         --admin-card-strong: rgba(255,255,255,0.12);
-        --admin-gold: #c9a227;
+        --admin-purple: #D6B46C ;
         --admin-white: #ffffff;
         --admin-muted: rgba(255,255,255,0.66);
         --admin-border: rgba(255,255,255,0.12);
@@ -64,10 +65,10 @@
       .admin-nav a:hover, .admin-nav a.active {
         color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px);
       }
-      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-gold); }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-purple); }
       .logout-btn {
         margin-top: auto; width: 100%; border-radius: 999px;
-        padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-gold); font-weight: 800;
+        padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-purple); font-weight: 800;
       }
 
       .page-main { padding: clamp(1.5rem,4vw,3rem); }
@@ -80,7 +81,7 @@
       .btn-new {
         display: inline-flex; align-items: center; gap: 0.5rem;
         padding: 0.85rem 1.5rem; border-radius: 999px;
-        background: var(--admin-gold); color: var(--admin-black);
+        background: var(--admin-purple); color: var(--admin-black);
         font-weight: 800; font-size: 0.95rem;
         transition: transform 0.2s, opacity 0.2s; text-decoration: none;
       }
@@ -96,7 +97,7 @@
         transition: background 0.2s, color 0.2s;
       }
       .tab-pill:hover { color: var(--admin-white); }
-      .tab-pill.active { background: rgba(201,162,39,0.18); color: var(--admin-gold); }
+      .tab-pill.active { background: rgba(201,162,39,0.18); color: var(--admin-purple); }
 
       .filter-bar {
         display: grid;
@@ -118,7 +119,7 @@
         transition: border-color 0.2s, background 0.2s;
       }
       .filter-control:focus {
-        border-color: var(--admin-gold);
+        border-color: var(--admin-purple);
         background: rgba(255,255,255,0.1);
       }
       .filter-search { padding: 0 1rem; }
@@ -133,7 +134,7 @@
         font-weight: 700;
         transition: background 0.2s, color 0.2s;
       }
-      .filter-clear:hover { background: rgba(255,255,255,0.14); color: var(--admin-gold); }
+      .filter-clear:hover { background: rgba(255,255,255,0.14); color: var(--admin-purple); }
 
       .library-grid {
         display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 1.25rem;
@@ -157,7 +158,7 @@
       }
       .card-title { font-size: 1rem; font-weight: 700; line-height: 1.4; flex: 1; }
       .card-excerpt { font-size: 0.85rem; color: var(--admin-muted); line-height: 1.5; margin-bottom: 0.75rem; }
-      .card-category { font-size: 0.78rem; color: var(--admin-gold); margin-bottom: 0.5rem; }
+      .card-category { font-size: 0.78rem; color: var(--admin-purple); margin-bottom: 0.5rem; }
       .card-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
       .status-badge {
         display: inline-flex; align-items: center;
@@ -232,7 +233,7 @@
         .sidebar-brand { display: none; }
         .admin-nav { display: flex; gap: 0.45rem; flex: 1; overflow-x: auto; }
         .admin-nav a { min-height: 42px; white-space: nowrap; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
-        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-gold); }
+        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-purple); }
         .logout-btn { width: auto; flex: 0 0 auto; margin: 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; }
         .filter-bar { grid-template-columns: 1fr; }
       }
@@ -244,10 +245,10 @@
       .preview-content ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.25rem; }
       .preview-content ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1.25rem; }
       .preview-content li { margin-bottom: 0.5rem; color: rgba(255,255,255,0.85); line-height: 1.8; }
-      .preview-content a { color: var(--admin-gold) !important; text-decoration: underline; }
+      .preview-content a { color: var(--admin-purple) !important; text-decoration: underline; }
       .preview-content img { max-width: 100%; border-radius: 12px; margin: 1.25rem auto; display: block; }
       .preview-content blockquote {
-        border-left: 3px solid var(--admin-gold); padding: 0.75rem 1.25rem;
+        border-left: 3px solid var(--admin-purple); padding: 0.75rem 1.25rem;
         margin: 1.5rem 0; background: rgba(201,162,39,0.06);
         border-radius: 0 12px 12px 0; color: rgba(255,255,255,0.8);
       }
@@ -526,12 +527,12 @@
           ${post.cover_url ? `<img src="${post.cover_url}" style="width:100%;max-height:220px;object-fit:cover;border-radius:16px;margin-bottom:1.25rem" />` : ''}
           <div style="margin-bottom:1rem">
             <span class="status-badge status-${post.status || 'draft'}" style="margin-right:0.5rem">${(post.status || 'draft').charAt(0).toUpperCase() + (post.status || 'draft').slice(1)}</span>
-            ${post.category ? `<span style="color:var(--admin-gold);font-size:0.85rem">${post.category}</span>` : ''}
+            ${post.category ? `<span style="color:var(--admin-purple);font-size:0.85rem">${post.category}</span>` : ''}
           </div>
           <h2 style="font-size:1.4rem;margin-bottom:0.75rem">${post.title || '—'}</h2>
           ${post.short_description ? `<p style="color:var(--admin-muted);margin-bottom:1.25rem;line-height:1.7">${post.short_description}</p>` : ''}
           ${post.content ? `<div class="preview-content">${post.content}</div>` : '<p style="color:var(--admin-muted)">No content yet.</p>'}
-          ${post.cta_text ? `<div style="margin-top:1.5rem;padding:1rem;border:1px solid var(--admin-border);border-radius:14px;background:rgba(201,162,39,0.06)"><div style="font-size:0.78rem;color:var(--admin-muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.08em">CTA</div><a href="${post.cta_link}" target="_blank" style="color:var(--admin-gold);font-weight:700">${post.cta_text} →</a></div>` : ''}
+          ${post.cta_text ? `<div style="margin-top:1.5rem;padding:1rem;border:1px solid var(--admin-border);border-radius:14px;background:rgba(201,162,39,0.06)"><div style="font-size:0.78rem;color:var(--admin-muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.08em">CTA</div><a href="${post.cta_link}" target="_blank" style="color:var(--admin-purple);font-weight:700">${post.cta_text} →</a></div>` : ''}
         `;
         modal.classList.remove('hidden');
         }

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Upload Inspiration — TayNova CMS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      :root{
+        --admin-black:#151216;
+        --admin-purple:#D6B46C ;
+        --admin-white:#fff;
+        --admin-muted:rgba(255,255,255,0.66);
+        --admin-border:rgba(255,255,255,0.12);
+      }
+      *{box-sizing:border-box;margin:0;padding:0}
+      body{font-family:Inter,system-ui,sans-serif;color:var(--admin-white);background:radial-gradient(circle at top right, rgba(201,162,39,0.12), transparent 30%),linear-gradient(135deg,#100e12,var(--admin-black));min-height:100vh}
+      a{color:inherit;text-decoration:none}
+      .hidden{display:none!important}
+
+      /* Sidebar */
+      .dashboard-shell{min-height:100vh;padding-left:280px}
+      .admin-sidebar{position:fixed;inset:0 auto 0 0;width:280px;display:flex;flex-direction:column;gap:2rem;padding:1.5rem;border-right:1px solid var(--admin-border);background:rgba(18,15,20,0.86);backdrop-filter:blur(22px)}
+      .sidebar-brand{display:grid;justify-items:center;gap:.85rem;padding:.75rem 0 1.25rem;border-bottom:1px solid var(--admin-border);text-align:center}
+      .admin-nav{display:grid;gap:.45rem}
+      .admin-nav a{display:flex;align-items:center;min-height:46px;padding:.85rem 1rem;border-radius:16px;color:var(--admin-muted);font-weight:700}
+      .admin-nav a:hover,.admin-nav a.active{color:var(--admin-white);background:rgba(201,162,39,0.14);transform:translateX(2px)}
+      .admin-nav a.active{box-shadow:inset 3px 0 0 var(--admin-purple)}
+      .logout-btn{margin-top:auto;width:100%;border-radius:999px;padding:.9rem 1.2rem;color:#111;background:var(--admin-purple);font-weight:800}
+
+      /* Page main */
+      .page-main{padding:clamp(1.25rem,3vw,2.25rem);max-width:980px}
+      .page-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem}
+      .back-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem 1rem;border-radius:999px;background:rgba(255,255,255,0.08);color:var(--admin-muted)}
+      .back-btn:hover{background:rgba(255,255,255,0.14);color:var(--admin-white)}
+
+      /* Stepper */
+      .stepper{display:flex;gap:.5rem;margin-bottom:1rem;border-radius:12px;overflow:hidden;border:1px solid var(--admin-border)}
+      .step{flex:1;padding:.6rem;text-align:center;background:rgba(255,255,255,0.03);font-weight:700;color:var(--admin-muted)}
+      .step.active{background:rgba(201,162,39,0.14);color:var(--admin-purple)}
+
+      /* Panels */
+      .panel{display:none}
+      .panel.active{display:block}
+
+      /* Upload zone */
+      .upload-zone{border:2px dashed var(--admin-border);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;background:rgba(255,255,255,0.02);position:relative}
+      .upload-zone.dragover{border-color:var(--admin-purple);background:rgba(201,162,39,0.03)}
+      .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+      .preview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem;margin-top:.8rem}
+      .preview-item{position:relative;border-radius:10px;overflow:hidden;background:#0b0b0b;aspect-ratio:3/4}
+      .preview-item img, .preview-item video{width:100%;height:100%;object-fit:cover}
+      .preview-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer}
+      .error-text{color:#f5b8b8;margin-top:.5rem}
+
+      /* form groups */
+      .form-group{margin-bottom:1rem}
+      label{display:block;color:var(--admin-muted);font-weight:700;font-size:.8rem;margin-bottom:.35rem}
+      input[type=text],select,textarea{width:100%;padding:.75rem;border-radius:10px;border:1px solid var(--admin-border);background:rgba(255,255,255,0.04);color:var(--admin-white)}
+      select option{background:#1a161e}
+
+      /* chips */
+      .chips{display:flex;flex-wrap:wrap;gap:.5rem}
+      .chip{padding:.5rem .75rem;border-radius:999px;background:rgba(255,255,255,0.04);color:var(--admin-muted);cursor:pointer;border:1px solid transparent}
+      .chip.selected{background:var(--admin-purple);color:#111;border-color:rgba(0,0,0,0.08)}
+
+      /* toggle */
+      .toggle{display:inline-flex;align-items:center;gap:.6rem}
+      .toggle-pill{width:60px;height:30px;border-radius:999px;background:rgba(255,255,255,0.06);position:relative;cursor:pointer;border:1px solid var(--admin-border)}
+      .toggle-pill .knob{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#111;transition:left .18s}
+      .toggle-pill.active{background:var(--admin-purple)}
+      .toggle-pill.active .knob{left:33px;background:#111}
+      .toggle-label{font-weight:700;color:var(--admin-muted)}
+
+      /* review grid */
+      .review-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+      .progress{height:8px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden}
+      .progress > span{display:block;height:100%;background:var(--admin-purple);width:0%}
+
+      /* modal */
+      .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);place-items:center;padding:1rem;z-index:400}
+      .modal .card{width:min(520px,100%);background:#1a161e;border:1px solid var(--admin-border);border-radius:16px;padding:1.25rem}
+
+      .action-bar{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem}
+      .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.75rem 1.25rem;border-radius:999px;font-weight:700;background:rgba(255,255,255,0.08);color:var(--admin-white)}
+      .btn.primary{background:var(--admin-purple);color:#111}
+
+      @media (max-width:760px){.review-grid{grid-template-columns:repeat(2,1fr)}.dashboard-shell{padding-left:0}}
+    </style>
+  </head>
+  <body>
+    <main id="app">
+      <section class="auth-check" id="checking">
+        <div style="width:min(520px,100%);margin:4rem auto;text-align:center;color:var(--admin-muted)">
+          <h1 style="font-size:2rem;margin-bottom:.5rem">Checking Access</h1>
+          <p>Verifying your admin session…</p>
+        </div>
+      </section>
+
+      <div class="dashboard-shell hidden" id="shell">
+        <aside class="admin-sidebar">
+          <div class="sidebar-brand"><img src="/assets/images/logo/logo.png" alt="TayNova" style="width:56px;height:56px;object-fit:contain"/><h2>TayNova Admin</h2></div>
+          <nav class="admin-nav">
+            <a href="/admin/dashboard.html">Home</a>
+            <a href="/admin/blogs.html">Blog</a>
+            <a href="/admin/products.html">Products</a>
+            <a href="/admin/ebooks.html">Ebooks</a>
+            <a href="/admin/inspiration.html" class="active">Inspiration</a>
+            <a href="/admin/content.html">Content</a>
+          </nav>
+          <button class="logout-btn" id="logout">Logout</button>
+        </aside>
+
+        <section class="page-main">
+          <div class="page-header">
+            <a href="/admin/inspiration.html" class="back-btn">← Back</a>
+            <h1>Upload Inspiration Media</h1>
+          </div>
+
+          <div class="stepper" id="stepper">
+            <div class="step active" data-step="1">1. Media</div>
+            <div class="step" data-step="2">2. Details</div>
+            <div class="step" data-step="3">3. Review</div>
+          </div>
+
+          <div id="panel-1" class="panel active">
+            <div class="upload-zone" id="drop-zone">
+              <input id="file-input" type="file" accept="image/jpeg,image/png,image/webp,video/mp4" multiple />
+              <div style="font-size:2rem">📤</div>
+              <strong>Drag & drop or click to select files</strong>
+              <p style="color:var(--admin-muted);margin-top:6px">JPG, PNG, WEBP, MP4 · Max 10 images or 7 videos · Max 10MB per file</p>
+            </div>
+            <div id="upload-error" class="error-text" style="display:none"></div>
+            <div class="preview-grid" id="preview-grid"></div>
+            <div class="action-bar">
+              <button class="btn" id="save-draft-1">Save Draft</button>
+              <button class="btn primary" id="to-details">Continue →</button>
+            </div>
+          </div>
+
+          <div id="panel-2" class="panel">
+            <div class="form-group"><label>Title *</label><input id="media-title" type="text" /></div>
+            <div class="form-group"><label>Sanctuary *</label>
+              <div style="display:flex;gap:.5rem;align-items:center">
+                <select id="sanctuary-select" style="flex:1"><option value="">Select sanctuary...</option></select>
+                <button class="btn" id="new-sanctuary-btn">+ New</button>
+              </div>
+            </div>
+
+            <div class="form-group"><label>Style Tags *</label><div class="chips" id="style-chips"></div><div id="style-error" class="error-text" style="display:none">Pick at least one style tag</div></div>
+            <div class="form-group"><label>Room Tags</label><div class="chips" id="room-chips"></div></div>
+            <div class="form-group"><label>Category Tags</label><div class="chips" id="category-chips"></div></div>
+
+            <div class="form-group"><label>Featured</label><div class="toggle" id="featured-toggle"><div class="toggle-pill" id="featured-pill"><div class="knob"></div></div><div class="toggle-label" id="featured-label">Not featured</div></div></div>
+
+            <div class="action-bar">
+              <button class="btn" id="back-to-media">← Back</button>
+              <button class="btn" id="save-draft-2">Save Draft</button>
+              <button class="btn primary" id="to-review">Continue →</button>
+            </div>
+          </div>
+
+          <div id="panel-3" class="panel">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap">
+              <div style="flex:1">
+                <div style="font-weight:800;color:var(--admin-muted);text-transform:uppercase">Preview</div>
+                <div class="review-grid" id="review-previews"></div>
+              </div>
+              <div style="width:320px">
+                <div style="font-weight:800;color:var(--admin-muted);text-transform:uppercase">Details</div>
+                <div id="review-meta" style="margin-top:.6rem;color:var(--admin-white)">—</div>
+                <div style="margin-top:1rem" id="upload-progress-list"></div>
+              </div>
+            </div>
+
+            <div class="action-bar">
+              <button class="btn" id="back-to-details">← Back</button>
+              <button class="btn" id="save-draft-3">Save Draft</button>
+              <button class="btn primary" id="upload-now">🚀 Upload Now</button>
+            </div>
+          </div>
+
+          <div id="panel-success" class="panel">
+            <div style="text-align:center;padding:4rem 2rem;max-width:560px;margin:0 auto">
+              <div style="font-size:4.5rem;margin-bottom:1.5rem">🎉</div>
+              <h2 style="font-size:2rem;font-weight:800;margin-bottom:0.75rem">Media Uploaded Successfully!</h2>
+              <p id="success-count" style="color:var(--admin-muted);margin-bottom:0.5rem;font-size:1rem;line-height:1.7"></p>
+              <div style="display:inline-flex;align-items:center;gap:0.5rem;background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.2);border-radius:999px;padding:0.5rem 1.25rem;margin-bottom:2.5rem">
+                <span style="color:#2ecc71">✓</span>
+                <span style="color:#2ecc71;font-weight:700;font-size:0.9rem">Live on TayNova</span>
+              </div>
+              <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+                <a href="/admin/inspiration.html" class="btn">← Back to Library</a>
+                <button class="btn primary" id="upload-more">➕ Upload More</button>
+                <a href="/inspiration.html" target="_blank" class="btn" style="background:rgba(201,162,39,0.18);color:var(--admin-purple)">🌐 View Live →</a>
+              </div>
+            </div>
+          </div>
+
+        </section>
+      </div>
+    </main>
+
+    <div class="modal" id="sanctuary-modal">
+      <div class="card">
+        <h3>New Sanctuary</h3>
+        <div class="form-group"><label>Name *</label><input id="new-sanctuary-name" type="text" /></div>
+        <div class="form-group"><label>Editorial Intro</label><textarea id="new-sanctuary-intro" rows="3"></textarea></div>
+        <div style="display:flex;gap:.5rem;justify-content:flex-end;margin-top:1rem">
+          <button class="btn" id="cancel-sanctuary">Cancel</button>
+          <button class="btn primary" id="create-sanctuary">Create Sanctuary</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const SUPABASE_URL = 'https://ngnricijtqlikjxrbtlr.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI';
+      const ADMIN_EMAIL = 'oreoluwaoluwadare2@gmail.com';
+      let sb = null;
+
+      // auth + client init
+      async function createClient() {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+          sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true,storage:window.localStorage,autoRefreshToken:true}});
+          return sb;
+        }
+        // wait up to a short timeout
+        for (let i=0;i<10;i++){ await new Promise(r=>setTimeout(r,200)); if(window.supabase && typeof window.supabase.createClient==='function'){ sb = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,storage:window.localStorage,autoRefreshToken:true}}); return sb; }}
+        throw new Error('Supabase SDK unavailable');
+      }
+
+      async function guard() {
+        try{
+          await createClient();
+          const { data } = await sb.auth.getSession();
+          const session = data && data.session ? data.session : null;
+          if(!session || session.user?.email !== ADMIN_EMAIL){ window.location.replace('/admin/index.html'); return; }
+          document.getElementById('checking').classList.add('hidden');
+          document.getElementById('shell').classList.remove('hidden');
+          init();
+        }catch(e){ console.error(e); window.location.replace('/admin/index.html'); }
+      }
+
+      // state
+      const state = { stagedFiles: [], sanctuaries: [], styleTags:[], roomTags:[], categoryTags:[], featured:false };
+
+      // helpers
+      function el(id){return document.getElementById(id)}
+
+      // init UI
+      function init(){
+        setupDropZone();
+        populateChips();
+        wireButtons();
+        loadSanctuaries();
+        renderStep(1);
+      }
+
+      // Stepper
+      function renderStep(n){ state.step=n; document.querySelectorAll('.step').forEach(s=>s.classList.toggle('active', +s.dataset.step===n)); document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+n)); updatePreviewMeta(); }
+
+      // Drop zone
+      function setupDropZone(){
+        const drop = el('drop-zone'); const input = el('file-input'); const preview = el('preview-grid'); const error = el('upload-error');
+        if(!drop||!input) return;
+        drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('dragover')});
+        drop.addEventListener('dragleave',()=>drop.classList.remove('dragover'));
+        drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('dragover');handleFiles(Array.from(e.dataTransfer.files))});
+        input.addEventListener('change',e=>handleFiles(Array.from(e.target.files)));
+      }
+
+      function handleFiles(files){
+        const errorEl = el('upload-error'); errorEl.style.display='none';
+        const images = files.filter(f=>f.type.startsWith('image/'));
+        const videos = files.filter(f=>f.type.startsWith('video/'));
+        if(images.length + state.stagedFiles.filter(f=>f.type==='image').length > 10){ errorEl.textContent='Max 10 images per batch.'; errorEl.style.display='block'; return }
+        if(videos.length + state.stagedFiles.filter(f=>f.type==='video').length > 7){ errorEl.textContent='Max 7 videos per batch.'; errorEl.style.display='block'; return }
+        const invalid = files.find(f=>f.size>10*1024*1024);
+        if(invalid){ errorEl.textContent='Each file must be under 10MB.'; errorEl.style.display='block'; return }
+        files.forEach(file=>{ state.stagedFiles.push({file, url:URL.createObjectURL(file), type:file.type.startsWith('video/')?'video':'image', progress:0, status:'pending'}); });
+        renderPreviews();
+      }
+
+      function renderPreviews(){ const grid = el('preview-grid'); grid.innerHTML = state.stagedFiles.map((s,idx)=>`<div class="preview-item" data-idx="${idx}">${s.type==='image'?`<img src="${s.url}"/>`:`<video src="${s.url}" muted playsinline loop autoplay></video>`}<div class="preview-remove" data-idx="${idx}">✕</div></div>`).join(''); grid.querySelectorAll('.preview-remove').forEach(b=>b.addEventListener('click',e=>{ const i=+e.target.dataset.idx; URL.revokeObjectURL(state.stagedFiles[i].url); state.stagedFiles.splice(i,1); renderPreviews(); })); updatePreviewMeta(); }
+
+      // chips
+      const STYLE_OPTIONS=['Boho','Japandi','Minimalist','Modern Organic','Cozy Luxe','Soft Neutral','Scandinavian','Coastal','Pinterest Aesthetic'];
+      const ROOM_OPTIONS=['Kitchen','Bedroom','Living Room','Office','Bathroom','Outdoor'];
+      const CAT_OPTIONS=['Furniture','Decor','Lighting','Storage','Lifestyle'];
+
+      function populateChips(){ const sc = el('style-chips'); STYLE_OPTIONS.forEach(opt=>{ const btn=document.createElement('button');btn.type='button';btn.className='chip';btn.textContent=opt;btn.addEventListener('click',()=>{btn.classList.toggle('selected'); toggleArray(state.styleTags,opt)}); sc.appendChild(btn)});
+        const rc = el('room-chips'); ROOM_OPTIONS.forEach(opt=>{ const btn=document.createElement('button');btn.type='button';btn.className='chip';btn.textContent=opt;btn.addEventListener('click',()=>{btn.classList.toggle('selected'); toggleArray(state.roomTags,opt)}); rc.appendChild(btn)});
+        const cc = el('category-chips'); CAT_OPTIONS.forEach(opt=>{ const btn=document.createElement('button');btn.type='button';btn.className='chip';btn.textContent=opt;btn.addEventListener('click',()=>{btn.classList.toggle('selected'); toggleArray(state.categoryTags,opt)}); cc.appendChild(btn)});
+      }
+      function toggleArray(arr,val){ const i=arr.indexOf(val); if(i===-1) arr.push(val); else arr.splice(i,1); }
+
+      // featured toggle
+      el('featured-pill').addEventListener('click',()=>{ state.featured=!state.featured; const pill=el('featured-pill'); const label=el('featured-label'); if(state.featured){ pill.classList.add('active'); label.textContent='⭐ Featured on homepage' } else { pill.classList.remove('active'); label.textContent='Not featured' } });
+
+      // buttons
+      function wireButtons(){ el('to-details').addEventListener('click',()=>{ if(!state.stagedFiles.length){ el('upload-error').textContent='Please add at least one media file.'; el('upload-error').style.display='block'; return } renderStep(2)});
+        el('back-to-media').addEventListener('click',()=>renderStep(1));
+        el('to-review').addEventListener('click',()=>{ const title=el('media-title').value.trim(); if(!title){ alert('Title required'); return } if(state.styleTags.length===0){ el('style-error').style.display='block'; return } el('style-error').style.display='none'; renderStep(3); populateReview(); });
+        el('back-to-details').addEventListener('click',()=>renderStep(2));
+        el('save-draft-1').addEventListener('click',()=>saveBatch('draft'));
+        el('save-draft-2').addEventListener('click',()=>saveBatch('draft'));
+        el('save-draft-3').addEventListener('click',()=>saveBatch('draft'));
+        el('upload-now').addEventListener('click',()=>uploadAll());
+        el('new-sanctuary-btn').addEventListener('click',()=>el('sanctuary-modal').style.display='grid');
+        el('cancel-sanctuary').addEventListener('click',()=>el('sanctuary-modal').style.display='none');
+        el('create-sanctuary').addEventListener('click',createSanctuary);
+        el('upload-more').addEventListener('click',()=>{ state.stagedFiles=[]; renderPreviews(); renderStep(1); });
+        el('logout').addEventListener('click',async ()=>{ await sb.auth.signOut(); window.location.replace('/admin/index.html') });
+      }
+
+      // review
+      function populateReview(){ const rep=el('review-previews'); rep.innerHTML = state.stagedFiles.map(s=>`<div style="aspect-ratio:3/4;border-radius:10px;overflow:hidden;">${s.type==='image'?`<img src="${s.url}">`:`<video src="${s.url}" muted playsinline loop></video>`}</div>`).join(''); updatePreviewMeta(); }
+
+      function updatePreviewMeta(){ const title=el('media-title')?el('media-title').value.trim():'—'; const sanctuary=el('sanctuary-select')?el('sanctuary-select').value:'—'; const featured=state.featured?'Yes':'No'; const styles=state.styleTags.join(', '); const rooms=state.roomTags.join(', '); const cats=state.categoryTags.join(', '); el('review-meta').textContent = `${title||'—'} · Sanctuary: ${sanctuary||'—'} · Styles: ${styles||'—'} · Rooms: ${rooms||'—'} · Categories: ${cats||'—'} · Featured: ${featured}` }
+
+      // Sanctuaries from supabase
+      async function loadSanctuaries(){ try{ const { data } = await sb.from('sanctuaries').select('*').order('name'); state.sanctuaries = data||[]; const sel=el('sanctuary-select'); sel.innerHTML = '<option value="">Select sanctuary...</option>' + state.sanctuaries.map(s=>`<option value="${s.name}">${s.name}</option>`).join(''); }catch(e){console.error('loadSanctuaries',e)} }
+
+      async function createSanctuary(){ const name=el('new-sanctuary-name').value.trim(); const intro=el('new-sanctuary-intro').value.trim(); if(!name){ alert('Sanctuary name required'); return } try{ const { data, error } = await sb.from('sanctuaries').insert({name,intro}).select().single(); if(error) throw error; const sel=el('sanctuary-select'); const opt=document.createElement('option'); opt.value=data.name; opt.textContent=data.name; sel.appendChild(opt); sel.value=data.name; el('sanctuary-modal').style.display='none'; el('new-sanctuary-name').value=''; el('new-sanctuary-intro').value=''; }catch(e){console.error(e); alert('Failed to create sanctuary')} }
+
+      // save draft: insert rows with status=draft but don't upload files to storage
+      async function saveBatch(status){ try{ const title=el('media-title').value.trim(); const sanctuary=el('sanctuary-select').value; const styleTags=state.styleTags; const roomTags=state.roomTags; const catTags=state.categoryTags; const featured=state.featured; if(!title){ alert('Title required'); return } for(let s of state.stagedFiles){ const row={ title, file_url:s.url, file_type:s.type, sanctuary, style_tags:styleTags, room_tags:roomTags, category_tags:catTags, featured, status }; const res = await sb.from('inspiration').insert(row); if(res.error) console.error(res.error); } alert('Saved as '+status); window.location.href='/admin/inspiration.html'; }catch(e){console.error(e);alert('Failed to save')} }
+
+      // upload helpers
+      async function uploadAll(){ if(!state.stagedFiles.length){ alert('No files to upload'); return } const list=el('upload-progress-list'); list.innerHTML=''; const title=el('media-title').value.trim(); const sanctuary=el('sanctuary-select').value; const styleTags=state.styleTags; const roomTags=state.roomTags; const catTags=state.categoryTags; const featured=state.featured; for(let i=0;i<state.stagedFiles.length;i++){ const s=state.stagedFiles[i]; const rowWrap=document.createElement('div'); rowWrap.style.marginBottom='.6rem'; rowWrap.innerHTML = `<div style="font-weight:700">File ${i+1} — ${s.file.name}</div><div class="progress"><span style="width:0%"></span></div><div class="status" style="font-size:.85rem;color:var(--admin-muted)">Pending</div>`; list.appendChild(rowWrap); const bar=rowWrap.querySelector('.progress > span'); const statusEl=rowWrap.querySelector('.status'); try{ const bucket = s.type==='image'?'images':'videos'; const folder = s.type==='image'?'inspo/images':'inspo/videos'; const ext = s.file.name.split('.').pop(); const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`; // upload
+            const upload = await sb.storage.from(bucket).upload(path, s.file, {upsert:true}); if(upload.error) throw upload.error; const { data } = sb.storage.from(bucket).getPublicUrl(path); const publicUrl = data.publicUrl; // simulate progress
+            for(let p=0;p<=100;p+=10){ await new Promise(r=>setTimeout(r,40)); bar.style.width=p+'%'; }
+            statusEl.textContent='Done'; // insert row
+            const row = { title, file_url:publicUrl, file_type:s.type, sanctuary, style_tags:styleTags, room_tags:roomTags, category_tags:catTags, featured, status:'published' };
+            const ins = await sb.from('inspiration').insert(row);
+            if(ins.error) throw ins.error;
+          }catch(e){ console.error(e); statusEl.textContent='Failed'; rowWrap.querySelector('.progress > span').style.background='rgba(231,76,60,0.8)'; }
+        }
+
+           // Show success screen
+          const doneCount = Array.from(
+            document.querySelectorAll('#upload-progress-list .status')
+          ).filter(s => s.textContent === 'Done').length;
+
+          el('success-count').textContent = `${doneCount} file${doneCount !== 1 ? 's' : ''} uploaded successfully!`;
+
+          document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+          document.getElementById('panel-success').classList.add('active');
+
+          const actionBar = document.querySelector('.action-bar');
+          if (actionBar) actionBar.style.display = 'none';
+
+          document.querySelectorAll('.step').forEach(s => s.classList.add('done'));
+
+          // Wire upload more button
+          const uploadMoreBtn = document.getElementById('upload-more');
+          if (uploadMoreBtn) {
+            uploadMoreBtn.addEventListener('click', () => {
+              state.stagedFiles = [];
+              state.styleTags = [];
+              state.roomTags = [];
+              state.categoryTags = [];
+              state.featured = false;
+              if (el('media-title')) el('media-title').value = '';
+              if (el('sanctuary-select')) el('sanctuary-select').value = '';
+              const pill = el('featured-pill');
+              if (pill) pill.classList.remove('active');
+              const label = el('featured-label');
+              if (label) label.textContent = 'Not featured';
+              document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+              const grid = document.getElementById('preview-grid');
+              if (grid) grid.innerHTML = '';
+              if (actionBar) actionBar.style.display = '';
+              renderStep(1);
+            });
+          }
+      }
+
+      // initial boot
+      guard();
+    </script>
+  </body>
+</html>

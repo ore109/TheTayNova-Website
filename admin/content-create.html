@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Add Content — TayNova CMS</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      :root {
+        --admin-black: #151216;
+        --admin-card: rgba(255,255,255,0.08);
+        --admin-card-strong: rgba(255,255,255,0.12);
+        --admin-purple: #D6B46C ;
+        --admin-white: #ffffff;
+        --admin-muted: rgba(255,255,255,0.66);
+        --admin-border: rgba(255,255,255,0.12);
+        --admin-danger: #e74c3c;
+        --admin-success: #2ecc71;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: Inter, system-ui, sans-serif;
+        color: var(--admin-white);
+        background: radial-gradient(circle at top right, rgba(201,162,39,0.12), transparent 30%),
+          linear-gradient(135deg, #100e12, var(--admin-black));
+        min-height: 100vh;
+      }
+      button { border: none; font: inherit; cursor: pointer; }
+      img { display: block; max-width: 100%; }
+      a { text-decoration: none; color: inherit; }
+      .hidden { display: none !important; }
+
+      .auth-check { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; }
+      .auth-card { width: min(480px,100%); padding: 2rem; border: 1px solid var(--admin-border); border-radius: 28px; background: var(--admin-card); backdrop-filter: blur(18px); text-align: center; }
+      .auth-card h1 { font-size: clamp(2rem,6vw,3rem); margin-bottom: 0.75rem; }
+      .auth-card p { color: var(--admin-muted); line-height: 1.7; }
+
+      /* SIDEBAR */
+      .dashboard-shell { min-height: 100vh; padding-left: 280px; }
+      .admin-sidebar { position: fixed; inset: 0 auto 0 0; width: 280px; display: flex; flex-direction: column; gap: 2rem; padding: 1.5rem; border-right: 1px solid var(--admin-border); background: rgba(18,15,20,0.86); backdrop-filter: blur(22px); box-shadow: 24px 0 80px rgba(0,0,0,0.18); z-index: 100; }
+      .sidebar-brand { display: grid; justify-items: center; gap: 0.85rem; padding: 0.75rem 0 1.25rem; border-bottom: 1px solid var(--admin-border); text-align: center; }
+      .sidebar-brand img { width: 58px; height: 58px; object-fit: contain; }
+      .sidebar-brand h2 { font-size: 1.05rem; letter-spacing: 0.04em; }
+      .admin-nav { display: grid; gap: 0.45rem; }
+      .admin-nav a { display: flex; align-items: center; min-height: 46px; padding: 0.85rem 1rem; border-radius: 16px; color: var(--admin-muted); font-weight: 700; transition: color 0.2s, background 0.2s, transform 0.2s; }
+      .admin-nav a:hover, .admin-nav a.active { color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px); }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-purple); }
+      .logout-btn { margin-top: auto; width: 100%; border-radius: 999px; padding: 0.9rem 1.2rem; color: var(--admin-black); background: var(--admin-purple); font-weight: 800; }
+
+      /* PAGE */
+      .page-main { padding: clamp(1.5rem,4vw,3rem); max-width: 780px; }
+      .page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+      .back-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1rem; border-radius: 999px; background: rgba(255,255,255,0.08); color: var(--admin-muted); font-size: 0.9rem; font-weight: 600; transition: background 0.2s, color 0.2s; }
+      .back-btn:hover { background: rgba(255,255,255,0.14); color: var(--admin-white); }
+      .page-header h1 { font-size: clamp(1.5rem,3vw,2.2rem); flex: 1; }
+
+      /* TYPE SELECTOR */
+      .type-selector { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 2rem; }
+      .type-card { padding: 1.5rem 1rem; border-radius: 20px; border: 2px solid var(--admin-border); background: rgba(255,255,255,0.04); text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s, transform 0.2s; }
+      .type-card:hover { border-color: rgba(216,167,177,0.4); background: rgba(255,255,255,0.07); transform: translateY(-2px); }
+      .type-card.selected { border-color: var(--admin-purple); background: rgba(216,167,177,0.1); }
+      .type-card .type-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+      .type-card .type-name { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.25rem; }
+      .type-card .type-hint { font-size: 0.78rem; color: var(--admin-muted); }
+
+      /* STEPPER */
+      .stepper { display: flex; margin-bottom: 2.5rem; border-radius: 18px; overflow: hidden; border: 1px solid var(--admin-border); }
+      .step-item { flex: 1; text-align: center; padding: 0.85rem 0.5rem; font-size: 0.78rem; font-weight: 700; color: var(--admin-muted); background: rgba(255,255,255,0.04); border-right: 1px solid var(--admin-border); transition: background 0.2s, color 0.2s; }
+      .step-item:last-child { border-right: none; }
+      .step-item.active { background: rgba(201,162,39,0.18); color: var(--admin-purple); }
+      .step-item.done { background: rgba(46,204,113,0.08); color: var(--admin-success); }
+
+      .step-panel { display: none; }
+      .step-panel.active { display: block; }
+
+      /* FORM */
+      .form-group { margin-bottom: 1.5rem; }
+      .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--admin-muted); margin-bottom: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase; }
+      .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.9rem 1rem; border: 1px solid var(--admin-border); border-radius: 14px; background: rgba(255,255,255,0.06); color: var(--admin-white); font: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s, background 0.2s; }
+      .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--admin-purple); background: rgba(255,255,255,0.1); }
+      .form-group select option { background: #1a161e; }
+      .form-group textarea { resize: vertical; min-height: 100px; }
+      .form-hint { font-size: 0.8rem; color: var(--admin-muted); margin-top: 0.35rem; }
+      .form-error { font-size: 0.8rem; color: var(--admin-danger); margin-top: 0.35rem; display: none; }
+      .form-error.show { display: block; }
+      .required-star { color: var(--admin-purple); }
+
+      /* UPLOAD ZONE */
+      .upload-zone { border: 2px dashed var(--admin-border); border-radius: 18px; padding: 2.5rem; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: rgba(255,255,255,0.03); position: relative; }
+      .upload-zone:hover, .upload-zone.dragover { border-color: var(--admin-purple); background: rgba(201,162,39,0.06); }
+      .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+      .upload-zone .upload-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+      .upload-zone strong { display: block; margin: 0.25rem 0; }
+      .upload-zone p { color: var(--admin-muted); font-size: 0.88rem; }
+      .media-preview-wrap { margin-top: 1.25rem; position: relative; }
+      .media-preview-wrap video, .media-preview-wrap img { width: 100%; max-height: 280px; object-fit: contain; border-radius: 16px; display: block; }
+      .media-remove-btn { position: absolute; top: 10px; right: 10px; padding: 0.4rem 0.75rem; border-radius: 999px; background: rgba(0,0,0,0.7); color: white; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: none; }
+
+      /* TRIM INDICATOR */
+      .trim-badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.85rem; border-radius: 999px; background: rgba(255,200,0,0.15); color: #ffc800; font-size: 0.8rem; font-weight: 700; margin-top: 0.75rem; }
+
+      /* CTA SECTION */
+      .cta-section { border: 1px solid var(--admin-border); border-radius: 18px; padding: 1.25rem; background: rgba(255,255,255,0.03); }
+      .cta-section h3 { font-size: 0.85rem; font-weight: 800; color: var(--admin-purple); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }
+      .cta-row { display: grid; grid-template-columns: 1fr 1.5fr; gap: 1rem; }
+
+      /* REVIEW */
+      .review-grid { display: grid; gap: 1.25rem; }
+      .review-card { border: 1px solid var(--admin-border); border-radius: 16px; padding: 1.25rem; background: rgba(255,255,255,0.04); }
+      .review-label { font-size: 0.75rem; font-weight: 800; color: var(--admin-purple); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.6rem; }
+      .review-value { font-size: 0.95rem; line-height: 1.6; word-break: break-all; }
+      .review-media { width: 100%; max-height: 220px; object-fit: contain; border-radius: 14px; display: block; }
+
+      /* PROGRESS BAR */
+      .upload-progress { margin-top: 1rem; }
+      .upload-progress-bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); overflow: hidden; }
+      .upload-progress-fill { height: 100%; background: var(--admin-purple); transition: width 0.3s; }
+      .upload-progress-label { font-size: 0.8rem; color: var(--admin-muted); margin-top: 0.4rem; }
+
+      /* ACTION BAR */
+      .action-bar { position: sticky; bottom: 0; display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: flex-end; padding: 1.25rem 0; margin-top: 2rem; border-top: 1px solid var(--admin-border); background: linear-gradient(to top, rgba(16,14,18,0.98), transparent); backdrop-filter: blur(12px); }
+      .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.85rem 1.5rem; border-radius: 999px; font-weight: 700; font-size: 0.9rem; transition: transform 0.2s, opacity 0.2s; cursor: pointer; border: none; }
+      .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+      .btn-ghost { background: rgba(255,255,255,0.08); color: var(--admin-white); }
+      .btn-draft { background: rgba(255,255,255,0.12); color: var(--admin-white); }
+      .btn-primary { background: var(--admin-purple); color: var(--admin-black); }
+
+      /* SUCCESS */
+      .success-screen { text-align: center; padding: 4rem 2rem; }
+      .success-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+      .success-screen h2 { font-size: 2rem; margin-bottom: 0.75rem; }
+      .success-screen p { color: var(--admin-muted); margin-bottom: 2rem; line-height: 1.7; }
+      .success-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+      /* TOAST */
+      .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 1rem 1.5rem; border-radius: 14px; font-weight: 700; z-index: 400; border: 1px solid; transform: translateY(100px); opacity: 0; transition: transform 0.3s, opacity 0.3s; }
+      .toast.show { transform: translateY(0); opacity: 1; }
+
+      @media (max-width: 760px) {
+        .dashboard-shell { padding-left: 0; padding-bottom: 88px; }
+        .admin-sidebar { inset: auto 0 0 0; width: 100%; height: auto; flex-direction: row; align-items: center; gap: 0.65rem; padding: 0.65rem; border-top: 1px solid var(--admin-border); border-right: none; overflow-x: auto; }
+        .sidebar-brand { display: none; }
+        .admin-nav { display: flex; gap: 0.45rem; flex: 1; overflow-x: auto; }
+        .admin-nav a { min-height: 42px; white-space: nowrap; padding: 0.7rem 0.85rem; font-size: 0.9rem; }
+        .admin-nav a.active { box-shadow: inset 0 -3px 0 var(--admin-purple); }
+        .logout-btn { width: auto; flex: 0 0 auto; margin: 0; padding: 0.7rem 0.9rem; font-size: 0.9rem; }
+        .type-selector { grid-template-columns: 1fr; }
+        .cta-row { grid-template-columns: 1fr; }
+        .action-bar { justify-content: stretch; }
+        .action-bar .btn { flex: 1; justify-content: center; }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="auth-check" id="checking">
+      <div class="auth-card">
+        <h1>Checking Access</h1>
+        <p>Verifying your TayNova admin session...</p>
+      </div>
+    </section>
+
+    <div class="dashboard-shell hidden" id="dashboard-shell">
+      <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+          <img src="/assets/images/logo/logo.png" alt="TayNova Logo" onerror="this.style.display='none'" />
+          <h2>TayNova Admin</h2>
+        </div>
+        <nav class="admin-nav">
+          <a href="/admin/dashboard.html">Home</a>
+          <a href="/admin/blogs.html">Blog</a>
+          <a href="/admin/products.html">Products</a>
+          <a href="/admin/ebooks.html">Ebooks</a>
+          <a href="/admin/inspiration.html">Inspiration</a>
+          <a href="/admin/content.html" class="active">Content</a>
+        </nav>
+        <button class="logout-btn" id="logout">Logout</button>
+      </aside>
+
+      <main class="page-main">
+        <div class="page-header">
+          <a href="/admin/content.html" class="back-btn">← Back</a>
+          <h1 id="page-title">Add Content</h1>
+        </div>
+
+        <!-- STEP 0: TYPE SELECTION -->
+        <div id="panel-type">
+          <p style="color:var(--admin-muted);margin-bottom:1.5rem">Choose the type of content you want to upload.</p>
+          <div class="type-selector">
+            <div class="type-card" data-type="reel" onclick="selectType('reel')">
+              <div class="type-icon">📸</div>
+              <div class="type-name">Instagram Reel</div>
+              <div class="type-hint">MP4 · max 10 sec · links to Instagram</div>
+            </div>
+            <div class="type-card" data-type="short" onclick="selectType('short')">
+              <div class="type-icon">▶️</div>
+              <div class="type-name">YouTube Short</div>
+              <div class="type-hint">MP4 · max 10 sec · links to YouTube</div>
+            </div>
+            <div class="type-card" data-type="tutorial" onclick="selectType('tutorial')">
+              <div class="type-icon">🎬</div>
+              <div class="type-name">YouTube Tutorial</div>
+              <div class="type-hint">Thumbnail image + YouTube embed link</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPLOAD FLOW (shown after type selected) -->
+        <div id="upload-flow" class="hidden">
+          <div class="stepper" id="stepper">
+            <div class="step-item active" data-step="1">1. Details</div>
+            <div class="step-item" data-step="2">2. Media</div>
+            <div class="step-item" data-step="3">3. Review</div>
+          </div>
+
+          <!-- STEP 1: DETAILS -->
+          <div class="step-panel active" id="panel-1">
+            <div class="form-group">
+              <label>Title <span class="required-star">*</span></label>
+              <input type="text" id="c-title" placeholder="e.g. Cozy Home Styling" />
+              <div class="form-error" id="err-title">Title is required</div>
+            </div>
+            <div class="form-group">
+              <label>Short Description</label>
+              <textarea id="c-desc" placeholder="A quick caption or summary..."></textarea>
+            </div>
+            <div class="cta-section">
+              <h3>Call to Action</h3>
+              <div class="cta-row">
+                <div class="form-group" style="margin-bottom:0">
+                  <label>CTA Label <span class="required-star">*</span></label>
+                  <input type="text" id="c-cta-label" placeholder="e.g. Watch on Instagram" />
+                  <div class="form-error" id="err-cta-label">CTA label is required</div>
+                </div>
+                <div class="form-group" style="margin-bottom:0">
+                  <label id="cta-link-label">External Link <span class="required-star">*</span></label>
+                  <input type="url" id="c-cta-link" placeholder="https://..." />
+                  <div class="form-error" id="err-cta-link">External link is required</div>
+                </div>
+              </div>
+            </div>
+            <div class="form-group" style="margin-top:1.5rem">
+              <label>Status</label>
+              <select id="c-status">
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- STEP 2: MEDIA -->
+          <div class="step-panel" id="panel-2">
+            <!-- VIDEO UPLOAD (reel + short) -->
+            <div id="video-upload-section">
+              <div class="form-group">
+                <label>Upload Video (MP4) <span class="required-star">*</span></label>
+                <div class="upload-zone" id="video-zone">
+                  <input type="file" id="video-input" accept="video/mp4" onchange="handleVideoFile(event)" />
+                  <div class="upload-icon">🎥</div>
+                  <strong>Upload MP4 Video</strong>
+                  <p>Click or drag & drop · Auto-trimmed to 10 seconds</p>
+                </div>
+                <div class="form-error" id="err-video">Video is required</div>
+                <div id="video-preview-wrap" class="media-preview-wrap hidden">
+                  <video id="video-preview" muted autoplay loop playsinline></video>
+                  <button class="media-remove-btn" onclick="removeVideo()">✕ Remove</button>
+                  <div id="trim-note" class="trim-badge hidden">⚡ Video trimmed to 10 seconds</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- THUMBNAIL UPLOAD (tutorial only) -->
+            <div id="thumbnail-upload-section" class="hidden">
+              <div class="form-group">
+                <label>Thumbnail Image (16:9) <span class="required-star">*</span></label>
+                <div class="upload-zone" id="thumb-zone">
+                  <input type="file" id="thumb-input" accept="image/jpeg,image/png,image/webp" onchange="handleThumbFile(event)" />
+                  <div class="upload-icon">🖼️</div>
+                  <strong>Upload Thumbnail</strong>
+                  <p>JPG, PNG, WEBP · 16:9 ratio recommended</p>
+                </div>
+                <div class="form-error" id="err-thumb">Thumbnail is required</div>
+                <div id="thumb-preview-wrap" class="media-preview-wrap hidden">
+                  <img id="thumb-preview" src="" alt="Thumbnail" />
+                  <button class="media-remove-btn" onclick="removeThumb()">✕ Remove</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>YouTube Video URL <span class="required-star">*</span></label>
+                <input type="url" id="c-yt-url" placeholder="https://www.youtube.com/watch?v=..." />
+                <div class="form-hint">Full YouTube watch link — used to embed the video on the detail page</div>
+                <div class="form-error" id="err-yt-url">YouTube URL is required</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- STEP 3: REVIEW -->
+          <div class="step-panel" id="panel-3">
+            <div class="review-grid">
+              <div class="review-card">
+                <div class="review-label">Content Type</div>
+                <div class="review-value" id="review-type">—</div>
+              </div>
+              <div id="review-media-card" class="review-card">
+                <div class="review-label">Media Preview</div>
+                <div id="review-media-content">—</div>
+              </div>
+              <div class="review-card">
+                <div class="review-label">Title</div>
+                <div class="review-value" id="review-title">—</div>
+              </div>
+              <div class="review-card">
+                <div class="review-label">Description</div>
+                <div class="review-value" id="review-desc" style="color:var(--admin-muted)">—</div>
+              </div>
+              <div class="review-card">
+                <div class="review-label">Call to Action</div>
+                <div class="review-value" id="review-cta">—</div>
+              </div>
+              <div class="review-card">
+                <div class="review-label">Status</div>
+                <div class="review-value" id="review-status">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUCCESS -->
+          <div class="step-panel" id="panel-success">
+            <div class="success-screen">
+              <div class="success-icon">🎉</div>
+              <h2>Content Published!</h2>
+              <p>Your content is now live on TayNova.</p>
+              <div class="success-actions">
+                <a href="/admin/content.html" class="btn btn-ghost">← Back to Content</a>
+                <button class="btn btn-primary" onclick="resetFlow()">＋ Add Another</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-bar" id="action-bar"></div>
+        </div>
+      </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const SUPABASE_URL = 'https://ngnricijtqlikjxrbtlr.supabase.co';
+      const SUPABASE_KEY = 'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI';
+      const ADMIN_EMAIL = 'oreoluwaoluwadare2@gmail.com';
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { persistSession: true, storage: window.localStorage, autoRefreshToken: true }
+      });
+
+      const MAX_VIDEO_DURATION = 10; // seconds
+
+      let currentType = null;
+      let currentStep = 1;
+      let editingId = null;
+      let videoFile = null;
+      let thumbFile = null;
+      let videoObjectUrl = null;
+      let thumbObjectUrl = null;
+
+      const TYPE_LABELS = { reel: '📸 Instagram Reel', short: '▶️ YouTube Short', tutorial: '🎬 YouTube Tutorial' };
+      const CTA_PLACEHOLDERS = { reel: 'https://www.instagram.com/...', short: 'https://youtube.com/shorts/...', tutorial: 'https://www.youtube.com/watch?v=...' };
+      const CTA_LINK_LABELS = { reel: 'Instagram Link', short: 'YouTube Shorts Link', tutorial: 'CTA Button Link' };
+      const DEFAULT_CTA_LABELS = { reel: 'View on Instagram', short: 'Watch on YouTube', tutorial: 'Watch on YouTube' };
+
+      async function guardPage() {
+        const { data } = await sb.auth.getSession();
+        if (!data.session || data.session.user.email !== ADMIN_EMAIL) {
+          window.location.replace('/admin/index.html'); return;
+        }
+        document.getElementById('checking').classList.add('hidden');
+        document.getElementById('dashboard-shell').classList.remove('hidden');
+        checkEditMode();
+      }
+
+      document.getElementById('logout').addEventListener('click', async () => {
+        await sb.auth.signOut();
+        window.location.replace('/admin/index.html');
+      });
+
+      function showToast(msg, isError = false) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.style.background = isError ? 'rgba(231,76,60,0.18)' : 'rgba(46,204,113,0.18)';
+        t.style.borderColor = isError ? 'rgba(231,76,60,0.3)' : 'rgba(46,204,113,0.3)';
+        t.style.color = isError ? '#e74c3c' : '#2ecc71';
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 3500);
+      }
+
+      function selectType(type) {
+        currentType = type;
+        document.querySelectorAll('.type-card').forEach(c => c.classList.toggle('selected', c.dataset.type === type));
+
+        // Update CTA link placeholder + label
+        document.getElementById('c-cta-link').placeholder = CTA_PLACEHOLDERS[type] || 'https://...';
+        document.getElementById('cta-link-label').childNodes[0].textContent = CTA_LINK_LABELS[type] + ' ';
+        if (!document.getElementById('c-cta-label').value) {
+          document.getElementById('c-cta-label').value = DEFAULT_CTA_LABELS[type] || '';
+        }
+
+        // Show/hide media sections
+        const isVideo = type === 'reel' || type === 'short';
+        document.getElementById('video-upload-section').classList.toggle('hidden', !isVideo);
+        document.getElementById('thumbnail-upload-section').classList.toggle('hidden', type !== 'tutorial');
+
+        document.getElementById('panel-type').classList.add('hidden');
+        document.getElementById('upload-flow').classList.remove('hidden');
+        document.getElementById('page-title').textContent = `Add ${TYPE_LABELS[type] || 'Content'}`;
+        currentStep = 1;
+        renderActionBar();
+        goToStep(1);
+      }
+
+      function goToStep(n) {
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.step-item').forEach(s => {
+          const sn = parseInt(s.dataset.step);
+          s.classList.toggle('active', sn === n);
+          s.classList.toggle('done', sn < n);
+        });
+        const panel = document.getElementById(`panel-${n}`);
+        if (panel) panel.classList.add('active');
+        currentStep = n;
+        renderActionBar();
+        if (n === 3) populateReview();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function validateStep(n) {
+        if (n === 1) {
+          const title = document.getElementById('c-title').value.trim();
+          const ctaLabel = document.getElementById('c-cta-label').value.trim();
+          const ctaLink = document.getElementById('c-cta-link').value.trim();
+
+          if (!title) { document.getElementById('err-title').classList.add('show'); showToast('Title is required', true); return false; }
+          document.getElementById('err-title').classList.remove('show');
+          if (!ctaLabel) { document.getElementById('err-cta-label').classList.add('show'); showToast('CTA label is required', true); return false; }
+          document.getElementById('err-cta-label').classList.remove('show');
+          if (!ctaLink) { document.getElementById('err-cta-link').classList.add('show'); showToast('External link is required', true); return false; }
+          document.getElementById('err-cta-link').classList.remove('show');
+        }
+        if (n === 2) {
+          if ((currentType === 'reel' || currentType === 'short') && !videoFile && !editingId) {
+            document.getElementById('err-video').classList.add('show');
+            showToast('Please upload a video', true);
+            return false;
+          }
+          document.getElementById('err-video').classList.remove('show');
+
+          if (currentType === 'tutorial') {
+            if (!thumbFile && !editingId) {
+              document.getElementById('err-thumb').classList.add('show');
+              showToast('Please upload a thumbnail', true);
+              return false;
+            }
+            document.getElementById('err-thumb').classList.remove('show');
+
+            const ytUrl = document.getElementById('c-yt-url').value.trim();
+            if (!ytUrl) { document.getElementById('err-yt-url').classList.add('show'); showToast('YouTube URL is required', true); return false; }
+            document.getElementById('err-yt-url').classList.remove('show');
+          }
+        }
+        return true;
+      }
+
+      function nextStep() {
+        if (!validateStep(currentStep)) return;
+        goToStep(currentStep + 1);
+      }
+
+      function prevStep() { goToStep(currentStep - 1); }
+
+      function renderActionBar() {
+        const bar = document.getElementById('action-bar');
+        if (currentStep > 3) { bar.innerHTML = ''; return; }
+        let html = '';
+        if (currentStep > 1) html += `<button class="btn btn-ghost" onclick="prevStep()">← Back</button>`;
+        html += `<button class="btn btn-draft" onclick="saveContent('draft')">💾 Save Draft</button>`;
+        if (currentStep < 3) html += `<button class="btn btn-primary" onclick="nextStep()">Continue →</button>`;
+        if (currentStep === 3) html += `<button class="btn btn-primary" onclick="saveContent('published')">🚀 Upload Now</button>`;
+        bar.innerHTML = html;
+      }
+
+      function populateReview() {
+        const TYPE_MAP = { reel: '📸 Instagram Reel', short: '▶️ YouTube Short', tutorial: '🎬 YouTube Tutorial' };
+        document.getElementById('review-type').textContent = TYPE_MAP[currentType] || currentType;
+        document.getElementById('review-title').textContent = document.getElementById('c-title').value.trim() || '—';
+        document.getElementById('review-desc').textContent = document.getElementById('c-desc').value.trim() || 'No description';
+
+        const ctaLabel = document.getElementById('c-cta-label').value.trim();
+        const ctaLink = document.getElementById('c-cta-link').value.trim();
+        document.getElementById('review-cta').innerHTML = `<strong>${ctaLabel}</strong><br><span style="color:var(--admin-purple);font-size:0.85rem">${ctaLink}</span>`;
+
+        const status = document.getElementById('c-status').value;
+        document.getElementById('review-status').innerHTML = `<span style="padding:0.2rem 0.6rem;border-radius:999px;background:${status==='published'?'rgba(46,204,113,0.18)':'rgba(255,255,255,0.1)'};color:${status==='published'?'#2ecc71':'rgba(255,255,255,0.66)'};font-size:0.85rem;font-weight:700">${status.charAt(0).toUpperCase()+status.slice(1)}</span>`;
+
+        const mediaContent = document.getElementById('review-media-content');
+        if (currentType === 'tutorial' && thumbObjectUrl) {
+          mediaContent.innerHTML = `<img class="review-media" src="${thumbObjectUrl}" alt="Thumbnail" />`;
+        } else if (videoObjectUrl) {
+          mediaContent.innerHTML = `<video class="review-media" src="${videoObjectUrl}" muted autoplay loop playsinline></video>`;
+        } else {
+          mediaContent.innerHTML = '<span style="color:var(--admin-muted)">No media selected</span>';
+        }
+      }
+
+      // VIDEO HANDLING
+      function handleVideoFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.type.includes('mp4')) { showToast('Only MP4 files are supported', true); return; }
+        if (file.size > 100 * 1024 * 1024) { showToast('File exceeds 100MB limit. Please compress before uploading.', true); return; }
+
+        // Check duration, trim note if > 10s
+        const tempUrl = URL.createObjectURL(file);
+        const tempVid = document.createElement('video');
+        tempVid.src = tempUrl;
+        tempVid.onloadedmetadata = () => {
+          const dur = tempVid.duration;
+          document.getElementById('trim-note').classList.toggle('hidden', dur <= MAX_VIDEO_DURATION);
+          URL.revokeObjectURL(tempUrl);
+        };
+
+        videoFile = file;
+        if (videoObjectUrl) URL.revokeObjectURL(videoObjectUrl);
+        videoObjectUrl = URL.createObjectURL(file);
+        const vid = document.getElementById('video-preview');
+        vid.src = videoObjectUrl;
+        document.getElementById('video-preview-wrap').classList.remove('hidden');
+      }
+
+      function removeVideo() {
+        videoFile = null;
+        if (videoObjectUrl) { URL.revokeObjectURL(videoObjectUrl); videoObjectUrl = null; }
+        document.getElementById('video-preview').src = '';
+        document.getElementById('video-preview-wrap').classList.add('hidden');
+        document.getElementById('video-input').value = '';
+        document.getElementById('trim-note').classList.add('hidden');
+      }
+
+      // THUMBNAIL HANDLING
+      function handleThumbFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!['image/jpeg','image/png','image/webp'].includes(file.type)) {
+          showToast('Unsupported format. Use JPG, PNG, or WEBP.', true); return;
+        }
+        thumbFile = file;
+        if (thumbObjectUrl) URL.revokeObjectURL(thumbObjectUrl);
+        thumbObjectUrl = URL.createObjectURL(file);
+        document.getElementById('thumb-preview').src = thumbObjectUrl;
+        document.getElementById('thumb-preview-wrap').classList.remove('hidden');
+      }
+
+      function removeThumb() {
+        thumbFile = null;
+        if (thumbObjectUrl) { URL.revokeObjectURL(thumbObjectUrl); thumbObjectUrl = null; }
+        document.getElementById('thumb-preview').src = '';
+        document.getElementById('thumb-preview-wrap').classList.add('hidden');
+        document.getElementById('thumb-input').value = '';
+      }
+
+      async function uploadFile(file, bucket, folder) {
+        const ext = file.name.split('.').pop();
+        const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error } = await sb.storage.from(bucket).upload(path, file, { upsert: true });
+        if (error) throw error;
+        const { data } = sb.storage.from(bucket).getPublicUrl(path);
+        return data.publicUrl;
+      }
+
+      async function buildData(status) {
+        let videoUrl = null;
+        let thumbUrl = null;
+
+        if (videoFile) {
+          videoUrl = await uploadFile(videoFile, 'videos', 'content');
+        }
+        if (thumbFile) {
+          thumbUrl = await uploadFile(thumbFile, 'images', 'content-thumbnails');
+        }
+
+        return {
+          content_type: currentType,
+          title: document.getElementById('c-title').value.trim(),
+          description: document.getElementById('c-desc').value.trim() || null,
+          video_url: videoUrl,
+          thumbnail_url: thumbUrl,
+          youtube_url: currentType === 'tutorial' ? document.getElementById('c-yt-url').value.trim() || null : null,
+          cta_label: document.getElementById('c-cta-label').value.trim(),
+          cta_link: document.getElementById('c-cta-link').value.trim(),
+          status
+        };
+      }
+
+      async function saveContent(status) {
+        const btn = event?.target;
+        if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
+        try {
+          const data = await buildData(status);
+          let result;
+          if (editingId) {
+            // don't overwrite existing media if no new file uploaded
+            if (!videoFile) delete data.video_url;
+            if (!thumbFile) delete data.thumbnail_url;
+            result = await sb.from('content').update(data).eq('id', editingId);
+          } else {
+            result = await sb.from('content').insert(data).select().single();
+            if (result.data) editingId = result.data.id;
+          }
+          if (result.error) throw result.error;
+
+          if (status === 'published') {
+            document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-success').classList.add('active');
+            document.getElementById('action-bar').innerHTML = '';
+            document.querySelectorAll('.step-item').forEach(s => s.classList.add('done'));
+          } else {
+            showToast('Draft saved!');
+            if (btn) { btn.textContent = '💾 Save Draft'; btn.disabled = false; }
+          }
+        } catch (e) {
+          console.error(e);
+          showToast('Failed to save. Please try again.', true);
+          if (btn) { btn.textContent = btn.textContent.includes('Draft') ? '💾 Save Draft' : '🚀 Upload Now'; btn.disabled = false; }
+        }
+      }
+
+      function checkEditMode() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        if (id) {
+          editingId = id;
+          document.getElementById('page-title').textContent = 'Edit Content';
+          loadContent(id);
+        }
+      }
+
+      async function loadContent(id) {
+        const { data, error } = await sb.from('content').select('*').eq('id', id).single();
+        if (error || !data) { showToast('Failed to load content', true); return; }
+
+        currentType = data.content_type;
+
+        // Hide type selector, show flow
+        document.getElementById('panel-type').classList.add('hidden');
+        document.getElementById('upload-flow').classList.remove('hidden');
+        document.getElementById('page-title').textContent = `Edit ${TYPE_LABELS[currentType] || 'Content'}`;
+
+        // Update media sections visibility
+        const isVideo = currentType === 'reel' || currentType === 'short';
+        document.getElementById('video-upload-section').classList.toggle('hidden', !isVideo);
+        document.getElementById('thumbnail-upload-section').classList.toggle('hidden', currentType !== 'tutorial');
+
+        // Prefill
+        document.getElementById('c-title').value = data.title || '';
+        document.getElementById('c-desc').value = data.description || '';
+        document.getElementById('c-cta-label').value = data.cta_label || '';
+        document.getElementById('c-cta-link').value = data.cta_link || '';
+        document.getElementById('c-status').value = data.status || 'published';
+        if (data.youtube_url) document.getElementById('c-yt-url').value = data.youtube_url;
+
+        // Show existing media
+        if (data.video_url) {
+          document.getElementById('video-preview').src = data.video_url;
+          document.getElementById('video-preview-wrap').classList.remove('hidden');
+          videoObjectUrl = data.video_url;
+        }
+        if (data.thumbnail_url) {
+          document.getElementById('thumb-preview').src = data.thumbnail_url;
+          document.getElementById('thumb-preview-wrap').classList.remove('hidden');
+          thumbObjectUrl = data.thumbnail_url;
+        }
+
+        goToStep(1);
+      }
+
+      function resetFlow() {
+        editingId = null; currentType = null; videoFile = null; thumbFile = null;
+        if (videoObjectUrl && videoObjectUrl.startsWith('blob:')) URL.revokeObjectURL(videoObjectUrl);
+        if (thumbObjectUrl && thumbObjectUrl.startsWith('blob:')) URL.revokeObjectURL(thumbObjectUrl);
+        videoObjectUrl = null; thumbObjectUrl = null;
+
+        document.getElementById('c-title').value = '';
+        document.getElementById('c-desc').value = '';
+        document.getElementById('c-cta-label').value = '';
+        document.getElementById('c-cta-link').value = '';
+        document.getElementById('c-yt-url').value = '';
+        document.getElementById('c-status').value = 'published';
+        document.getElementById('video-preview-wrap').classList.add('hidden');
+        document.getElementById('thumb-preview-wrap').classList.add('hidden');
+        document.getElementById('video-input').value = '';
+        document.getElementById('thumb-input').value = '';
+        document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+        document.querySelectorAll('.step-item').forEach(s => { s.classList.remove('active','done'); });
+        document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+
+        document.getElementById('upload-flow').classList.add('hidden');
+        document.getElementById('panel-type').classList.remove('hidden');
+        document.getElementById('page-title').textContent = 'Add Content';
+      }
+
+      guardPage();
+    </script>
+  </body>
+</html>

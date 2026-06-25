@@ -10,7 +10,27 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" href="/assets/images/logo/logo.png" type="image/png" />
     <link rel="stylesheet" href="style.css" />
+    <style>
+      :root{--color-beige:#f5efe6;--color-purple:#D6B46C ;--color-purple:#7c3aed}
+      .lightbox-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
+      .lightbox-card{width:min(1100px,98%);background:var(--color-beige);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.6);display:flex;gap:20px;overflow:hidden;animation:fadeIn .3s ease}
+      .lightbox-media{flex:1;display:flex;align-items:center;justify-content:center;padding:20px}
+      .lightbox-media img,.lightbox-media video{max-height:85vh;max-width:100%;border-radius:12px;object-fit:contain}
+      .lightbox-details{width:360px;padding:20px;overflow:auto}
+      .lightbox-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+      .lightbox-logo{width:36px;height:36px;border-radius:50%;overflow:hidden}
+      .chip{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:var(--color-purple);color:#111;font-weight:700;margin-right:6px;margin-bottom:6px}
+      .btn-purple{background:var(--color-purple);color:#fff;padding:8px 12px;border-radius:999px;font-weight:800;border:none}
+      .btn-visit{background:#eee;color:#111;padding:8px 12px;border-radius:999px;border:none}
+      .more-inspo{padding:14px;border-top:1px solid rgba(0,0,0,0.06)}
+      .more-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+      .more-thumb{width:100%;aspect-ratio:3/4;overflow:hidden;border-radius:10px;cursor:pointer}
+      .more-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+      @media(max-width:900px){.lightbox-card{flex-direction:column}.lightbox-details{width:100%}.more-grid{grid-auto-flow:column;grid-auto-columns:calc(60%);overflow:auto;display:flex;gap:10px}}
+      @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    </style>
   </head>
   <body class="inspo-page">
     <header class="site-header">
@@ -30,7 +50,7 @@
             <li><a href="ebooks.html">Ebooks</a></li>
             <li><a href="content.html">Content</a></li>
             <li><a href="inspiration.html">Inspos Gallery</a></li>
-            <li><a href="#">Collab</a></li>
+            <li><a href="/collab.html">Collab</a></li>
             <li><a href="#">About</a></li>
           </ul>
         </nav>
@@ -152,6 +172,28 @@
       </section>
     </main>
 
+      <!-- LIGHTBOX OVERLAY -->
+      <div class="lightbox-overlay" id="lightbox-overlay" aria-hidden="true">
+        <div class="lightbox-card" role="dialog" aria-modal="true">
+          <button id="lightbox-back" aria-label="Close" style="position:absolute;left:12px;top:12px;background:transparent;border:none;color:#111;font-size:1.25rem;z-index:60">←</button>
+          <div class="lightbox-media" id="lightbox-media"></div>
+          <div class="lightbox-details" id="lightbox-details">
+            <div class="lightbox-header"><div class="lightbox-logo"><img src="/assets/images/logo/logo.png" alt="TayNova" style="width:100%;height:100%;object-fit:cover"></div><div style="font-weight:800">TayNova</div></div>
+            <h2 id="lightbox-title" style="margin-top:8px;font-size:1.15rem"></h2>
+            <div id="lightbox-sanctuary" style="margin:8px 0"></div>
+            <div id="lightbox-tags" style="margin-bottom:12px"></div>
+            <div style="display:flex;gap:8px">
+              <button id="lightbox-share" class="btn-purple">🔗 Share</button>
+              <a href="/index.html" class="btn-visit">Visit Site</a>
+            </div>
+            <div id="lightbox-more-wrap" style="margin-top:14px">
+              <div style="color:var(--color-purple);font-weight:800;font-size:0.75rem;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px">More Inspiration</div>
+              <div class="more-grid" id="lightbox-more"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <footer class="site-footer">
       <div class="footer-grid">
         <div class="footer-column footer-copy">
@@ -175,6 +217,13 @@
       </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  window.supabaseClient = window.supabase.createClient(
+    'https://ngnricijtqlikjxrbtlr.supabase.co',
+    'sb_publishable_5TfnayimjP1cq7ia0NPFCw_bf17fkdI'
+  );
+</script>
+<script src="/script.js"></script>
   </body>
 </html>

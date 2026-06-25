@@ -4,6 +4,34 @@ document.querySelectorAll('img').forEach((img) => {
   });
 });
 
+// Global resource error watcher — helps surface 404s and missing assets
+function showResourceError(url, type){
+  console.warn('Resource failed to load:', type, url);
+  try{ if(window.__lastResourceErrorTimeout) clearTimeout(window.__lastResourceErrorTimeout); }catch(e){}
+  let badge = document.getElementById('resource-error-badge');
+  if(!badge){
+    badge = document.createElement('div'); badge.id = 'resource-error-badge';
+    badge.style.cssText = 'position:fixed;right:1rem;bottom:1rem;background:#111;color:#fff;padding:.6rem .9rem;border-radius:8px;z-index:99999;font-size:13px;max-width:320px;box-shadow:0 6px 18px rgba(0,0,0,0.4)';
+    const close = document.createElement('button'); close.textContent='×'; close.style.cssText='background:transparent;border:none;color:#fff;font-weight:800;float:right;margin-left:8px;font-size:16px'; close.onclick=()=>badge.remove(); badge.appendChild(close);
+    const txt = document.createElement('div'); txt.id='resource-error-text'; txt.style.cssText='margin-right:18px'; badge.appendChild(txt);
+    document.body.appendChild(badge);
+  }
+  const txt = document.getElementById('resource-error-text'); if(txt) txt.textContent = `${type}: ${url}`;
+  window.__lastResourceErrorTimeout = setTimeout(()=>{ badge.remove(); }, 10000);
+}
+
+window.addEventListener('error', function(e){
+  const t = e.target || e.srcElement;
+  if(t && (t.tagName === 'IMG' || t.tagName === 'VIDEO' || t.tagName === 'SCRIPT' || t.tagName === 'LINK')){
+    const url = t.currentSrc || t.src || t.href || '(unknown)';
+    showResourceError(url, t.tagName);
+  }
+}, true);
+
+window.addEventListener('unhandledrejection', function(ev){
+  console.warn('Unhandled promise rejection:', ev.reason);
+});
+
 // PAGE SIZE FOR PAGINATION
 const PAGE_SIZE = 12;
 let blogPage = 1;
@@ -267,6 +295,7 @@ if (blogGrid && searchInput) {
 
 if (blogBackButton) blogBackButton.addEventListener('click', () => window.location.href = 'blog.html');
 
+
 if (document.body.classList.contains('inspo-page')) {
   const inspoToggleButtons = document.querySelectorAll('.view-toggle .toggle-pill');
   const creativeView = document.getElementById('creative-view');
@@ -284,157 +313,379 @@ if (document.body.classList.contains('inspo-page')) {
   const clearFiltersButton = document.getElementById('clear-filters');
   const inspoFilterSelects = document.querySelectorAll('.inspo-filters select');
 
+  // Hardcoded items (kept as fallback)
   const inspoMediaItems = [
-    {
-      id: 'loft-glow',
-      title: 'Loft Glow',
-      type: 'image',
-      src: '/assets/images/inspo/1.jpg',
-      style: 'Modern',
-      room: 'Living Room',
-      category: 'Decor',
-      link: '/assets/images/inspo/1.jpg'
-    },
-    {
-      id: 'cozy-bedroom',
-      title: 'Cozy Bedroom Mood',
-      type: 'image',
-      src: '/assets/images/inspo/12.png',
-      style: 'Boho',
-      room: 'Bedroom',
-      category: 'Lighting',
-      link: '/assets/images/inspo/12.png'
-    },
-    {
-      id: 'minimal-kitchen',
-      title: 'Minimal Kitchen Edit',
-      type: 'image',
-      src: '/assets/images/inspo/14.png',
-      style: 'Minimal',
-      room: 'Kitchen',
-      category: 'Layout',
-      link: '/assets/images/inspo/14.png'
-    },
-    {
-      id: 'boho-luxe',
-      title: 'Boho Luxe Living',
-      type: 'image',
-      src: '/assets/images/inspo/15.png',
-      style: 'Boho',
-      room: 'Living Room',
-      category: 'Decor',
-      link: '/assets/images/inspo/15.png'
-    },
-    {
-      id: 'modern-office',
-      title: 'Modern Office Flow',
-      type: 'image',
-      src: '/assets/images/inspo/2.png',
-      style: 'Luxury',
-      room: 'Office',
-      category: 'Organization',
-      link: '/assets/images/inspo/2.png'
-    },
-    {
-      id: 'sunny-lounge',
-      title: 'Japandi Lounge',
-      type: 'image',
-      src: '/assets/images/inspo/3.jpg',
-      style: 'Japandi',
-      room: 'Living Room',
-      category: 'Lighting',
-      link: '/assets/images/inspo/3.jpg'
-    },
-    {
-      id: 'creative-reel-1',
-      title: 'Creative Reel',
-      type: 'video',
-      src: '/assets/videos/reels/1.mp4',
-      style: 'Modern',
-      room: 'Living Room',
-      category: 'Decor',
-      link: '/assets/videos/reels/1.mp4'
-    },
-    {
-      id: 'cozy-reel-2',
-      title: 'Cozy Morning Reel',
-      type: 'video',
-      src: '/assets/videos/reels/2.mp4',
-      style: 'Boho',
-      room: 'Bedroom',
-      category: 'Lighting',
-      link: '/assets/videos/reels/2.mp4'
-    },
-    {
-      id: 'modern-reel-3',
-      title: 'Studio Reel',
-      type: 'video',
-      src: '/assets/videos/reels/3.mp4',
-      style: 'Luxury',
-      room: 'Office',
-      category: 'Layout',
-      link: '/assets/videos/reels/3.mp4'
-    }
+    { id: 'loft-glow', title: 'Loft Glow', type: 'image', src: '/assets/images/inspo/1.jpg', style: 'Modern', style_tags: ['Modern'], room: 'Living Room', room_tags: ['Living Room'], category: 'Decor', category_tags: ['Decor'], sanctuary: 'Warm Minimal Living', link: '/assets/images/inspo/1.jpg' },
+    { id: 'cozy-bedroom', title: 'Cozy Bedroom Mood', type: 'image', src: '/assets/images/inspo/12.png', style: 'Boho', style_tags: ['Boho'], room: 'Bedroom', room_tags: ['Bedroom'], category: 'Lighting', category_tags: ['Lighting'], sanctuary: 'Rest & Reset Bedrooms', link: '/assets/images/inspo/12.png' },
+    { id: 'minimal-kitchen', title: 'Minimal Kitchen Edit', type: 'image', src: '/assets/images/inspo/14.png', style: 'Minimal', style_tags: ['Minimal'], room: 'Kitchen', room_tags: ['Kitchen'], category: 'Layout', category_tags: ['Layout'], sanctuary: 'Cozy Kitchen Sanctuaries', link: '/assets/images/inspo/14.png' },
+    { id: 'boho-luxe', title: 'Boho Luxe Living', type: 'image', src: '/assets/images/inspo/15.png', style: 'Boho', style_tags: ['Boho'], room: 'Living Room', room_tags: ['Living Room'], category: 'Decor', category_tags: ['Decor'], sanctuary: 'Warm Minimal Living', link: '/assets/images/inspo/15.png' },
+    { id: 'modern-office', title: 'Modern Office Flow', type: 'image', src: '/assets/images/inspo/2.png', style: 'Luxury', style_tags: ['Luxury'], room: 'Office', room_tags: ['Office'], category: 'Organization', category_tags: ['Organization'], sanctuary: 'Feminine Workspace', link: '/assets/images/inspo/2.png' },
+    { id: 'sunny-lounge', title: 'Japandi Lounge', type: 'image', src: '/assets/images/inspo/3.jpg', style: 'Japandi', style_tags: ['Japandi'], room: 'Living Room', room_tags: ['Living Room'], category: 'Lighting', category_tags: ['Lighting'], sanctuary: 'Warm Minimal Living', link: '/assets/images/inspo/3.jpg' },
+    { id: 'creative-reel-1', title: 'Creative Reel', type: 'video', src: '/assets/videos/reels/1.mp4', style: 'Modern', style_tags: ['Modern'], room: 'Living Room', room_tags: ['Living Room'], category: 'Decor', category_tags: ['Decor'], sanctuary: 'Warm Minimal Living', link: '/assets/videos/reels/1.mp4' },
+    { id: 'cozy-reel-2', title: 'Cozy Morning Reel', type: 'video', src: '/assets/videos/reels/2.mp4', style: 'Boho', style_tags: ['Boho'], room: 'Bedroom', room_tags: ['Bedroom'], category: 'Lighting', category_tags: ['Lighting'], sanctuary: 'Soft Morning Rituals', link: '/assets/videos/reels/2.mp4' },
+    { id: 'modern-reel-3', title: 'Studio Reel', type: 'video', src: '/assets/videos/reels/3.mp4', style: 'Luxury', style_tags: ['Luxury'], room: 'Office', room_tags: ['Office'], category: 'Layout', category_tags: ['Layout'], sanctuary: 'Feminine Workspace', link: '/assets/videos/reels/3.mp4' }
   ];
 
   const sanctuaryCollections = [
-    {
-      id: 'cozy-bedroom',
-      title: 'Cozy Bedroom',
-      description: 'Soft textures, warm lighting, and an intimate layer of comfort.',
-      cover: '/assets/images/inspo/12.png',
-      filters: ['Boho', 'Bedroom', 'Lighting']
-    },
-    {
-      id: 'minimal-kitchen',
-      title: 'Minimal Kitchen',
-      description: 'Streamlined storage, thoughtful layout, and soft natural finishes.',
-      cover: '/assets/images/inspo/14.png',
-      filters: ['Minimal', 'Kitchen', 'Layout']
-    },
-    {
-      id: 'modern-living',
-      title: 'Modern Living Room',
-      description: 'A crisp, layered space anchored by artful decor and calm structure.',
-      cover: '/assets/images/inspo/1.jpg',
-      filters: ['Modern', 'Living Room', 'Decor']
-    },
-    {
-      id: 'luxury-office',
-      title: 'Luxury Office',
-      description: 'A focused workspace with polished finishes, mood lighting, and ease.',
-      cover: '/assets/images/inspo/2.png',
-      filters: ['Luxury', 'Office', 'Organization']
-    }
+    { id: 'soft-morning', title: 'Soft Morning Rituals', cover: '/assets/images/inspo/12.png' },
+    { id: 'cozy-kitchen', title: 'Cozy Kitchen Sanctuaries', cover: '/assets/images/inspo/14.png' },
+    { id: 'warm-minimal', title: 'Warm Minimal Living', cover: '/assets/images/inspo/1.jpg' },
+    { id: 'feminine-workspace', title: 'Feminine Workspace', cover: '/assets/images/inspo/2.png' },
+    { id: 'rest-reset', title: 'Rest & Reset Bedrooms', cover: '/assets/images/inspo/12.png' }
   ];
 
-  const activeFilters = {
-    style: [],
-    room: [],
-    category: []
-  };
+  const activeFilters = { style: [], room: [], category: [] };
+  let allItems = [...inspoMediaItems];
+  let allSanctuaries = [...sanctuaryCollections];
+  window._allInspoItems = allItems;
 
-  let selectedSanctuary = null;
-
-  function setView(viewName) {
-    if (!creativeView || !sanctuaryView) return;
-    creativeView.classList.toggle('hidden', viewName !== 'creative');
-    sanctuaryView.classList.toggle('hidden', viewName !== 'sanctuary');
-    inspoToggleButtons.forEach((button) => {
-      button.classList.toggle('active', button.dataset.view === viewName);
-    });
-  }
-
+  // ── FILTERS ──────────────────────────────────────────────
   function applyInspoFilters(items) {
     return items.filter((item) => {
-      const matchesStyle = !activeFilters.style.length || activeFilters.style.includes(item.style);
-      const matchesRoom = !activeFilters.room.length || activeFilters.room.includes(item.room);
-      const matchesCategory = !activeFilters.category.length || activeFilters.category.includes(item.category);
+      const itemStyles = item.style_tags || (item.style ? [item.style] : []);
+      const itemRooms = item.room_tags || (item.room ? [item.room] : []);
+      const itemCats = item.category_tags || (item.category ? [item.category] : []);
+      const matchesStyle = !activeFilters.style.length || activeFilters.style.some(f => itemStyles.includes(f));
+      const matchesRoom = !activeFilters.room.length || activeFilters.room.some(f => itemRooms.includes(f));
+      const matchesCategory = !activeFilters.category.length || activeFilters.category.some(f => itemCats.includes(f));
       return matchesStyle && matchesRoom && matchesCategory;
     });
   }
 
+  // ── LIGHTBOX ─────────────────────────────────────────────
+  function openLightbox(item, items) {
+    const overlay = document.getElementById('lightbox-overlay');
+    if (!overlay) return;
+    const src = item.src || item.file_url || '';
+    const type = item.type || item.file_type || 'image';
+    const title = item.title || '';
+    const sanctuary = item.sanctuary || item.room || '';
+    const tags = item.style_tags || (item.style ? [item.style] : []);
+
+    document.getElementById('lightbox-media').innerHTML = type === 'video'
+      ? `<video src="${src}" autoplay muted loop playsinline controls style="max-height:85vh;max-width:100%;border-radius:12px;object-fit:contain"></video>`
+      : `<img src="${src}" alt="${title}" style="max-height:85vh;max-width:100%;border-radius:12px;object-fit:contain" onerror="this.style.display='none'" />`;
+
+    document.getElementById('lightbox-title').textContent = title;
+    document.getElementById('lightbox-sanctuary').innerHTML = sanctuary
+      ? `<span style="display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:rgba(201,162,39,0.15);color:var(--color-purple);font-size:0.8rem;font-weight:700">${sanctuary}</span>`
+      : '';
+    document.getElementById('lightbox-tags').innerHTML = tags.map(t =>
+      `<span class="chip">${t}</span>`).join('');
+
+    // More from same sanctuary
+    const others = (items || window._allInspoItems || [])
+      .filter(i => (i.src || i.file_url) !== src)
+      .filter(i => !sanctuary || (i.sanctuary || i.room) === sanctuary)
+      .slice(0, 5);
+
+    const moreEl = document.getElementById('lightbox-more');
+    if (others.length) {
+      moreEl.innerHTML = others.map(i => {
+        const s = i.src || i.file_url || '';
+        const t = i.type || i.file_type || 'image';
+        return `<div class="more-thumb" onclick="openLightbox(${JSON.stringify(i).replace(/"/g, '&quot;')}, window._allInspoItems)">
+          ${t === 'video'
+            ? `<video src="${s}" muted loop playsinline autoplay style="width:100%;height:100%;object-fit:cover"></video>`
+            : `<img src="${s}" alt="${i.title||''}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'" />`}
+        </div>`;
+      }).join('');
+      document.getElementById('lightbox-more-wrap').style.display = 'block';
+    } else {
+      document.getElementById('lightbox-more-wrap').style.display = 'none';
+    }
+
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Lightbox close
+  const lbBack = document.getElementById('lightbox-back');
+  if (lbBack) lbBack.addEventListener('click', () => {
+    document.getElementById('lightbox-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      const o = document.getElementById('lightbox-overlay');
+      if (o) { o.style.display = 'none'; document.body.style.overflow = ''; }
+    }
+  });
+
+  // Lightbox share
+  const lbShare = document.getElementById('lightbox-share');
+  if (lbShare) lbShare.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(window.location.href); } catch {
+      const ta = document.createElement('textarea'); ta.value = window.location.href;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    }
+    const orig = lbShare.textContent;
+    lbShare.textContent = '✓ Link copied!';
+    setTimeout(() => lbShare.textContent = orig, 2000);
+  });
+
+  // ── CREATIVE VIEW ────────────────────────────────────────
   function renderMediaGrid(items) {
+    if (!inspoMediaGrid) return;
+    inspoMediaGrid.innerHTML = '';
+    inspoMediaGrid.style.cssText = 'columns:4;column-gap:1rem';
+
+    if (!items.length) {
+      if (inspoEmpty) inspoEmpty.classList.remove('hidden');
+      return;
+    }
+    if (inspoEmpty) inspoEmpty.classList.add('hidden');
+
+    items.forEach((item) => {
+      const src = item.src || item.file_url || '';
+      const type = item.type || item.file_type || 'image';
+      if (!src) return;
+
+      const card = document.createElement('div');
+      card.style.cssText = 'break-inside:avoid;margin-bottom:1rem;border-radius:16px;overflow:hidden;cursor:pointer;background:#f0ebe3';
+      card.addEventListener('click', () => openLightbox(item, window._allInspoItems));
+
+      if (type === 'video') {
+        card.innerHTML = `<video src="${src}" muted autoplay loop playsinline style="width:100%;display:block;border-radius:16px" onerror="this.style.display='none'"></video>`;
+      } else {
+        card.innerHTML = `<img src="${src}" alt="${item.title||''}" style="width:100%;display:block;border-radius:16px" onerror="this.style.display='none'" loading="lazy" />`;
+      }
+
+      inspoMediaGrid.appendChild(card);
+    });
+  }
+
+  // ── SANCTUARY VIEW ───────────────────────────────────────
+  function renderSanctuaryGrid(collections) {
+    if (!sanctuaryGrid) return;
+    sanctuaryGrid.innerHTML = '';
+    const toRender = collections || allSanctuaries;
+
+    // Style the grid
+    sanctuaryGrid.style.cssText = 'display:grid;grid-template-columns:repeat(5,1fr);gap:1rem';
+
+    toRender.forEach((s) => {
+      const nookCount = allItems.filter(i => (i.sanctuary || i.room) === s.title).length;
+      const cover = s.cover || s.cover_url || '/assets/images/inspo/1.jpg';
+
+      const card = document.createElement('div');
+      card.style.cssText = 'cursor:pointer;border-radius:12px;overflow:hidden;background:#f0ebe3';
+      card.innerHTML = `
+        <div style="aspect-ratio:9/16;overflow:hidden">
+          <img src="${cover}" alt="${s.title}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'" loading="lazy" />
+        </div>
+        <div style="padding:0.6rem 0.25rem">
+          <div style="font-weight:800;font-size:0.95rem;color:var(--color-black)">${s.title}</div>
+          <div style="font-size:0.78rem;color:#888;margin-top:2px">${nookCount} Nook${nookCount !== 1 ? 's' : ''}</div>
+        </div>
+      `;
+      card.addEventListener('click', () => openSanctuaryDetail(s, toRender));
+      sanctuaryGrid.appendChild(card);
+    });
+  }
+
+  function openSanctuaryDetail(sanctuary, allSanctuaryList) {
+    if (!sanctuaryDetail || !sanctuaryGrid) return;
+    sanctuaryGrid.classList.add('hidden');
+    sanctuaryDetail.classList.remove('hidden');
+
+    if (sanctuaryResultTitle) sanctuaryResultTitle.textContent = sanctuary.title;
+    if (sanctuaryResultInfo) sanctuaryResultInfo.textContent = '';
+
+    // Filter items for this sanctuary
+    const matched = allItems.filter(i => (i.sanctuary || i.room) === sanctuary.title);
+
+    if (!sanctuaryResults) return;
+    sanctuaryResults.innerHTML = '';
+    sanctuaryResults.style.cssText = 'columns:4;column-gap:1rem;margin-top:1.5rem';
+
+    if (!matched.length) {
+      sanctuaryResults.innerHTML = '<div style="text-align:center;padding:2rem;color:#888">No nooks in this sanctuary yet.</div>';
+      return;
+    }
+
+    matched.forEach(item => {
+      const src = item.src || item.file_url || '';
+      const type = item.type || item.file_type || 'image';
+      if (!src) return;
+
+      const card = document.createElement('div');
+      card.style.cssText = 'break-inside:avoid;margin-bottom:1rem;border-radius:12px;overflow:hidden;cursor:pointer';
+      card.addEventListener('click', () => openLightbox(item, matched));
+
+      card.innerHTML = type === 'video'
+        ? `<video src="${src}" muted autoplay loop playsinline style="width:100%;display:block;border-radius:12px" onerror="this.style.display='none'"></video>`
+        : `<img src="${src}" alt="${item.title||''}" style="width:100%;display:block;border-radius:12px" onerror="this.style.display='none'" loading="lazy" />`;
+
+      sanctuaryResults.appendChild(card);
+    });
+  }
+
+  // ── VIEW TOGGLE ──────────────────────────────────────────
+  function setView(viewName) {
+    if (!creativeView || !sanctuaryView) return;
+    creativeView.classList.toggle('hidden', viewName !== 'creative');
+    sanctuaryView.classList.toggle('hidden', viewName !== 'sanctuary');
+    inspoToggleButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.view === viewName));
+  }
+
+  if (typeof inspoToggleButtons !== 'undefined' && inspoToggleButtons) {
+  inspoToggleButtons.forEach((button) => {
+    button.addEventListener('click', () => setView(button.dataset.view));
+  });
+}
+ 
+  // ── FILTERS ──────────────────────────────────────────────
+  function handleFilterChange(select) {
+    const type = select.dataset.filterType;
+    const value = select.value;
+    activeFilters[type] = value ? [value] : [];
+    renderMediaGrid(applyInspoFilters(allItems));
+    updateFilterTags();
+    if (sanctuaryDetail) sanctuaryDetail.classList.add('hidden');
+    if (sanctuaryGrid) sanctuaryGrid.classList.remove('hidden');
+  }
+
+  function updateFilterTags() {
+    if (!activeFiltersWrap || !filterSummary) return;
+    const selections = [];
+    Object.keys(activeFilters).forEach(group => {
+      activeFilters[group].forEach(value => selections.push({ type: group, value }));
+    });
+    if (!selections.length) { filterSummary.classList.add('hidden'); activeFiltersWrap.innerHTML = ''; return; }
+    filterSummary.classList.remove('hidden');
+    activeFiltersWrap.innerHTML = selections.map(f =>
+      `<button type="button" class="filter-tag" data-filter-type="${f.type}" data-filter-value="${f.value}">${f.value} ×</button>`
+    ).join('');
+    activeFiltersWrap.querySelectorAll('.filter-tag').forEach(btn => {
+      btn.addEventListener('click', () => {
+        activeFilters[btn.dataset.filterType] = activeFilters[btn.dataset.filterType].filter(i => i !== btn.dataset.filterValue);
+        const sel = document.querySelector(`.inspo-filters select[data-filter-type="${btn.dataset.filterType}"]`);
+        if (sel) sel.value = '';
+        renderMediaGrid(applyInspoFilters(allItems));
+        updateFilterTags();
+      });
+    });
+  }
+
+  function clearFilters() {
+    activeFilters.style = []; activeFilters.room = []; activeFilters.category = [];
+    inspoFilterSelects.forEach(s => s.value = '');
+    updateFilterTags();
+    renderMediaGrid(applyInspoFilters(allItems));
+    if (sanctuaryDetail) sanctuaryDetail.classList.add('hidden');
+    if (sanctuaryGrid) sanctuaryGrid.classList.remove('hidden');
+  }
+
+  inspoFilterSelects.forEach(select => select.addEventListener('change', () => handleFilterChange(select)));
+  if (clearFiltersButton) clearFiltersButton.addEventListener('click', clearFilters);
+  if (sanctuaryBack) sanctuaryBack.addEventListener('click', () => {
+    if (sanctuaryDetail) sanctuaryDetail.classList.add('hidden');
+    if (sanctuaryGrid) sanctuaryGrid.classList.remove('hidden');
+  });
+
+  // ── RESPONSIVE GRID ──────────────────────────────────────
+  function applyResponsiveGrid() {
+    const cols = window.innerWidth <= 600 ? 2 : window.innerWidth <= 900 ? 3 : 4;
+    if (inspoMediaGrid) inspoMediaGrid.style.columns = cols;
+    if (sanctuaryResults) sanctuaryResults.style.columns = cols;
+  }
+  window.addEventListener('resize', applyResponsiveGrid);
+  applyResponsiveGrid();
+
+  // ── INITIAL RENDER ───────────────────────────────────────
+  renderSanctuaryGrid();
+  updateFilterTags();
+  renderMediaGrid(applyInspoFilters(allItems));
+  setView('creative');
+
+  // ── LOAD FROM SUPABASE ───────────────────────────────────
+  (async () => {
+    try {
+      if (!window.supabaseClient) return;
+
+      const { data: inspoData } = await window.supabaseClient
+        .from('inspiration')
+        .select('*')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
+
+      if (inspoData && inspoData.length) {
+        const supabaseItems = inspoData.map(item => ({
+          id: item.id,
+          title: item.title || 'Untitled',
+          type: item.file_type || 'image',
+          src: item.file_url || '',
+          link: item.file_url || '',
+          style: (item.style_tags && item.style_tags[0]) || '',
+          style_tags: item.style_tags || [],
+          room: (item.room_tags && item.room_tags[0]) || '',
+          room_tags: item.room_tags || [],
+          category: (item.category_tags && item.category_tags[0]) || '',
+          category_tags: item.category_tags || [],
+          sanctuary: item.sanctuary || '',
+          featured: item.featured || false
+        }));
+
+        allItems = [...supabaseItems, ...inspoMediaItems];
+        window._allInspoItems = allItems;
+        renderMediaGrid(applyInspoFilters(allItems));
+      }
+
+      const { data: sanctuaryData } = await window.supabaseClient
+        .from('sanctuaries')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (sanctuaryData && sanctuaryData.length) {
+        const supabaseSanctuaries = sanctuaryData.map(s => ({
+          id: s.id,
+          title: s.name,
+          cover: s.cover_url || '/assets/images/inspo/1.jpg'
+        }));
+        const hardcodedFiltered = sanctuaryCollections.filter(h =>
+          !supabaseSanctuaries.find(s => s.title === h.title)
+        );
+        allSanctuaries = [...supabaseSanctuaries, ...hardcodedFiltered];
+        renderSanctuaryGrid(allSanctuaries);
+      }
+
+    } catch (e) {
+      console.error('Supabase inspo load failed:', e);
+    }
+  })();
+
+}
+
+const lbBackBtn = document.getElementById('lightbox-back');
+if (lbBackBtn) {
+  lbBackBtn.addEventListener('click', () => {
+    document.getElementById('lightbox-overlay').style.display = 'none';
+    document.body.style.overflow = '';
+  });
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    const o = document.getElementById('lightbox-overlay');
+    if (o) { o.style.display = 'none'; document.body.style.overflow = ''; }
+  }
+});
+
+const lbShareBtn = document.getElementById('lightbox-share');
+if (lbShareBtn) {
+  lbShareBtn.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(window.location.href); } catch {
+      const ta = document.createElement('textarea'); ta.value = window.location.href;
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    }
+    const orig = lbShareBtn.textContent;
+    lbShareBtn.textContent = '✓ Link copied!';
+    setTimeout(() => lbShareBtn.textContent = orig, 2000);
+  });
+}
+
+function renderMediaGrid(items) {
     if (!inspoMediaGrid) return;
     inspoMediaGrid.innerHTML = '';
     if (!items.length) {
@@ -444,8 +695,9 @@ if (document.body.classList.contains('inspo-page')) {
     inspoEmpty.classList.add('hidden');
 
     items.forEach((item) => {
-      const card = document.createElement('a');
-      card.href = item.link;
+      const card = document.createElement('div');
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => openLightbox(item, allItems));
       card.target = '_blank';
       card.rel = 'noreferrer';
       card.className = 'media-card';
@@ -467,11 +719,12 @@ if (document.body.classList.contains('inspo-page')) {
     });
   }
 
-  function renderSanctuaryGrid() {
-    if (!sanctuaryGrid) return;
-    sanctuaryGrid.innerHTML = '';
+function renderSanctuaryGrid(collections) {
+  if (!sanctuaryGrid) return;
+  sanctuaryGrid.innerHTML = '';
+  const toRender = collections || sanctuaryCollections;
 
-    sanctuaryCollections.forEach((collection) => {
+  toRender.forEach((collection) => {
       const card = document.createElement('button');
       card.type = 'button';
       card.className = 'sanctuary-card';
@@ -542,7 +795,14 @@ if (document.body.classList.contains('inspo-page')) {
       sanctuaryResults.appendChild(card);
     });
   }
+    const activeFiltersWrap = document.getElementById('active-filters');
+    const filterSummary = document.getElementById('filter-summary');
 
+    const activeFilters = {
+      style: [],
+      room: [],
+      category: []
+    };
   function updateFilterTags() {
     if (!activeFiltersWrap || !filterSummary) return;
     const selections = [];
@@ -571,11 +831,13 @@ if (document.body.classList.contains('inspo-page')) {
         activeFilters[type] = activeFilters[type].filter((item) => item !== value);
         const selectElement = document.querySelector(`.inspo-filters select[data-filter-type="${type}"]`);
         if (selectElement) selectElement.value = '';
-        renderMediaGrid(applyInspoFilters(inspoMediaItems));
+        renderMediaGrid(applyInspoFilters(window.mergedInspo || inspoMediaItems));
         updateFilterTags();
       });
     });
   }
+
+  const inspoFilterSelects = document.querySelectorAll('.inspo-filters select');
 
   function clearFilters() {
     activeFilters.style = [];
@@ -586,7 +848,7 @@ if (document.body.classList.contains('inspo-page')) {
       select.value = '';
     });
     updateFilterTags();
-    renderMediaGrid(applyInspoFilters(inspoMediaItems));
+    renderMediaGrid(applyInspoFilters(window.mergedInspo || inspoMediaItems));
     if (sanctuaryDetail) sanctuaryDetail.classList.add('hidden');
     if (sanctuaryGrid) sanctuaryGrid.classList.remove('hidden');
   }
@@ -597,22 +859,33 @@ if (document.body.classList.contains('inspo-page')) {
     activeFilters[type] = value ? [value] : [];
 
     selectedSanctuary = null;
-    renderMediaGrid(applyInspoFilters(inspoMediaItems));
+    renderMediaGrid(applyInspoFilters(window.mergedInspo || inspoMediaItems));
     updateFilterTags();
     if (sanctuaryDetail) sanctuaryDetail.classList.add('hidden');
     if (sanctuaryGrid) sanctuaryGrid.classList.remove('hidden');
   }
 
-  inspoToggleButtons.forEach((button) => {
-    button.addEventListener('click', () => setView(button.dataset.view));
-  });
-
   inspoFilterSelects.forEach((select) => {
     select.addEventListener('change', () => handleFilterChange(select));
   });
-  if (clearFiltersButton) {
-    clearFiltersButton.addEventListener('click', clearFilters);
-  }
+
+
+  if (document.body.classList.contains('inspo-page')) {
+
+  const inspoFilterSelects = document.querySelectorAll('.inspo-filters select');
+
+  const clearFiltersButton = document.getElementById('clear-filters');
+
+  const activeFiltersWrap = document.getElementById('active-filters');
+
+  const filterSummary = document.getElementById('filter-summary');
+
+}
+  const sanctuaryBack = document.getElementById('sanctuary-back');
+  const sanctuaryDetail = document.getElementById('sanctuary-detail');
+  const sanctuaryGrid = document.getElementById('sanctuary-grid');
+
+  let selectedSanctuary = null;
 
   if (sanctuaryBack) {
     sanctuaryBack.addEventListener('click', () => {
@@ -622,11 +895,187 @@ if (document.body.classList.contains('inspo-page')) {
     });
   }
 
-  renderSanctuaryGrid();
-  updateFilterTags();
-  renderMediaGrid(applyInspoFilters(inspoMediaItems));
-  setView('creative');
+  // Load from Supabase and merge
+  (async () => {
+  try {
+
+    let supabaseItems = [];
+    let supabaseSanctuaries = [];
+
+
+    // Load inspiration items
+    const { data: inspoData, error: inspoError } =
+      await supabaseClient
+      .from('inspiration')
+      .select('*')
+      .eq('status', 'published');
+
+
+    if (inspoError) throw inspoError;
+
+
+    supabaseItems = (inspoData || []).map(item => ({
+      id: item.id,
+      title: item.title,
+      src: item.file_url,
+      type: item.file_type || 'image',
+      style: item.style || '',
+      room: item.room || '',
+      category: item.category || ''
+    }));
+
+
+
+    // Load sanctuary items
+    const { data: sanctuaryData, error: sanctuaryError } =
+      await supabaseClient
+      .from('sanctuaries')
+      .select('*');
+
+
+    if (sanctuaryError) throw sanctuaryError;
+
+
+    supabaseSanctuaries = sanctuaryData || [];
+
+
+
+    // Render
+    window._allInspoItems = supabaseItems;
+
+    renderMediaGrid(
+      applyInspoFilters(supabaseItems)
+    );
+
+
+    renderSanctuaryGrid(
+      supabaseSanctuaries
+    );
+
+
+    updateFilterTags();
+
+
+    setView('creative');
+
+
+  } catch(e) {
+
+    console.error(
+      'Supabase inspo load failed:',
+      e
+    );
+
+  }
+
+})();
+
+
+
+// Initialize inspiration items (merge hardcoded + supabase if available) and render
+async function initInspo(){
+  // normalize hardcoded items
+  function normalizeHard(item){ return { id: item.id||item.src, title: item.title, type: item.type, src: item.src, style: item.style, room: item.room, category: item.category, link: item.link, tags: item.style? [item.style] : [] } }
+  let merged = (inspoMediaItems||[]).map(normalizeHard);
+  // fetch supabase items if client available
+  try{
+    if(window.supabaseClient){
+      const res = await window.supabaseClient.from('inspiration').select('*').order('created_at',{ascending:false});
+      if(res && res.data){
+        const fetched = res.data.map(it=>({ id: it.id, title: it.title||'', type: it.file_type||'image', src: it.file_url, style: (it.style_tags && it.style_tags[0])||'', room: it.sanctuary||'', category: '', link: it.file_url, tags: it.style_tags||[] }));
+        // merge with fetched items appended
+        merged = merged.concat(fetched);
+      }
+    }
+  }catch(e){ console.warn('Could not fetch inspo from Supabase', e); }
+
+  // store merged globally for lightbox navigation
+  window.mergedInspo = merged;
+  // render initial grid
+  renderMediaGrid(applyInspoFilters(window.mergedInspo));
 }
+
+// Render media grid: open lightbox on click (no navigation)
+function renderMediaGrid(items) {
+  if (!inspoMediaGrid) return;
+  inspoMediaGrid.innerHTML = '';
+  if (!items.length) {
+    inspoEmpty.classList.remove('hidden');
+    return;
+  }
+  inspoEmpty.classList.add('hidden');
+
+  items.forEach((item, idx) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'media-card';
+    card.dataset.index = idx;
+
+    const media = document.createElement('div');
+    media.className = 'media-preview';
+      if (item.type === 'video') {
+        media.innerHTML = `<video src="${item.src}" muted loop playsinline></video><div class="play-icon">▶</div>`;
+        const v = media.querySelector('video');
+        if(v){ v.addEventListener('error', ()=> showResourceError(item.src, 'VIDEO')); }
+      } else {
+        media.innerHTML = `<img src="${item.src}" alt="${item.title}" onerror="this.outerHTML='<div class=\"content-placeholder\">Image coming soon</div>'">`;
+        const im = media.querySelector('img');
+        if(im) im.addEventListener('error', ()=> showResourceError(item.src, 'IMG'));
+      }
+
+    const meta = document.createElement('div');
+    meta.className = 'media-meta';
+    meta.innerHTML = `<h3>${item.title}</h3><p>${item.style} • ${item.room}</p>`;
+
+    card.append(media, meta);
+    card.addEventListener('click', (e)=>{ e.preventDefault(); openLightboxForItem(item); });
+    inspoMediaGrid.appendChild(card);
+  });
+}
+
+// Lightbox functions
+function openLightboxForItem(item){
+  const overlay = document.getElementById('lightbox-overlay');
+  const mediaWrap = document.getElementById('lightbox-media');
+  const title = document.getElementById('lightbox-title');
+  const sanctuary = document.getElementById('lightbox-sanctuary');
+  const tagsWrap = document.getElementById('lightbox-tags');
+  const more = document.getElementById('lightbox-more');
+  if(!overlay) return;
+  document.body.style.overflow='hidden';
+  overlay.style.display='flex';
+
+  // media
+  mediaWrap.innerHTML='';
+  if(item.type==='video'){
+    mediaWrap.innerHTML = `<video src="${item.src}" controls autoplay muted loop playsinline style="max-height:85vh;border-radius:12px;object-fit:contain"></video>`;
+  } else {
+    mediaWrap.innerHTML = `<img src="${item.src}" alt="${item.title}" style="max-height:85vh;border-radius:12px;object-fit:contain">`;
+  }
+  title.textContent = item.title || '';
+  sanctuary.innerHTML = item.sanctuary ? `<div class="chip">${item.sanctuary}</div>` : '';
+  tagsWrap.innerHTML = (item.tags||[]).slice(0,5).map(t=>`<span class="chip" style="background:var(--color-purple);">${t}</span>`).join(' ');
+
+  // more items
+  more.innerHTML='';
+  const pool = (window.mergedInspo||[]).filter(x=>x.src !== item.src).slice(0,5);
+  pool.forEach(other=>{
+    const d = document.createElement('div'); d.className='more-thumb'; d.innerHTML = `<img src="${other.src}"><div style="position:absolute;right:8px;top:8px">${other.type==='video'?'<span style="background:rgba(0,0,0,0.5);color:#fff;padding:4px 6px;border-radius:6px;font-size:12px">▶</span>':''}</div>`;
+    d.addEventListener('click', ()=>{ openLightboxForItem(other); });
+    more.appendChild(d);
+  });
+
+  // share button
+  const shareBtn = document.getElementById('lightbox-share');
+  if(shareBtn){ shareBtn.onclick = async ()=>{ try{ await navigator.clipboard.writeText(window.location.href); }catch{ const ta=document.createElement('textarea'); ta.value=window.location.href; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } const t=document.createElement('div'); t.textContent='Link copied!'; t.style.cssText='position:fixed;bottom:2rem;right:2rem;background:#7c3aed;color:#fff;padding:0.75rem 1.25rem;border-radius:999px;font-weight:700;z-index:9999;'; document.body.appendChild(t); setTimeout(()=>t.remove(),2500); }; }
+
+  // close handlers
+  document.getElementById('lightbox-back').onclick = closeLightbox;
+  document.addEventListener('keydown', lightboxKeyHandler);
+}
+
+function closeLightbox(){ const overlay=document.getElementById('lightbox-overlay'); if(!overlay) return; overlay.style.display='none'; document.body.style.overflow=''; document.removeEventListener('keydown', lightboxKeyHandler); }
+function lightboxKeyHandler(e){ if(e.key === 'Escape') closeLightbox(); }
 
 let shopProducts = [];
 
@@ -692,7 +1141,7 @@ function renderShopCards(products) {
     card.innerHTML = `
       <div style="position:relative">
         <img src="${product.image_url || ''}" alt="${product.name}" />
-        ${isFree ? `<span style="position:absolute;top:10px;left:10px;background:var(--color-gold);color:#000;padding:0.3rem 0.75rem;border-radius:999px;font-weight:800;font-size:0.8rem">🏷️ FREE</span>` : ''}
+        ${isFree ? `<span style="position:absolute;top:10px;left:10px;background:var(--color-purple);color:#000;padding:0.3rem 0.75rem;border-radius:999px;font-weight:800;font-size:0.8rem">🏷️ FREE</span>` : ''}
       </div>
       <div class="shop-card-body">
         <h3>${product.name}</h3>
@@ -853,7 +1302,7 @@ function renderEbookCards(ebooks) {
     card.innerHTML = `
       <div style="position:relative">
         <img src="${ebook.cover_url || ''}" alt="${ebook.title}" />
-        ${isFree ? `<span style="position:absolute;top:10px;left:10px;background:var(--color-gold);color:#000;padding:0.3rem 0.75rem;border-radius:999px;font-weight:800;font-size:0.8rem">🏷️ FREE</span>` : ''}
+        ${isFree ? `<span style="position:absolute;top:10px;left:10px;background:var(--color-purple);color:#000;padding:0.3rem 0.75rem;border-radius:999px;font-weight:800;font-size:0.8rem">🏷️ FREE</span>` : ''}
       </div>
       <div class="ebook-card-body">
         <h3>${ebook.title}</h3>
@@ -1005,7 +1454,9 @@ async function fetchSingle(table, id) {
         detailImage.alt = post.title || '';
       }
       if (detailContent) {
-        detailContent.innerHTML = post.content || '';
+        detailContent.innerHTML = 
+          post.content || '';
+          post.founder_note || ''
       }
       if (detailLinks) {
         if (post.links && Array.isArray(post.links)) {
@@ -1044,8 +1495,8 @@ async function fetchSingle(table, id) {
       if (detailPrice) {
         const isFree = !product.price || product.price == 0;
         detailPrice.innerHTML = isFree
-          ? '<span style="color:var(--color-gold);font-weight:800;font-size:1.5rem">FREE</span>'
-          : `<span style="font-weight:800;font-size:1.5rem">₦${Number(product.price).toLocaleString()}</span>${product.discount ? ` <span style="background:rgba(201,162,39,0.15);color:var(--color-gold);padding:0.3rem 0.75rem;border-radius:999px;font-size:0.85rem;font-weight:700">${product.discount}% OFF</span>` : ''}`;
+          ? '<span style="color:var(--color-purple);font-weight:800;font-size:1.5rem">FREE</span>'
+          : `<span style="font-weight:800;font-size:1.5rem">₦${Number(product.price).toLocaleString()}</span>${product.discount ? ` <span style="background:rgba(201,162,39,0.15);color:var(--color-purple);padding:0.3rem 0.75rem;border-radius:999px;font-size:0.85rem;font-weight:700">${product.discount}% OFF</span>` : ''}`;
       }
       if (detailContentShop) {
         if (Array.isArray(product.details)) {
@@ -1077,7 +1528,7 @@ async function fetchSingle(table, id) {
       if (detailEbookPrice) {
         const isFree = !ebook.price || ebook.price == 0;
         detailEbookPrice.innerHTML = isFree
-          ? '<span style="color:var(--color-gold);font-weight:800;font-size:1.5rem">FREE</span>'
+          ? '<span style="color:var(--color-purple);font-weight:800;font-size:1.5rem">FREE</span>'
           : `<span style="font-weight:800;font-size:1.5rem">₦${Number(ebook.price).toLocaleString()}</span>`;
       }
       if (detailEbookImage) {
