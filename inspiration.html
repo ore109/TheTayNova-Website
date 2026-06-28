@@ -13,22 +13,60 @@
     <link rel="icon" href="/assets/images/logo/logo.png" type="image/png" />
     <link rel="stylesheet" href="style.css" />
     <style>
-      :root{--color-beige:#f5efe6;--color-purple:#D6B46C ;--color-purple:#7c3aed}
+      :root{--color-beige:#f5efe6;--color-gold:#e6a71f ;--color-purple:#7c3aed}
       .lightbox-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
-      .lightbox-card{width:min(1100px,98%);background:var(--color-beige);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.6);display:flex;gap:20px;overflow:hidden;animation:fadeIn .3s ease}
-      .lightbox-media{flex:1;display:flex;align-items:center;justify-content:center;padding:20px}
-      .lightbox-media img,.lightbox-media video{max-height:85vh;max-width:100%;border-radius:12px;object-fit:contain}
-      .lightbox-details{width:360px;padding:20px;overflow:auto}
+      .lightbox-card {
+      width: min(1020px, 98%);
+      background: var(--color-beige);
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      display: grid;
+      grid-template-columns: 1fr 290px;
+      overflow: hidden;
+      animation: fadeIn .3s ease;
+      position: relative;
+    }
+    .lightbox-media {
+      position: relative;
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+    }
+    .lightbox-details {
+      padding: 20px 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-left: 1px solid rgba(0,0,0,0.06);}
       .lightbox-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
       .lightbox-logo{width:36px;height:36px;border-radius:50%;overflow:hidden}
       .chip{display:inline-flex;align-items:center;padding:6px 10px;border-radius:999px;background:var(--color-purple);color:#111;font-weight:700;margin-right:6px;margin-bottom:6px}
       .btn-purple{background:var(--color-purple);color:#fff;padding:8px 12px;border-radius:999px;font-weight:800;border:none}
       .btn-visit{background:#eee;color:#111;padding:8px 12px;border-radius:999px;border:none}
-      .more-inspo{padding:14px;border-top:1px solid rgba(0,0,0,0.06)}
-      .more-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-      .more-thumb{width:100%;aspect-ratio:3/4;overflow:hidden;border-radius:10px;cursor:pointer}
-      .more-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-      @media(max-width:900px){.lightbox-card{flex-direction:column}.lightbox-details{width:100%}.more-grid{grid-auto-flow:column;grid-auto-columns:calc(60%);overflow:auto;display:flex;gap:10px}}
+      .more-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .more-thumb {
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      background: #1a1a1a;
+    }
+    .more-thumb img, .more-thumb video {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+      @media(max-width: 760px) {
+  .lightbox-card { grid-template-columns: 1fr; }
+  .more-grid { grid-template-columns: repeat(4, 1fr); }
+  }
       @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
     </style>
   </head>
@@ -50,8 +88,8 @@
             <li><a href="ebooks.html">Ebooks</a></li>
             <li><a href="content.html">Content</a></li>
             <li><a href="inspiration.html">Inspos Gallery</a></li>
-            <li><a href="/collab.html">Collab</a></li>
-            <li><a href="#">About</a></li>
+            <li><a href="collab.html">Collab</a></li>
+            <li><a href="about.html">About</a></li>
           </ul>
         </nav>
       </div>

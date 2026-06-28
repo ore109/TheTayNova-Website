@@ -446,10 +446,49 @@ if (document.body.classList.contains('inspo-page')) {
       card.addEventListener('click', () => openLightbox(item, window._allInspoItems));
 
       if (type === 'video') {
-        card.innerHTML = `<video src="${src}" muted autoplay loop playsinline style="width:100%;display:block;border-radius:16px" onerror="this.style.display='none'"></video>`;
+        card.innerHTML = `
+          <div class="inspo-media-wrapper">
+
+            <video 
+              src="${src}"
+              muted
+              autoplay
+              loop
+              playsinline
+              class="inspo-media">
+            </video>
+
+
+            <img 
+              src="/assets/images/logo/logo.png"
+              class="taynova-watermark"
+              alt="TayNova">
+
+          </div>
+        `;
+
+
       } else {
-        card.innerHTML = `<img src="${src}" alt="${item.title||''}" style="width:100%;display:block;border-radius:16px" onerror="this.style.display='none'" loading="lazy" />`;
-      }
+
+
+        card.innerHTML = `
+          <div class="inspo-media-wrapper">
+
+            <img 
+              src="${src}"
+              alt="${item.title || ''}"
+              class="inspo-media">
+
+
+            <img 
+              src="/assets/images/logo/logo.png"
+              class="taynova-watermark"
+              alt="TayNova">
+
+          </div>
+        `;
+
+}
 
       inspoMediaGrid.appendChild(card);
     });
@@ -459,31 +498,35 @@ if (document.body.classList.contains('inspo-page')) {
   function renderSanctuaryGrid(collections) {
     if (!sanctuaryGrid) return;
     sanctuaryGrid.innerHTML = '';
-    const toRender = collections || allSanctuaries;
+    const toRender = collections || sanctuaryCollections;
 
-    // Style the grid
-    sanctuaryGrid.style.cssText = 'display:grid;grid-template-columns:repeat(5,1fr);gap:1rem';
-
-    toRender.forEach((s) => {
-      const nookCount = allItems.filter(i => (i.sanctuary || i.room) === s.title).length;
-      const cover = s.cover || s.cover_url || '/assets/images/inspo/1.jpg';
-
-      const card = document.createElement('div');
-      card.style.cssText = 'cursor:pointer;border-radius:12px;overflow:hidden;background:#f0ebe3';
+    toRender.forEach((collection) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'sanctuary-card';
       card.innerHTML = `
-        <div style="aspect-ratio:9/16;overflow:hidden">
-          <img src="${cover}" alt="${s.title}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'" loading="lazy" />
-        </div>
-        <div style="padding:0.6rem 0.25rem">
-          <div style="font-weight:800;font-size:0.95rem;color:var(--color-black)">${s.title}</div>
-          <div style="font-size:0.78rem;color:#888;margin-top:2px">${nookCount} Nook${nookCount !== 1 ? 's' : ''}</div>
+        <div class="media-preview"></div>
+        <div class="sanctuary-copy">
+          <h3>${collection.title}</h3>
+          <p>${allItems.filter(i => (i.sanctuary || i.room) === collection.title).length} Nook${allItems.filter(i => (i.sanctuary || i.room) === collection.title).length !== 1 ? 's' : ''}</p>
         </div>
       `;
-      card.addEventListener('click', () => openSanctuaryDetail(s, toRender));
+
+      const image = document.createElement('img');
+      image.src = collection.cover || collection.cover_url || '/assets/images/inspo/1.jpg';
+      image.alt = collection.title;
+      image.onerror = () => {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'content-placeholder';
+        placeholder.textContent = 'Image coming soon';
+        image.replaceWith(placeholder);
+      };
+
+      card.querySelector('.media-preview')?.appendChild(image);
+      card.addEventListener('click', () => openSanctuaryDetail(collection, toRender));
       sanctuaryGrid.appendChild(card);
     });
   }
-
   function openSanctuaryDetail(sanctuary, allSanctuaryList) {
     if (!sanctuaryDetail || !sanctuaryGrid) return;
     sanctuaryGrid.classList.add('hidden');
@@ -781,6 +824,7 @@ function renderSanctuaryGrid(collections) {
 
       const media = document.createElement('div');
       media.className = 'media-preview';
+
       if (item.type === 'video') {
         media.innerHTML = `<video src="${item.src}" muted autoplay loop playsinline></video><div class="play-icon">▶</div>`;
       } else {
