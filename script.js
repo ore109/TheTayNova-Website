@@ -313,30 +313,9 @@ if (document.body.classList.contains('inspo-page')) {
   const clearFiltersButton = document.getElementById('clear-filters');
   const inspoFilterSelects = document.querySelectorAll('.inspo-filters select');
 
-  // Hardcoded items (kept as fallback)
-  const inspoMediaItems = [
-    { id: 'loft-glow', title: 'Loft Glow', type: 'image', src: '/assets/images/inspo/1.jpg', style: 'Modern', style_tags: ['Modern'], room: 'Living Room', room_tags: ['Living Room'], category: 'Decor', category_tags: ['Decor'], sanctuary: 'Warm Minimal Living', link: '/assets/images/inspo/1.jpg' },
-    { id: 'cozy-bedroom', title: 'Cozy Bedroom Mood', type: 'image', src: '/assets/images/inspo/12.png', style: 'Boho', style_tags: ['Boho'], room: 'Bedroom', room_tags: ['Bedroom'], category: 'Lighting', category_tags: ['Lighting'], sanctuary: 'Rest & Reset Bedrooms', link: '/assets/images/inspo/12.png' },
-    { id: 'minimal-kitchen', title: 'Minimal Kitchen Edit', type: 'image', src: '/assets/images/inspo/14.png', style: 'Minimal', style_tags: ['Minimal'], room: 'Kitchen', room_tags: ['Kitchen'], category: 'Layout', category_tags: ['Layout'], sanctuary: 'Cozy Kitchen Sanctuaries', link: '/assets/images/inspo/14.png' },
-    { id: 'boho-luxe', title: 'Boho Luxe Living', type: 'image', src: '/assets/images/inspo/15.png', style: 'Boho', style_tags: ['Boho'], room: 'Living Room', room_tags: ['Living Room'], category: 'Decor', category_tags: ['Decor'], sanctuary: 'Warm Minimal Living', link: '/assets/images/inspo/15.png' },
-    { id: 'modern-office', title: 'Modern Office Flow', type: 'image', src: '/assets/images/inspo/2.png', style: 'Luxury', style_tags: ['Luxury'], room: 'Office', room_tags: ['Office'], category: 'Organization', category_tags: ['Organization'], sanctuary: 'Feminine Workspace', link: '/assets/images/inspo/2.png' },
-    { id: 'sunny-lounge', title: 'Japandi Lounge', type: 'image', src: '/assets/images/inspo/3.jpg', style: 'Japandi', style_tags: ['Japandi'], room: 'Living Room', room_tags: ['Living Room'], category: 'Lighting', category_tags: ['Lighting'], sanctuary: 'Warm Minimal Living', link: '/assets/images/inspo/3.jpg' },
-    { id: 'creative-reel-1', title: 'Creative Reel', type: 'video', src: '/assets/videos/reels/1.mp4', style: 'Modern', style_tags: ['Modern'], room: 'Living Room', room_tags: ['Living Room'], category: 'Decor', category_tags: ['Decor'], sanctuary: 'Warm Minimal Living', link: '/assets/videos/reels/1.mp4' },
-    { id: 'cozy-reel-2', title: 'Cozy Morning Reel', type: 'video', src: '/assets/videos/reels/2.mp4', style: 'Boho', style_tags: ['Boho'], room: 'Bedroom', room_tags: ['Bedroom'], category: 'Lighting', category_tags: ['Lighting'], sanctuary: 'Soft Morning Rituals', link: '/assets/videos/reels/2.mp4' },
-    { id: 'modern-reel-3', title: 'Studio Reel', type: 'video', src: '/assets/videos/reels/3.mp4', style: 'Luxury', style_tags: ['Luxury'], room: 'Office', room_tags: ['Office'], category: 'Layout', category_tags: ['Layout'], sanctuary: 'Feminine Workspace', link: '/assets/videos/reels/3.mp4' }
-  ];
-
-  const sanctuaryCollections = [
-    { id: 'soft-morning', title: 'Soft Morning Rituals', cover: '/assets/images/inspo/12.png' },
-    { id: 'cozy-kitchen', title: 'Cozy Kitchen Sanctuaries', cover: '/assets/images/inspo/14.png' },
-    { id: 'warm-minimal', title: 'Warm Minimal Living', cover: '/assets/images/inspo/1.jpg' },
-    { id: 'feminine-workspace', title: 'Feminine Workspace', cover: '/assets/images/inspo/2.png' },
-    { id: 'rest-reset', title: 'Rest & Reset Bedrooms', cover: '/assets/images/inspo/12.png' }
-  ];
-
   const activeFilters = { style: [], room: [], category: [] };
-  let allItems = [...inspoMediaItems];
-  let allSanctuaries = [...sanctuaryCollections];
+  let allItems = [];
+  let allSanctuaries = [];
   window._allInspoItems = allItems;
 
   // ── FILTERS ──────────────────────────────────────────────
@@ -445,50 +424,9 @@ if (document.body.classList.contains('inspo-page')) {
       card.style.cssText = 'break-inside:avoid;margin-bottom:1rem;border-radius:16px;overflow:hidden;cursor:pointer;background:#f0ebe3';
       card.addEventListener('click', () => openLightbox(item, window._allInspoItems));
 
-      if (type === 'video') {
-        card.innerHTML = `
-          <div class="inspo-media-wrapper">
-
-            <video 
-              src="${src}"
-              muted
-              autoplay
-              loop
-              playsinline
-              class="inspo-media">
-            </video>
-
-
-            <img 
-              src="/assets/images/logo/logo.png"
-              class="taynova-watermark"
-              alt="TayNova">
-
-          </div>
-        `;
-
-
-      } else {
-
-
-        card.innerHTML = `
-          <div class="inspo-media-wrapper">
-
-            <img 
-              src="${src}"
-              alt="${item.title || ''}"
-              class="inspo-media">
-
-
-            <img 
-              src="/assets/images/logo/logo.png"
-              class="taynova-watermark"
-              alt="TayNova">
-
-          </div>
-        `;
-
-}
+      card.innerHTML = type === 'video'
+        ? `<video src="${src}" muted autoplay loop playsinline class="inspo-media" onerror="this.style.display='none'"></video>`
+        : `<img src="${src}" alt="${item.title || ''}" class="inspo-media" onerror="this.style.display='none'" loading="lazy" />`;
 
       inspoMediaGrid.appendChild(card);
     });
@@ -498,7 +436,7 @@ if (document.body.classList.contains('inspo-page')) {
   function renderSanctuaryGrid(collections) {
     if (!sanctuaryGrid) return;
     sanctuaryGrid.innerHTML = '';
-    const toRender = collections || sanctuaryCollections;
+    const toRender = collections || allSanctuaries;
 
     toRender.forEach((collection) => {
       const card = document.createElement('button');
@@ -670,7 +608,7 @@ if (document.body.classList.contains('inspo-page')) {
           featured: item.featured || false
         }));
 
-        allItems = [...supabaseItems, ...inspoMediaItems];
+        allItems = supabaseItems;
         window._allInspoItems = allItems;
         renderMediaGrid(applyInspoFilters(allItems));
       }
@@ -686,10 +624,8 @@ if (document.body.classList.contains('inspo-page')) {
           title: s.name,
           cover: s.cover_url || '/assets/images/inspo/1.jpg'
         }));
-        const hardcodedFiltered = sanctuaryCollections.filter(h =>
-          !supabaseSanctuaries.find(s => s.title === h.title)
-        );
-        allSanctuaries = [...supabaseSanctuaries, ...hardcodedFiltered];
+        
+        allSanctuaries = supabaseSanctuaries;
         renderSanctuaryGrid(allSanctuaries);
       }
 
@@ -699,427 +635,6 @@ if (document.body.classList.contains('inspo-page')) {
   })();
 
 }
-
-const lbBackBtn = document.getElementById('lightbox-back');
-if (lbBackBtn) {
-  lbBackBtn.addEventListener('click', () => {
-    document.getElementById('lightbox-overlay').style.display = 'none';
-    document.body.style.overflow = '';
-  });
-}
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') {
-    const o = document.getElementById('lightbox-overlay');
-    if (o) { o.style.display = 'none'; document.body.style.overflow = ''; }
-  }
-});
-
-const lbShareBtn = document.getElementById('lightbox-share');
-if (lbShareBtn) {
-  lbShareBtn.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(window.location.href); } catch {
-      const ta = document.createElement('textarea'); ta.value = window.location.href;
-      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-    }
-    const orig = lbShareBtn.textContent;
-    lbShareBtn.textContent = '✓ Link copied!';
-    setTimeout(() => lbShareBtn.textContent = orig, 2000);
-  });
-}
-
-function renderMediaGrid(items) {
-    if (!inspoMediaGrid) return;
-    inspoMediaGrid.innerHTML = '';
-    if (!items.length) {
-      inspoEmpty.classList.remove('hidden');
-      return;
-    }
-    inspoEmpty.classList.add('hidden');
-
-    items.forEach((item) => {
-      const card = document.createElement('div');
-      card.style.cursor = 'pointer';
-      card.addEventListener('click', () => openLightbox(item, allItems));
-      card.target = '_blank';
-      card.rel = 'noreferrer';
-      card.className = 'media-card';
-
-      const media = document.createElement('div');
-      media.className = 'media-preview';
-      if (item.type === 'video') {
-        media.innerHTML = `<video src="${item.src}" muted autoplay loop playsinline></video><div class="play-icon">▶</div>`;
-      } else {
-        media.innerHTML = `<img src="${item.src}" alt="${item.title}" onerror="this.outerHTML='<div class=\"content-placeholder\">Image coming soon</div>'">`;
-      }
-
-      const meta = document.createElement('div');
-      meta.className = 'media-meta';
-      meta.innerHTML = `<h3>${item.title}</h3><p>${item.style} • ${item.room}</p>`;
-
-      card.append(media, meta);
-      inspoMediaGrid.appendChild(card);
-    });
-  }
-
-function renderSanctuaryGrid(collections) {
-  if (!sanctuaryGrid) return;
-  sanctuaryGrid.innerHTML = '';
-  const toRender = collections || sanctuaryCollections;
-
-  toRender.forEach((collection) => {
-      const card = document.createElement('button');
-      card.type = 'button';
-      card.className = 'sanctuary-card';
-      card.innerHTML = `
-        <div class="media-preview"></div>
-        <div class="sanctuary-copy">
-          <h3>${collection.title}</h3>
-          <p>${collection.description}</p>
-        </div>
-      `;
-
-      const image = document.createElement('img');
-      image.src = collection.cover;
-      image.alt = collection.title;
-      image.onerror = () => {
-        const placeholder = document.createElement('div');
-        placeholder.className = 'content-placeholder';
-        placeholder.textContent = 'Image coming soon';
-        image.replaceWith(placeholder);
-      };
-
-      card.querySelector('.media-preview')?.appendChild(image);
-      card.addEventListener('click', () => openSanctuary(collection.id));
-      sanctuaryGrid.appendChild(card);
-    });
-  }
-
-  function openSanctuary(id) {
-    selectedSanctuary = id;
-    const collection = sanctuaryCollections.find((item) => item.id === id);
-    if (!collection || !sanctuaryDetail) return;
-
-    sanctuaryGrid.classList.add('hidden');
-    sanctuaryDetail.classList.remove('hidden');
-    sanctuaryResultTitle.textContent = collection.title;
-    sanctuaryResultInfo.textContent = collection.description;
-
-    const filtered = inspoMediaItems.filter((item) =>
-      collection.filters.some((tag) => item.style === tag || item.room === tag || item.category === tag)
-    );
-
-    sanctuaryResults.innerHTML = '';
-    if (!filtered.length) {
-      sanctuaryResults.innerHTML = '<div class="empty-state">No inspiration found for this sanctuary. Try another mood.</div>';
-      return;
-    }
-
-    filtered.forEach((item) => {
-      const card = document.createElement('a');
-      card.href = item.link;
-      card.target = '_blank';
-      card.rel = 'noreferrer';
-      card.className = 'media-card';
-
-      const media = document.createElement('div');
-      media.className = 'media-preview';
-
-      if (item.type === 'video') {
-        media.innerHTML = `<video src="${item.src}" muted autoplay loop playsinline></video><div class="play-icon">▶</div>`;
-      } else {
-        media.innerHTML = `<img src="${item.src}" alt="${item.title}" onerror="this.outerHTML='<div class=\"content-placeholder\">Image coming soon</div>'">`;
-      }
-
-      const meta = document.createElement('div');
-      meta.className = 'media-meta';
-      meta.innerHTML = `<h3>${item.title}</h3><p>${item.style} • ${item.room}</p>`;
-
-      card.append(media, meta);
-      sanctuaryResults.appendChild(card);
-    });
-  }
-    const activeFiltersWrap = document.getElementById('active-filters');
-    const filterSummary = document.getElementById('filter-summary');
-
-    const activeFilters = {
-      style: [],
-      room: [],
-      category: []
-    };
-  function updateFilterTags() {
-    if (!activeFiltersWrap || !filterSummary) return;
-    const selections = [];
-    Object.keys(activeFilters).forEach((group) => {
-      activeFilters[group].forEach((value) => selections.push({ type: group, value }));
-    });
-
-    if (!selections.length) {
-      filterSummary.classList.add('hidden');
-      activeFiltersWrap.innerHTML = '';
-      return;
-    }
-
-    filterSummary.classList.remove('hidden');
-    activeFiltersWrap.innerHTML = selections
-      .map(
-        (filter) =>
-          `<button type="button" class="filter-tag" data-filter-type="${filter.type}" data-filter-value="${filter.value}">${filter.value} ×</button>`
-      )
-      .join('');
-
-    activeFiltersWrap.querySelectorAll('.filter-tag').forEach((button) => {
-      button.addEventListener('click', () => {
-        const type = button.dataset.filterType;
-        const value = button.dataset.filterValue;
-        activeFilters[type] = activeFilters[type].filter((item) => item !== value);
-        const selectElement = document.querySelector(`.inspo-filters select[data-filter-type="${type}"]`);
-        if (selectElement) selectElement.value = '';
-        renderMediaGrid(applyInspoFilters(window.mergedInspo || inspoMediaItems));
-        updateFilterTags();
-      });
-    });
-  }
-
-  const inspoFilterSelects = document.querySelectorAll('.inspo-filters select');
-
-  function clearFilters() {
-    activeFilters.style = [];
-    activeFilters.room = [];
-    activeFilters.category = [];
-    selectedSanctuary = null;
-    inspoFilterSelects.forEach((select) => {
-      select.value = '';
-    });
-    updateFilterTags();
-    renderMediaGrid(applyInspoFilters(window.mergedInspo || inspoMediaItems));
-    if (sanctuaryDetail) sanctuaryDetail.classList.add('hidden');
-    if (sanctuaryGrid) sanctuaryGrid.classList.remove('hidden');
-  }
-
-  function handleFilterChange(select) {
-    const type = select.dataset.filterType;
-    const value = select.value;
-    activeFilters[type] = value ? [value] : [];
-
-    selectedSanctuary = null;
-    renderMediaGrid(applyInspoFilters(window.mergedInspo || inspoMediaItems));
-    updateFilterTags();
-    if (sanctuaryDetail) sanctuaryDetail.classList.add('hidden');
-    if (sanctuaryGrid) sanctuaryGrid.classList.remove('hidden');
-  }
-
-  inspoFilterSelects.forEach((select) => {
-    select.addEventListener('change', () => handleFilterChange(select));
-  });
-
-
-  if (document.body.classList.contains('inspo-page')) {
-
-  const inspoFilterSelects = document.querySelectorAll('.inspo-filters select');
-
-  const clearFiltersButton = document.getElementById('clear-filters');
-
-  const activeFiltersWrap = document.getElementById('active-filters');
-
-  const filterSummary = document.getElementById('filter-summary');
-
-}
-  const sanctuaryBack = document.getElementById('sanctuary-back');
-  const sanctuaryDetail = document.getElementById('sanctuary-detail');
-  const sanctuaryGrid = document.getElementById('sanctuary-grid');
-
-  let selectedSanctuary = null;
-
-  if (sanctuaryBack) {
-    sanctuaryBack.addEventListener('click', () => {
-      selectedSanctuary = null;
-      sanctuaryDetail.classList.add('hidden');
-      sanctuaryGrid.classList.remove('hidden');
-    });
-  }
-
-  // Load from Supabase and merge
-  (async () => {
-  try {
-
-    let supabaseItems = [];
-    let supabaseSanctuaries = [];
-
-
-    // Load inspiration items
-    const { data: inspoData, error: inspoError } =
-      await supabaseClient
-      .from('inspiration')
-      .select('*')
-      .eq('status', 'published');
-
-
-    if (inspoError) throw inspoError;
-
-
-    supabaseItems = (inspoData || []).map(item => ({
-      id: item.id,
-      title: item.title,
-      src: item.file_url,
-      type: item.file_type || 'image',
-      style: item.style || '',
-      room: item.room || '',
-      category: item.category || ''
-    }));
-
-
-
-    // Load sanctuary items
-    const { data: sanctuaryData, error: sanctuaryError } =
-      await supabaseClient
-      .from('sanctuaries')
-      .select('*');
-
-
-    if (sanctuaryError) throw sanctuaryError;
-
-
-    supabaseSanctuaries = sanctuaryData || [];
-
-
-
-    // Render
-    window._allInspoItems = supabaseItems;
-
-    renderMediaGrid(
-      applyInspoFilters(supabaseItems)
-    );
-
-
-    renderSanctuaryGrid(
-      supabaseSanctuaries
-    );
-
-
-    updateFilterTags();
-
-
-    setView('creative');
-
-
-  } catch(e) {
-
-    console.error(
-      'Supabase inspo load failed:',
-      e
-    );
-
-  }
-
-})();
-
-
-
-// Initialize inspiration items (merge hardcoded + supabase if available) and render
-async function initInspo(){
-  // normalize hardcoded items
-  function normalizeHard(item){ return { id: item.id||item.src, title: item.title, type: item.type, src: item.src, style: item.style, room: item.room, category: item.category, link: item.link, tags: item.style? [item.style] : [] } }
-  let merged = (inspoMediaItems||[]).map(normalizeHard);
-  // fetch supabase items if client available
-  try{
-    if(window.supabaseClient){
-      const res = await window.supabaseClient.from('inspiration').select('*').order('created_at',{ascending:false});
-      if(res && res.data){
-        const fetched = res.data.map(it=>({ id: it.id, title: it.title||'', type: it.file_type||'image', src: it.file_url, style: (it.style_tags && it.style_tags[0])||'', room: it.sanctuary||'', category: '', link: it.file_url, tags: it.style_tags||[] }));
-        // merge with fetched items appended
-        merged = merged.concat(fetched);
-      }
-    }
-  }catch(e){ console.warn('Could not fetch inspo from Supabase', e); }
-
-  // store merged globally for lightbox navigation
-  window.mergedInspo = merged;
-  // render initial grid
-  renderMediaGrid(applyInspoFilters(window.mergedInspo));
-}
-
-// Render media grid: open lightbox on click (no navigation)
-function renderMediaGrid(items) {
-  if (!inspoMediaGrid) return;
-  inspoMediaGrid.innerHTML = '';
-  if (!items.length) {
-    inspoEmpty.classList.remove('hidden');
-    return;
-  }
-  inspoEmpty.classList.add('hidden');
-
-  items.forEach((item, idx) => {
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = 'media-card';
-    card.dataset.index = idx;
-
-    const media = document.createElement('div');
-    media.className = 'media-preview';
-      if (item.type === 'video') {
-        media.innerHTML = `<video src="${item.src}" muted loop playsinline></video><div class="play-icon">▶</div>`;
-        const v = media.querySelector('video');
-        if(v){ v.addEventListener('error', ()=> showResourceError(item.src, 'VIDEO')); }
-      } else {
-        media.innerHTML = `<img src="${item.src}" alt="${item.title}" onerror="this.outerHTML='<div class=\"content-placeholder\">Image coming soon</div>'">`;
-        const im = media.querySelector('img');
-        if(im) im.addEventListener('error', ()=> showResourceError(item.src, 'IMG'));
-      }
-
-    const meta = document.createElement('div');
-    meta.className = 'media-meta';
-    meta.innerHTML = `<h3>${item.title}</h3><p>${item.style} • ${item.room}</p>`;
-
-    card.append(media, meta);
-    card.addEventListener('click', (e)=>{ e.preventDefault(); openLightboxForItem(item); });
-    inspoMediaGrid.appendChild(card);
-  });
-}
-
-// Lightbox functions
-function openLightboxForItem(item){
-  const overlay = document.getElementById('lightbox-overlay');
-  const mediaWrap = document.getElementById('lightbox-media');
-  const title = document.getElementById('lightbox-title');
-  const sanctuary = document.getElementById('lightbox-sanctuary');
-  const tagsWrap = document.getElementById('lightbox-tags');
-  const more = document.getElementById('lightbox-more');
-  if(!overlay) return;
-  document.body.style.overflow='hidden';
-  overlay.style.display='flex';
-
-  // media
-  mediaWrap.innerHTML='';
-  if(item.type==='video'){
-    mediaWrap.innerHTML = `<video src="${item.src}" controls autoplay muted loop playsinline style="max-height:85vh;border-radius:12px;object-fit:contain"></video>`;
-  } else {
-    mediaWrap.innerHTML = `<img src="${item.src}" alt="${item.title}" style="max-height:85vh;border-radius:12px;object-fit:contain">`;
-  }
-  title.textContent = item.title || '';
-  sanctuary.innerHTML = item.sanctuary ? `<div class="chip">${item.sanctuary}</div>` : '';
-  tagsWrap.innerHTML = (item.tags||[]).slice(0,5).map(t=>`<span class="chip" style="background:var(--color-purple);">${t}</span>`).join(' ');
-
-  // more items
-  more.innerHTML='';
-  const pool = (window.mergedInspo||[]).filter(x=>x.src !== item.src).slice(0,5);
-  pool.forEach(other=>{
-    const d = document.createElement('div'); d.className='more-thumb'; d.innerHTML = `<img src="${other.src}"><div style="position:absolute;right:8px;top:8px">${other.type==='video'?'<span style="background:rgba(0,0,0,0.5);color:#fff;padding:4px 6px;border-radius:6px;font-size:12px">▶</span>':''}</div>`;
-    d.addEventListener('click', ()=>{ openLightboxForItem(other); });
-    more.appendChild(d);
-  });
-
-  // share button
-  const shareBtn = document.getElementById('lightbox-share');
-  if(shareBtn){ shareBtn.onclick = async ()=>{ try{ await navigator.clipboard.writeText(window.location.href); }catch{ const ta=document.createElement('textarea'); ta.value=window.location.href; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } const t=document.createElement('div'); t.textContent='Link copied!'; t.style.cssText='position:fixed;bottom:2rem;right:2rem;background:#7c3aed;color:#fff;padding:0.75rem 1.25rem;border-radius:999px;font-weight:700;z-index:9999;'; document.body.appendChild(t); setTimeout(()=>t.remove(),2500); }; }
-
-  // close handlers
-  document.getElementById('lightbox-back').onclick = closeLightbox;
-  document.addEventListener('keydown', lightboxKeyHandler);
-}
-
-function closeLightbox(){ const overlay=document.getElementById('lightbox-overlay'); if(!overlay) return; overlay.style.display='none'; document.body.style.overflow=''; document.removeEventListener('keydown', lightboxKeyHandler); }
-function lightboxKeyHandler(e){ if(e.key === 'Escape') closeLightbox(); }
 
 let shopProducts = [];
 
@@ -1322,6 +837,21 @@ function getActiveEbookCategory() {
   return activeFilter ? activeFilter.dataset.category : 'All';
 }
 
+// Helper: format an ebook price as "₦X,XXX.00 - $Y.YY" to match the
+// admin-style price summary, or a plain "$Y.YY" / "FREE" when only one
+// price is present.
+function formatEbookPrice(ebook) {
+  const NGN_TO_USD_RATE = 1380; // ₦ per $1 — update as the exchange rate moves
+
+  const naira = Number(ebook.price_ngn ?? ebook.price_naira ?? ebook.naira_price ?? ebook.price ?? 0);
+
+  if (!naira) return 'FREE';
+
+  const usd = naira / NGN_TO_USD_RATE;
+  return `$${usd.toFixed(2)}`;
+}
+
+
 function renderEbookCards(ebooks) {
   if (!ebookGrid) return;
   ebookGrid.innerHTML = '';
@@ -1343,36 +873,26 @@ function renderEbookCards(ebooks) {
     const base = location.origin + location.pathname.replace(/\/[^\/]*$/, '/');
     const detailPath = base + `ebook-detail.html?id=${encodeURIComponent(ebook.id)}`;
     const isFree = !ebook.price || ebook.price == 0;
+    const priceText = formatEbookPrice(ebook);
+    
     card.innerHTML = `
-      <div style="position:relative">
-        <img src="${ebook.cover_url || ''}" alt="${ebook.title}" />
-        ${isFree ? `<span style="position:absolute;top:10px;left:10px;background:var(--color-purple);color:#000;padding:0.3rem 0.75rem;border-radius:999px;font-weight:800;font-size:0.8rem">🏷️ FREE</span>` : ''}
+    <div class="ebook-card-image-wrap">
+      <img src="${ebook.cover_url || ''}" alt="${ebook.title}" />
+      ${isFree ? `<span class="ebook-card-badge">🏷️ FREE</span>` : ''}
+    </div>
+    <div class="ebook-card-body">
+      <h3>${ebook.title}</h3>
+      ${ebook.category ? `<p class="ebook-card-category">${ebook.category}</p>` : ''}
+      <div class="ebook-card-footer">
+        <p class="ebook-card-price">${priceText}</p>
+        <a class="btn-read" href="${detailPath}">Read More</a>
       </div>
-      <div class="ebook-card-body">
-        <h3>${ebook.title}</h3>
-        <div class="ebook-card-footer">
-          <div class="card-actions">
-            <div style="text-align:center;margin-top:auto;padding-top:1rem">
-              <a class="btn btn-read" href="${detailPath}" style="display:inline-flex;justify-content:center">Read More</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
+    </div>
+  `;
 
-    card.addEventListener('click', (e) => {
-      const tag = e.target.tagName.toLowerCase();
-      if (tag === 'button' || tag === 'a') return;
+    card.addEventListener('click', () => {
       window.location.href = detailPath;
     });
-
-    const shareBtn = card.querySelector('.btn-share');
-    if (shareBtn) {
-      shareBtn.addEventListener('click', async (e) => {
-        e.stopPropagation();
-        await shareLink(shareBtn.dataset.url);
-      });
-    }
 
     ebookGrid.appendChild(card);
   });
@@ -1570,17 +1090,16 @@ async function fetchSingle(table, id) {
       if (detailEbookTitle) detailEbookTitle.textContent = ebook.title || '';
       if (detailEbookDescription) detailEbookDescription.innerHTML = ebook.description || '';
       if (detailEbookPrice) {
-        const isFree = !ebook.price || ebook.price == 0;
-        detailEbookPrice.innerHTML = isFree
+        detailEbookPrice.innerHTML = formatEbookPrice(ebook) === 'FREE'
           ? '<span style="color:var(--color-purple);font-weight:800;font-size:1.5rem">FREE</span>'
-          : `<span style="font-weight:800;font-size:1.5rem">₦${Number(ebook.price).toLocaleString()}</span>`;
+          : `<span style="font-weight:800;font-size:1.5rem">${formatEbookPrice(ebook)}</span>`;
       }
       if (detailEbookImage) {
         detailEbookImage.src = ebook.cover_url || '';
         detailEbookImage.alt = ebook.title || '';
       }
       if (detailEbookActions) {
-        detailEbookActions.innerHTML = `<a class="ebook-detail-link" href="${ebook.link}" target="_blank" rel="noreferrer">Get the Guide</a>`;
+        detailEbookActions.innerHTML = `<a class="ebook-detail-link" href="${ebook.purchase_link || ebook.link || '#'}" target="_blank" rel="noreferrer">Get the Guide</a>`;
         const shareBtn = document.createElement('button');
         shareBtn.type = 'button';
         shareBtn.title = 'Share';
@@ -1712,16 +1231,21 @@ async function loadHomepageSections() {
       .select('id, title, cover_url, price, purchase_link')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
-      .limit(3);
+      .limit(4);
     if (ebooks && ebooks.length) {
-      homeEbooksGrid.innerHTML = ebooks.map(eb => `
-        <div class="ebook-card">
-          <img src="${eb.cover_url || ''}" alt="${eb.title}" />
-          <h4>${eb.title}</h4>
-          <a href="ebook-detail.html?id=${eb.id}" class="btn btn-ebook">Get the Guide</a>
-        </div>
-      `).join('');
-    }
+  homeEbooksGrid.innerHTML = ebooks.map(eb => `
+    <div class="ebook-card">
+      <div class="ebook-card-image-wrap">
+        <img src="${eb.cover_url || ''}" alt="${eb.title}" />
+      </div>
+      <div class="ebook-card-body">
+        <h3>${eb.title}</h3>
+        <p class="ebook-card-price">${formatEbookPrice(eb)}</p>
+      </div>
+      <a href="ebook-detail.html?id=${eb.id}" class="btn-ebook">Get the Guide</a>
+    </div>
+  `).join('');
+}
     homeEbooksGrid.insertAdjacentHTML('afterend', '...');
   }
 }

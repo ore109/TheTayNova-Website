@@ -328,55 +328,131 @@
       // save draft: insert rows with status=draft but don't upload files to storage
       async function saveBatch(status){ try{ const title=el('media-title').value.trim(); const sanctuary=el('sanctuary-select').value; const styleTags=state.styleTags; const roomTags=state.roomTags; const catTags=state.categoryTags; const featured=state.featured; if(!title){ alert('Title required'); return } for(let s of state.stagedFiles){ const row={ title, file_url:s.url, file_type:s.type, sanctuary, style_tags:styleTags, room_tags:roomTags, category_tags:catTags, featured, status }; const res = await sb.from('inspiration').insert(row); if(res.error) console.error(res.error); } alert('Saved as '+status); window.location.href='/admin/inspiration.html'; }catch(e){console.error(e);alert('Failed to save')} }
 
+      // watermark addition
+      async function addWatermarkToImage(file) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+
+          const logo = new Image();
+          logo.onload = () => {
+            const wmWidth = canvas.width * 0.09;               // small
+            const wmHeight = wmWidth * (logo.height / logo.width);
+            const margin = canvas.width * 0.025;
+            const x = canvas.width - wmWidth - margin;          // right
+            const y = canvas.height - wmHeight - margin;         // very low / bottom
+            ctx.globalAlpha = 0.85;
+            ctx.drawImage(logo, x, y, wmWidth, wmHeight);
+            ctx.globalAlpha = 1;
+            canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('toBlob failed')), file.type || 'image/jpeg', 0.92);
+          };
+          logo.onerror = () => reject(new Error('Failed to load logo'));
+          logo.src = '/assets/images/logo/logo.png';
+        };
+        img.onerror = () => reject(new Error('Failed to load source image'));
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+
       // upload helpers
-      async function uploadAll(){ if(!state.stagedFiles.length){ alert('No files to upload'); return } const list=el('upload-progress-list'); list.innerHTML=''; const title=el('media-title').value.trim(); const sanctuary=el('sanctuary-select').value; const styleTags=state.styleTags; const roomTags=state.roomTags; const catTags=state.categoryTags; const featured=state.featured; for(let i=0;i<state.stagedFiles.length;i++){ const s=state.stagedFiles[i]; const rowWrap=document.createElement('div'); rowWrap.style.marginBottom='.6rem'; rowWrap.innerHTML = `<div style="font-weight:700">File ${i+1} — ${s.file.name}</div><div class="progress"><span style="width:0%"></span></div><div class="status" style="font-size:.85rem;color:var(--admin-muted)">Pending</div>`; list.appendChild(rowWrap); const bar=rowWrap.querySelector('.progress > span'); const statusEl=rowWrap.querySelector('.status'); try{ const bucket = s.type==='image'?'images':'videos'; const folder = s.type==='image'?'inspo/images':'inspo/videos'; const ext = s.file.name.split('.').pop(); const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`; // upload
-            const upload = await sb.storage.from(bucket).upload(path, s.file, {upsert:true}); if(upload.error) throw upload.error; const { data } = sb.storage.from(bucket).getPublicUrl(path); const publicUrl = data.publicUrl; // simulate progress
-            for(let p=0;p<=100;p+=10){ await new Promise(r=>setTimeout(r,40)); bar.style.width=p+'%'; }
-            statusEl.textContent='Done'; // insert row
-            const row = { title, file_url:publicUrl, file_type:s.type, sanctuary, style_tags:styleTags, room_tags:roomTags, category_tags:catTags, featured, status:'published' };
-            const ins = await sb.from('inspiration').insert(row);
-            if(ins.error) throw ins.error;
-          }catch(e){ console.error(e); statusEl.textContent='Failed'; rowWrap.querySelector('.progress > span').style.background='rgba(231,76,60,0.8)'; }
+      async function uploadAll(){
+  if(!state.stagedFiles.length){ alert('No files to upload'); return }
+  const list = el('upload-progress-list');
+  list.innerHTML = '';
+  const title = el('media-title').value.trim();
+  const sanctuary = el('sanctuary-select').value;
+  const styleTags = state.styleTags;
+  const roomTags = state.roomTags;
+  const catTags = state.categoryTags;
+  const featured = state.featured;
+
+  for(let i=0; i<state.stagedFiles.length; i++){
+    const s = state.stagedFiles[i];
+    const rowWrap = document.createElement('div');
+    rowWrap.style.marginBottom = '.6rem';
+    rowWrap.innerHTML = `<div style="font-weight:700">File ${i+1} — ${s.file.name}</div><div class="progress"><span style="width:0%"></span></div><div class="status" style="font-size:.85rem;color:var(--admin-muted)">Pending</div>`;
+    list.appendChild(rowWrap);
+    const bar = rowWrap.querySelector('.progress > span');
+    const statusEl = rowWrap.querySelector('.status');
+
+    try{
+      const bucket = s.type === 'image' ? 'images' : 'videos';
+      const folder = s.type === 'image' ? 'inspo/images' : 'inspo/videos';
+      const ext = s.file.name.split('.').pop();
+      const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      let fileToUpload = s.file;
+      if (s.type === 'image') {
+        try {
+          fileToUpload = await addWatermarkToImage(s.file);
+        } catch (wmErr) {
+          console.error('Watermark failed, uploading original image instead:', wmErr);
         }
-
-           // Show success screen
-          const doneCount = Array.from(
-            document.querySelectorAll('#upload-progress-list .status')
-          ).filter(s => s.textContent === 'Done').length;
-
-          el('success-count').textContent = `${doneCount} file${doneCount !== 1 ? 's' : ''} uploaded successfully!`;
-
-          document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-          document.getElementById('panel-success').classList.add('active');
-
-          const actionBar = document.querySelector('.action-bar');
-          if (actionBar) actionBar.style.display = 'none';
-
-          document.querySelectorAll('.step').forEach(s => s.classList.add('done'));
-
-          // Wire upload more button
-          const uploadMoreBtn = document.getElementById('upload-more');
-          if (uploadMoreBtn) {
-            uploadMoreBtn.addEventListener('click', () => {
-              state.stagedFiles = [];
-              state.styleTags = [];
-              state.roomTags = [];
-              state.categoryTags = [];
-              state.featured = false;
-              if (el('media-title')) el('media-title').value = '';
-              if (el('sanctuary-select')) el('sanctuary-select').value = '';
-              const pill = el('featured-pill');
-              if (pill) pill.classList.remove('active');
-              const label = el('featured-label');
-              if (label) label.textContent = 'Not featured';
-              document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
-              const grid = document.getElementById('preview-grid');
-              if (grid) grid.innerHTML = '';
-              if (actionBar) actionBar.style.display = '';
-              renderStep(1);
-            });
-          }
       }
+
+      const upload = await sb.storage.from(bucket).upload(path, fileToUpload, {upsert:true});
+      if (upload.error) throw upload.error;
+
+      const { data } = sb.storage.from(bucket).getPublicUrl(path);
+      const publicUrl = data.publicUrl;
+
+      for(let p=0; p<=100; p+=10){ await new Promise(r=>setTimeout(r,40)); bar.style.width = p+'%'; }
+      statusEl.textContent = 'Done';
+
+      const row = { title, file_url: publicUrl, file_type: s.type, sanctuary, style_tags: styleTags, room_tags: roomTags, category_tags: catTags, featured, status: 'published' };
+      const ins = await sb.from('inspiration').insert(row);
+      if (ins.error) throw ins.error;
+
+    }catch(e){
+      console.error(e);
+      statusEl.textContent = 'Failed';
+      bar.style.background = 'rgba(231,76,60,0.8)';
+    }
+  }
+
+      // Show success screen
+      const doneCount = Array.from(
+        document.querySelectorAll('#upload-progress-list .status')
+      ).filter(s => s.textContent === 'Done').length;
+
+      el('success-count').textContent = `${doneCount} file${doneCount !== 1 ? 's' : ''} uploaded successfully!`;
+
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-success').classList.add('active');
+
+      const actionBar = document.querySelector('.action-bar');
+      if (actionBar) actionBar.style.display = 'none';
+
+      document.querySelectorAll('.step').forEach(s => s.classList.add('done'));
+
+      const uploadMoreBtn = document.getElementById('upload-more');
+      if (uploadMoreBtn) {
+        uploadMoreBtn.addEventListener('click', () => {
+          state.stagedFiles = [];
+          state.styleTags = [];
+          state.roomTags = [];
+          state.categoryTags = [];
+          state.featured = false;
+          if (el('media-title')) el('media-title').value = '';
+          if (el('sanctuary-select')) el('sanctuary-select').value = '';
+          const pill = el('featured-pill');
+          if (pill) pill.classList.remove('active');
+          const label = el('featured-label');
+          if (label) label.textContent = 'Not featured';
+          document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+          const grid = document.getElementById('preview-grid');
+          if (grid) grid.innerHTML = '';
+          if (actionBar) actionBar.style.display = '';
+          renderStep(1);
+    });
+  }
+}
 
       // initial boot
       guard();

@@ -935,16 +935,6 @@ body.ebooks-page .section-title {
   background: var(--color-beige);
 }
 
-.ebooks-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.ebooks-section {
-  background: var(--color-beige);
-}
-
 .ebook-controls-section {
   background: var(--color-beige);
   padding: 1.25rem 1.5rem 0.75rem;
@@ -1079,16 +1069,21 @@ body.ebooks-page .ebooks-section {
   box-shadow: 0 0 0 2px rgba(215, 180, 105, 0.1);
 }
 
+/* ── EBOOK GRID & CARD ───────────────────────────────────
+   Public-facing ebook cards: cover image (3:4, fully visible,
+   no cropping), title, category, and price — 4 per row on
+   desktop, matching the reference library/dashboard layout. */
+
 .ebooks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
   margin: 2rem 0 0;
 }
 
 .ebook-card {
   background: var(--color-white);
-  border-radius: var(--radius);
+  border-radius: 18px;
   overflow: hidden;
   box-shadow: var(--shadow-soft);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1102,69 +1097,104 @@ body.ebooks-page .ebooks-section {
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.12);
 }
 
-.ebook-card img {
-   width: 100%;
-  aspect-ratio: 3/4;
-  object-fit: contain;
+.ebook-card-image-wrap {
+  position: relative;
+  width: 100%;
   background: var(--color-beige);
 }
 
+.ebook-card-image-wrap img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: contain;
+  background: var(--color-beige);
+  display: block;
+}
+
+.ebook-card-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--color-purple);
+  color: var(--color-black);
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.75rem;
+}
+
 .ebook-card-body {
-  padding: 1.5rem;
+  padding: 1rem 1.1rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  flex: 1;
+  gap: 0.3rem;
 }
 
-.ebook-card h4 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.2rem;
+.ebook-card-body h3 {
   margin: 0;
-  line-height: 1.4;
-  text-align: center;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-black);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.ebook-card p {
-  color: var(--color-muted);
-  line-height: 1.6;
+.ebook-card-category {
   margin: 0;
-  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-purple);
+}
+
+.ebook-card-price {
+  margin: 0.15rem 0 0;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--color-black);
 }
 
 .ebook-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-top: 1.5rem;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
 }
 
-.ebook-price {
-  font-weight: 700;
-  color: var(--color-black);
-  font-size: 1rem;
+.ebook-card-footer .btn-read {
+  margin: 0;
+  white-space: nowrap;
 }
 
-.btn-get-guide {
-  background: var(--color-purple);
-  color: var(--color-white);
-  padding: 1.85rem 1.5rem;
-  border-radius: 600px;
-  border: none;
-  font-weight: 500;
-  cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: right;
-  justify-content: right;
+@media (max-width: 1100px) {
+  .ebooks-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-.btn-get-guide:hover,
-.btn-get-guide:focus-visible {
-  transform: translateY(-2px);
-  opacity: 0.95;
+@media (max-width: 768px) {
+  .ebooks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .ebook-card-body {
+    padding: 0.85rem 0.9rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .ebooks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .ebook-card-body h3 {
+    font-size: 0.9rem;
+  }
 }
 
 .ebook-detail-section {
@@ -1263,17 +1293,9 @@ body.ebooks-page .ebooks-section {
     grid-template-columns: 1fr;
     padding: 1.5rem;
   }
-
-  .ebook-card-footer {
-    flex-wrap: wrap;
-  }
 }
 
 @media (max-width: 520px) {
-  .ebooks-grid {
-    grid-template-columns: 1fr;
-  }
-
   .ebook-search-wrap input {
     max-width: 100%;
   }
@@ -1291,12 +1313,19 @@ body.ebooks-page .ebooks-section {
 }
 
 /* Home page ebook cards: ensure spacing between title and CTA */
-#home-ebooks-grid .ebook-card h4 {
-  margin: 0 1rem 1.25rem;
+#home-ebooks-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
 }
-#home-ebooks-grid .ebook-card .btn-ebook,
-#home-ebooks-grid .ebook-card a.btn-ebook {
-  margin-top: 0.5rem;
+
+@media (max-width: 1100px) {
+  #home-ebooks-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 768px) {
+  #home-ebooks-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 }
 
 .btn-ebook:hover,
@@ -1537,7 +1566,7 @@ body.content-page .section-footer .btn-read {
 
 .inspo-page .toggle-pill:hover,
 .inspo-page .toggle-pill:focus-visible {
-  background: rgba(124, 58, 237, 0.12);
+  background: rgba(230, 167, 31, 0.12); /* was rgba(124, 58, 237, 0.12) */
   color: var(--color-black);
   transform: translateY(-1px);
 }
@@ -1588,11 +1617,11 @@ body.content-page .section-footer .btn-read {
 .inspo-page .filter-group select:focus {
   outline: none;
   border-color: var(--color-purple);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 3px rgba(230, 167, 31, 0.1); /* was rgba(124, 58, 237, 0.1) */
 }
 
 .inspo-page .filter-group select:hover {
-  border-color: rgba(124, 58, 237, 0.2);
+  border-color: rgba(230, 167, 31, 0.2); /* was rgba(124, 58, 237, 0.2) */
 }
 
 .inspo-page .filter-panel {
@@ -1615,8 +1644,8 @@ body.content-page .section-footer .btn-read {
 
 .inspo-page .filter-pill:hover,
 .inspo-page .filter-pill:focus-visible {
-  background: rgba(124, 58, 237, 0.08);
-  border-color: rgba(124, 58, 237, 0.3);
+  background: rgba(230, 167, 31, 0.08);   /* was rgba(124, 58, 237, 0.08) */
+  border-color: rgba(230, 167, 31, 0.3);  /* was rgba(124, 58, 237, 0.3) */
 }
 
 .inspo-page .filter-pill.active {
@@ -2570,8 +2599,7 @@ body.privacy-modal-open {
 
   .products-grid,
   .blog-grid,
-  .content-grid,
-  .ebooks-grid {
+  .content-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2703,28 +2731,3 @@ body.privacy-modal-open {
   object-fit: cover;
   border-radius: 16px;
 }
-
-.taynova-watermark {
-
-  position: relative;
-
-  bottom: 40px;
-
-  right: 0px;
-
-  left: 220px;
-
-  width: 50px;
-
-  height: 50px;
-
-  object-fit: contain;
-
-  opacity: 1;
-
-  z-index: 30;
-
-  pointer-events: none;
-
-}
-
