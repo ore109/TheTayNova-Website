@@ -1004,7 +1004,6 @@ function prepareLoadedGalleryBlocks() {
         setTimeout(() => {
           if (quill && data.content) {
             quill.root.innerHTML = data.content;
-            prepareLoadedGalleryBlocks();
           }
         }, 300);
       }

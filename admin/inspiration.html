@@ -13,7 +13,19 @@
       img{display:block;max-width:100%}button{font:inherit;border:none;cursor:pointer}.hidden{display:none!important}
       .dashboard-shell{min-height:100vh;padding-left:280px}
       .admin-sidebar{position:fixed;inset:0 auto 0 0;width:280px;display:flex;flex-direction:column;gap:2rem;padding:1.5rem;border-right:1px solid var(--admin-border);background:rgba(18,15,20,0.86);backdrop-filter:blur(22px)}
-      .sidebar-brand{display:grid;justify-items:center;gap:.85rem;padding:.75rem 0 1.25rem;border-bottom:1px solid var(--admin-border);text-align:center}.admin-nav{display:grid;gap:.45rem}.admin-nav a{display:flex;align-items:center;min-height:46px;padding:.85rem 1rem;border-radius:16px;color:var(--admin-muted);text-decoration:none;font-weight:700}.admin-nav a:hover,.admin-nav a:focus,.admin-nav a.active{color:var(--admin-white);background:rgba(201,162,39,0.14);transform:translateX(2px)}.admin-nav a.active{box-shadow:inset 3px 0 0 var(--admin-purple)}
+      .admin-nav { display: grid; gap: 0.45rem; }
+      .admin-nav a {
+        display: flex; align-items: center; min-height: 46px;
+        padding: 0.85rem 1rem; border-radius: 16px; color: var(--admin-muted); font-weight: 700;
+        transition: color 0.2s, background 0.2s, transform 0.2s;
+      }
+      .admin-nav a:hover, .admin-nav a.active {
+        color: var(--admin-white); background: rgba(201,162,39,0.14); transform: translateX(2px);
+      }
+      .admin-nav a.active { box-shadow: inset 3px 0 0 var(--admin-purple); }
+      .sidebar-brand { display: grid; justify-items: center; gap: 0.85rem; padding: 0.75rem 0 1.25rem; border-bottom: 1px solid var(--admin-border); text-align: center; }
+      .sidebar-brand img { width: 58px; height: 58px; object-fit: contain; }
+      .sidebar-brand h2 { font-size: 1.05rem; letter-spacing: 0.04em; }
       .logout-btn{margin-top:auto;width:100%;border-radius:999px;padding:.9rem 1.2rem;color:#111;background:var(--admin-purple);font-weight:800}
       .dashboard-main{padding:clamp(1.25rem,3vw,2.25rem)}.dashboard-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.25rem}
       .tab-bar { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem; border-bottom:1px solid var(--admin-border); padding-bottom:0.75rem; }

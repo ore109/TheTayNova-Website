@@ -23,6 +23,7 @@
       .dashboard-shell{min-height:100vh;padding-left:280px}
       .admin-sidebar{position:fixed;inset:0 auto 0 0;width:280px;display:flex;flex-direction:column;gap:2rem;padding:1.5rem;border-right:1px solid var(--admin-border);background:rgba(18,15,20,0.86);backdrop-filter:blur(22px)}
       .sidebar-brand{display:grid;justify-items:center;gap:.85rem;padding:.75rem 0 1.25rem;border-bottom:1px solid var(--admin-border);text-align:center}
+      .sidebar-brand img{width:56px;height:56px;object-fit:contain;border-radius:50%}
       .admin-nav{display:grid;gap:.45rem}
       .admin-nav a{display:flex;align-items:center;min-height:46px;padding:.85rem 1rem;border-radius:16px;color:var(--admin-muted);font-weight:700}
       .admin-nav a:hover,.admin-nav a.active{color:var(--admin-white);background:rgba(201,162,39,0.14);transform:translateX(2px)}
@@ -135,6 +136,7 @@
             <div class="preview-grid" id="preview-grid"></div>
             <div class="action-bar">
               <button class="btn" id="save-draft-1">Save Draft</button>
+              <button class="btn" id="rewatermark-existing" type="button">🔁 Re-watermark Existing</button>
               <button class="btn primary" id="to-details">Continue →</button>
             </div>
           </div>
@@ -313,6 +315,7 @@
         el('create-sanctuary').addEventListener('click',createSanctuary);
         el('upload-more').addEventListener('click',()=>{ state.stagedFiles=[]; renderPreviews(); renderStep(1); });
         el('logout').addEventListener('click',async ()=>{ await sb.auth.signOut(); window.location.replace('/admin/index.html') });
+         el('rewatermark-existing').addEventListener('click',rewatermarkExisting);
       }
 
       // review
@@ -341,12 +344,12 @@
 
           const logo = new Image();
           logo.onload = () => {
-            const wmWidth = canvas.width * 0.09;               // small
+            const wmWidth = canvas.width * 0.22;               // bigger — ~22% of image width
             const wmHeight = wmWidth * (logo.height / logo.width);
-            const margin = canvas.width * 0.025;
+            const margin = canvas.width * 0.03;
             const x = canvas.width - wmWidth - margin;          // right
-            const y = canvas.height - wmHeight - margin;         // very low / bottom
-            ctx.globalAlpha = 0.85;
+            const y = canvas.height - wmHeight - margin;         // bottom
+            ctx.globalAlpha = 0.6;                              // 60% opacity
             ctx.drawImage(logo, x, y, wmWidth, wmHeight);
             ctx.globalAlpha = 1;
             canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('toBlob failed')), file.type || 'image/jpeg', 0.92);
@@ -359,6 +362,25 @@
       });
     }
 
+      async function rewatermarkExisting(){
+        if(!confirm('This will re-download every image in the Inspiration library, apply the new watermark, and replace the stored file. Continue?')) return;
+        const { data, error } = await sb.from('inspiration').select('*').eq('file_type','image');
+        if(error){ alert('Failed to load existing items'); return; }
+        for(const item of data){
+          try{
+            const resp = await fetch(item.file_url);
+            const blob = await resp.blob();
+            const file = new File([blob], 'reup.jpg', {type: blob.type || 'image/jpeg'});
+            const watermarked = await addWatermarkToImage(file);
+            const path = `inspo/images/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+            const up = await sb.storage.from('images').upload(path, watermarked, {upsert:true});
+            if(up.error) throw up.error;
+            const { data: pub } = sb.storage.from('images').getPublicUrl(path);
+            await sb.from('inspiration').update({file_url: pub.publicUrl}).eq('id', item.id);
+          }catch(e){ console.error('Failed for', item.id, e); }
+        }
+        alert('Done re-watermarking existing images.');
+      }
 
       // upload helpers
       async function uploadAll(){
