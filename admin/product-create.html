@@ -638,11 +638,11 @@
         const discounted = discount > 0 ? (price - price * discount / 100) : price;
         // display both NGN and USD (price input is USD)
         const ngn = toNGN(discounted);
-        document.getElementById('preview-final').textContent = `${fmtNGN(ngn)} · ${fmtUSD(discounted)}`;
+        document.getElementById('preview-final').textContent = `${fmtUSD(discounted)}`;
         const origEl = document.getElementById('preview-original');
         const badgeEl = document.getElementById('preview-badge');
         if (discount > 0) {
-          origEl.textContent = `${fmtNGN(toNGN(price))} · ${fmtUSD(price)}`;
+          origEl.textContent =  '${fmtUSD(price)}`;
           origEl.classList.remove('hidden');
           badgeEl.textContent = `${discount}% OFF`;
           badgeEl.classList.remove('hidden');
@@ -730,7 +730,7 @@
         document.getElementById('review-preview-cat').textContent = [cat, sub].filter(Boolean).join(' › ') || '—';
         // show both NGN and USD
         const discountedNum = parseFloat(discounted) || 0;
-        document.getElementById('review-preview-price').textContent = `${fmtNGN(toNGN(discountedNum))} · ${fmtUSD(discountedNum)}`;
+        document.getElementById('review-preview-price').textContent = ` ${fmtUSD(discountedNum)}`;
         document.getElementById('review-link').textContent = link || '—';
         document.getElementById('review-taxonomy').textContent = [cat, sub].filter(Boolean).join(' › ') || '—';
         document.getElementById('review-tags').innerHTML = [...selectedStyles, ...selectedTypes].map(t => `<span style="display:inline-block;padding:0.2rem 0.5rem;border-radius:999px;background:rgba(201,162,39,0.15);color:var(--admin-purple);font-size:0.75rem;margin:0.2rem">${t}</span>`).join('') || '—';
@@ -1007,7 +1007,7 @@
             <td style="color:var(--admin-muted)">${i + 1}</td>
             <td>${row.imgUrl ? `<img src="${row.imgUrl}" onerror="this.style.display='none'" />` : '—'}</td>
             <td style="color:var(--admin-white);font-weight:600">${row.name || '—'}</td>
-            <td>${fmtNGN(toNGN(row.price))} · ${fmtUSD(row.price)}${row.discount ? ` <span class="price-badge">${row.discount}%</span>` : ''}</td>
+            <td> ${fmtUSD(row.price)}${row.discount ? ` <span class="price-badge">${row.discount}%</span>` : ''}</td>
             <td>${[row.cat, row.sub].filter(Boolean).join(' › ') || '—'}</td>
             <td>${row.styleTags.slice(0,2).map(s => `<span style="display:inline-block;padding:0.15rem 0.4rem;border-radius:999px;background:rgba(201,162,39,0.15);color:var(--admin-purple);font-size:0.7rem;margin:0.1rem">${s}</span>`).join('') || '—'}</td>
             <td><span class="csv-status ${row.valid ? 'csv-ok' : 'csv-error'}">${row.valid ? '✓ Valid' : '✗ ' + row.errors[0]}</span></td>

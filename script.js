@@ -1060,7 +1060,7 @@ async function fetchSingle(table, id) {
         const isFree = !product.price || product.price == 0;
         detailPrice.innerHTML = isFree
           ? '<span style="color:var(--color-purple);font-weight:800;font-size:1.5rem">FREE</span>'
-          : `<span style="font-weight:800;font-size:1.5rem">₦${Number(product.price).toLocaleString()}</span>${product.discount ? ` <span style="background:rgba(201,162,39,0.15);color:var(--color-purple);padding:0.3rem 0.75rem;border-radius:999px;font-size:0.85rem;font-weight:700">${product.discount}% OFF</span>` : ''}`;
+          : `<span style="font-weight:800;font-size:1.5rem">$${Number(product.price).toFixed(2)}</span>${product.discount ? ` <span style="background:rgba(201,162,39,0.15);color:var(--color-purple);padding:0.3rem 0.75rem;border-radius:999px;font-size:0.85rem;font-weight:700">${product.discount}% OFF</span>` : ''}`;
       }
       if (detailContentShop) {
         if (Array.isArray(product.details)) {
