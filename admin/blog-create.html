@@ -57,7 +57,7 @@
         display: grid; justify-items: center; gap: 0.85rem;
         padding: 0.75rem 0 1.25rem; border-bottom: 1px solid var(--admin-border); text-align: center;
       }
-      .sidebar-brand img { width: 58px; height: 58px; object-fit: contain; }
+      .sidebar-brand img { width: 58px; height: 58px; object-fit: contain; border-radius: 50%; }
       .sidebar-brand h2 { font-size: 1.05rem; letter-spacing: 0.04em; }
       .admin-nav { display: grid; gap: 0.45rem; }
       .admin-nav a {
@@ -382,74 +382,47 @@
         color: var(--admin-purple) !important;
       }
 
-      /* Gallery block styles (editor) */
-      .gallery-block {
+      /* Blog inline image gallery — simple upload, 16:9, max 3 per row */
+      .blog-gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
         margin: 1.5rem 0;
-        border-radius: 16px;
-        overflow: visible;
-        border: 1px dashed rgba(201,162,39,0.3);
-        background: rgba(245,239,230,0.06);
-        padding: 0.75rem;
       }
-      .gallery-grid { display: grid; gap: 0.5rem; }
-      .gallery-grid.count-1 { grid-template-columns: 1fr; }
-      .gallery-grid.count-2 { grid-template-columns: 1fr 1fr; }
-      .gallery-grid.count-3 { grid-template-columns: 1fr 1fr 1fr; }
-      .gallery-cell { position: relative; aspect-ratio: 16/9;  min-height: 120px; border-radius: 12px; overflow: hidden; background: rgba(255,255,255,0.06);}
-      .gallery-cell img, .gallery-cell video { width: 100%; height: 100%; object-fit: cover; display: block; }
-      .gallery-cell-remove { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: rgba(0,0,0,0.7); color: white; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; }
-      .gallery-add-btn { position: relative; aspect-ratio: 16/9; border-radius: 12px; border: 2px dashed var(--admin-purple); background: transparent; color: var(--admin-purple); font-size: 2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; overflow: hidden; pointer-events: auto; }
-      .gallery-add-btn:hover { background: rgba(201,162,39,0.08); }
-      .gallery-file-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-      .gallery-caption { width: 100%; margin-top: 0.5rem; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); font-size: 0.82rem; padding: 0.35rem 0; outline: none; font-style: italic; }
-      .ql-gallery {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        width: auto !important;
-        padding: 0 0.7rem !important;
-        color: var(--admin-purple) !important;
-        font-weight: 800;
-        white-space: nowrap;
-        cursor: pointer;
+      .blog-gallery-item {
+        aspect-ratio: 16/9;
+        border-radius: 12px;
         overflow: hidden;
-      }
-      .gallery-toolbar-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
-      .gallery-spinner,
-      .gallery-error {
-        width: 100%;
-        height: 100%;
+        background: rgba(255,255,255,0.06);
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
       }
-      .gallery-spinner::before {
-        content: "";
-        width: 28px;
-        height: 28px;
-        border: 3px solid rgba(255,255,255,0.28);
-        border-top-color: var(--admin-purple);
-        border-radius: 50%;
-        animation: gallerySpin 0.8s linear infinite;
+      .blog-gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
       }
-      .gallery-error {
-        flex-direction: column;
-        gap: 0.5rem;
-        padding: 0.75rem;
-        color: var(--admin-danger);
-        text-align: center;
-        font-size: 0.82rem;
-        background: rgba(231,76,60,0.12);
+      .ql-toolbar .ql-formats.ql-addimages-group {
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
       }
-      .gallery-retry-btn {
-        padding: 0.35rem 0.7rem;
-        border-radius: 999px;
-        background: rgba(231,76,60,0.2);
-        color: #ffaaa0;
+      .ql-addimages {
+        display: inline-flex;
+        align-items: center;
+        height: 24px;
+        padding: 0 8px !important;
+        color: var(--admin-purple) !important;
         font-weight: 800;
-        font-size: 0.75rem;
+        font-size: 0.85rem !important;
+        cursor: pointer;
+        background: transparent !important;
+        border: none !important;
+        white-space: nowrap;
       }
-      @keyframes gallerySpin { to { transform: rotate(360deg); } }
     </style>
   </head>
   <body>
@@ -754,219 +727,131 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
       }
 
+      // REGISTER CUSTOM GALLERY BLOT — makes Quill treat the image grid as a
+      // real embed it tracks, saves, and reloads (instead of stripping it,
+      // which is what happened when we injected a plain <div> into the DOM).
+      let GalleryBlotRegistered = false;
+      function registerGalleryBlot() {
+        if (GalleryBlotRegistered || typeof Quill === 'undefined') return;
+        const BlockEmbed = Quill.import('blots/block/embed');
+        class GalleryBlot extends BlockEmbed {
+          static create(value) {
+            const node = super.create();
+            node.setAttribute('contenteditable', 'false');
+            (value && value.urls ? value.urls : []).forEach(url => {
+              const item = document.createElement('div');
+              item.className = 'blog-gallery-item';
+              const img = document.createElement('img');
+              img.setAttribute('src', url);
+              img.setAttribute('alt', '');
+              item.appendChild(img);
+              node.appendChild(item);
+            });
+            return node;
+          }
+          static value(node) {
+            const urls = Array.from(node.querySelectorAll('img')).map(img => img.getAttribute('src'));
+            return { urls };
+          }
+        }
+        GalleryBlot.blotName = 'gallery';
+        GalleryBlot.tagName = 'div';
+        GalleryBlot.className = 'blog-gallery';
+        Quill.register(GalleryBlot, true);
+        GalleryBlotRegistered = true;
+      }
+
       // INIT EDITOR
       function initEditor() {
-  // Temporarily show panel-4 so Quill can initialize
-  const panel4 = document.getElementById('panel-4');
-   const originalDisplay = panel4 ? panel4.style.display : '';
-  if (panel4) panel4.style.display = 'block';
+        registerGalleryBlot();
+        // Temporarily show panel-4 so Quill can initialize
+        const panel4 = document.getElementById('panel-4');
+        const originalDisplay = panel4 ? panel4.style.display : '';
+        if (panel4) panel4.style.display = 'block';
 
-  quill = new Quill('#quill-editor', {
-    theme: 'snow',
-    modules: {
-      toolbar: [
-        [{ font: ['', 'serif', 'monospace', 'cambria', 'georgia', 'times-new-roman'] }],
-        [{ header: [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ color: [] }, { background: [] }],
-        [{ align: [] }],
-        [{ list: 'ordered' }, { list: 'bullet' }],
-        ['blockquote', 'code-block'],
-        ['link'],
-        ['clean']
-      ]
-    }
-  });
+        quill = new Quill('#quill-editor', {
+          theme: 'snow',
+          modules: {
+            toolbar: [
+              [{ font: ['', 'serif', 'monospace', 'cambria', 'georgia', 'times-new-roman'] }],
+              [{ header: [1, 2, 3, false] }],
+              ['bold', 'italic', 'underline', 'strike'],
+              [{ color: [] }, { background: [] }],
+              [{ align: [] }],
+              [{ list: 'ordered' }, { list: 'bullet' }],
+              ['blockquote', 'code-block'],
+              ['link'],
+              ['clean']
+            ]
+          }
+        });
 
-if (panel4) { panel4.style.display = originalDisplay; panel4.style.visibility = ''; }
-  // Hide panel-4 again
-  if (panel4 && currentStep !== 4) panel4.style.display = '';
+        if (panel4) { panel4.style.display = originalDisplay; panel4.style.visibility = ''; }
+        // Hide panel-4 again
+        if (panel4 && currentStep !== 4) panel4.style.display = '';
 
-  // Add Gallery button to toolbar
-  try {
-    const toolbarEl = document.querySelector('.ql-toolbar');
-    if (toolbarEl) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'ql-gallery';
-      btn.title = 'Insert Gallery Block';
-      btn.textContent = '🖼️ Gallery';
-      btn.style.cssText = 'padding:0 8px;color:var(--admin-purple);font-weight:800;font-size:0.85rem;cursor:pointer;background:transparent;border:none';
-      btn.addEventListener('click', () => insertGalleryBlock());
-      toolbarEl.appendChild(btn);
-    }
-  } catch (e) { console.warn('Gallery button error', e); }
-}
-
-function insertGalleryBlock() {
-  if (!quill) return;
-  const range = quill.getSelection(true);
-  const index = range ? range.index : quill.getLength();
-
-  // Insert the gallery block as a DOM element directly
-  const block = document.createElement('div');
-  block.className = 'gallery-block';
-  block.contentEditable = 'false';
-  block.dataset.gallery = 'true';
-  block.innerHTML = `
-    <div class="gallery-grid count-1" id="gallery-grid-${Date.now()}">
-      <div class="gallery-add-btn" onclick="triggerGalleryUpload(this)">
-        <span style="font-size:2rem;pointer-events:none">+</span>
-      </div>
-    </div>
-    <input class="gallery-caption" type="text" placeholder="Add caption..." />
-  `;
-
-  // Insert after current line
-  const [line] = quill.getLine(index);
-  const lineNode = line ? line.domNode : null;
-  if (lineNode && lineNode.parentNode === quill.root) {
-    lineNode.after(block);
-  } else {
-    quill.root.appendChild(block);
-  }
-
-  // Add empty paragraph after gallery
-  const p = document.createElement('p');
-  p.innerHTML = '<br>';
-  block.after(p);
-}
-
-function triggerGalleryUpload(addBtn) {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/jpeg,image/png,image/webp,video/mp4';
-  input.style.cssText = 'position:fixed;left:-9999px;top:0';
-  input.addEventListener('change', () => {
-    const file = input.files && input.files[0];
-    if (file) {
-      const block = addBtn.closest('.gallery-block');
-      addMediaToGallery(block, file);
-    }
-    input.remove();
-  });
-  document.body.appendChild(input);
-  input.click();
-}
-
-async function addMediaToGallery(block, file) {
-  if (!block) return;
-
-  // Validate
-  if (!['image/jpeg','image/png','image/webp','video/mp4'].includes(file.type)) {
-    showToast('Only JPG, PNG, WEBP or MP4 allowed', true); return;
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    showToast('File must be under 10MB', true); return;
-  }
-
-  const grid = block.querySelector('.gallery-grid');
-  const cells = grid.querySelectorAll('.gallery-cell');
-  if (cells.length >= 3) {
-    showToast('Max 3 media per gallery block', true); return;
-  }
-
-  // Create cell with local preview immediately
-  const localUrl = URL.createObjectURL(file);
-  const isVideo = file.type === 'video/mp4';
-  const cell = document.createElement('div');
-  cell.className = 'gallery-cell';
-  cell.innerHTML = isVideo
-    ? `<video src="${localUrl}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover"></video>`
-    : `<img src="${localUrl}" alt="gallery" style="width:100%;height:100%;object-fit:cover" />`;
-
-  // Insert before add button
-  const addBtn = grid.querySelector('.gallery-add-btn');
-  if (addBtn) grid.insertBefore(cell, addBtn); else grid.appendChild(cell);
-
-  // Update grid count class
-  updateGalleryGrid(block);
-
-  // Show uploading indicator
-  const spinner = document.createElement('div');
-  spinner.className = 'gallery-spinner';
-  spinner.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;border-radius:12px';
-  spinner.innerHTML = '<div style="width:28px;height:28px;border:3px solid rgba(255,255,255,0.3);border-top-color:var(--admin-purple);border-radius:50%;animation:gallerySpin 0.8s linear infinite"></div>';
-  cell.style.position = 'relative';
-  cell.appendChild(spinner);
-
-  try {
-    const bucket = isVideo ? 'videos' : 'images';
-    const folder = isVideo ? 'blog/gallery' : 'blog/gallery';
-    const url = await uploadFile(file, bucket, folder);
-
-    // Replace with final URL
-    cell.innerHTML = isVideo
-      ? `<video src="${url}" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover"></video>`
-      : `<img src="${url}" alt="gallery" style="width:100%;height:100%;object-fit:cover" />`;
-
-    // Add remove button
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.className = 'gallery-cell-remove';
-    removeBtn.textContent = '✕';
-    removeBtn.onclick = () => { cell.remove(); updateGalleryGrid(block); };
-    cell.style.position = 'relative';
-    cell.appendChild(removeBtn);
-
-    URL.revokeObjectURL(localUrl);
-    showToast('Media uploaded ✓');
-  } catch (err) {
-    console.error(err);
-    cell.remove();
-    URL.revokeObjectURL(localUrl);
-    showToast('Upload failed — please retry', true);
-  }
-
-  updateGalleryGrid(block);
-}
-
-function updateGalleryGrid(block) {
-  if (!block) return;
-  const grid = block.querySelector('.gallery-grid');
-  if (!grid) return;
-  const cells = grid.querySelectorAll('.gallery-cell');
-  const count = cells.length;
-
-  grid.classList.remove('count-1','count-2','count-3');
-  grid.classList.add(`count-${Math.max(1, Math.min(count + (count < 3 ? 1 : 0), 3))}`);
-
-  let addBtn = grid.querySelector('.gallery-add-btn');
-  if (count < 3) {
-    if (!addBtn) {
-      addBtn = document.createElement('div');
-      addBtn.className = 'gallery-add-btn';
-      addBtn.innerHTML = '<span style="font-size:2rem;pointer-events:none">+</span>';
-      addBtn.onclick = () => triggerGalleryUpload(addBtn);
-      grid.appendChild(addBtn);
-    }
-  } else {
-    if (addBtn) addBtn.remove();
-  }
-}
-
-function prepareLoadedGalleryBlocks() {
-  if (!quill) return;
-  quill.root.querySelectorAll('.gallery-block').forEach(block => {
-    block.contentEditable = 'false';
-    updateGalleryGrid(block);
-    block.querySelectorAll('.gallery-cell').forEach(cell => {
-      if (!cell.querySelector('.gallery-cell-remove')) {
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'gallery-cell-remove';
-        removeBtn.textContent = '✕';
-        removeBtn.onclick = () => { cell.remove(); updateGalleryGrid(block); };
-        cell.style.position = 'relative';
-        cell.appendChild(removeBtn);
+        // Add "Add Images" button to toolbar — wrapped in its own ql-formats
+        // group so Quill's toolbar layout doesn't overlap it with the font picker
+        try {
+          const toolbarEl = document.querySelector('.ql-toolbar');
+          if (toolbarEl && !toolbarEl.querySelector('.ql-addimages')) {
+            const group = document.createElement('span');
+            group.className = 'ql-formats ql-addimages-group';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ql-addimages';
+            btn.title = 'Insert Images';
+            btn.textContent = '🖼️ Add Images';
+            btn.addEventListener('click', insertImagesIntoBlog);
+            group.appendChild(btn);
+            toolbarEl.appendChild(group);
+          }
+        } catch (e) { console.warn('Add Images button error', e); }
       }
-    });
-    block.querySelectorAll('.gallery-add-btn').forEach(btn => {
-      btn.onclick = () => triggerGalleryUpload(btn);
-    });
-  });
-}
 
+      // SIMPLE IMAGE GALLERY INSERTION — 16:9 crop, up to 3 columns per row
+      function insertImagesIntoBlog() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/jpeg,image/png,image/webp';
+        input.multiple = true;
+        input.style.cssText = 'position:fixed;left:-9999px;top:0';
+        input.addEventListener('change', async () => {
+          const files = Array.from(input.files || []);
+          input.remove();
+          if (!files.length) return;
+          await uploadAndInsertGallery(files);
+        });
+        document.body.appendChild(input);
+        input.click();
+      }
+
+      async function uploadAndInsertGallery(files) {
+        if (!quill) return;
+        showToast('Uploading images…');
+
+        const urls = [];
+        for (const file of files) {
+          if (file.size > 10 * 1024 * 1024) { showToast(`${file.name} is over 10MB — skipped`, true); continue; }
+          try {
+            const url = await uploadFile(file, 'images', 'blog/gallery');
+            urls.push(url);
+          } catch (e) {
+            console.error(e);
+            showToast(`Failed to upload ${file.name}`, true);
+          }
+        }
+        if (!urls.length) return;
+
+        const range = quill.getSelection(true) || { index: quill.getLength() };
+        // insertEmbed uses the registered GalleryBlot, so Quill tracks this
+        // as real content in its Delta model — it won't get stripped out.
+        quill.insertEmbed(range.index, 'gallery', { urls }, 'user');
+        quill.insertText(range.index + 1, '\n', 'user');
+        quill.setSelection(range.index + 2, 0);
+
+        showToast(`Inserted ${urls.length} image${urls.length > 1 ? 's' : ''} ✓`);
+      }
 
       // CHECK EDIT MODE
       function checkEditMode() {
@@ -1004,6 +889,8 @@ function prepareLoadedGalleryBlocks() {
         setTimeout(() => {
           if (quill && data.content) {
             quill.root.innerHTML = data.content;
+            // Ensure loaded gallery blocks stay non-editable
+            quill.root.querySelectorAll('.blog-gallery').forEach(g => g.contentEditable = 'false');
           }
         }, 300);
       }
@@ -1118,13 +1005,6 @@ function prepareLoadedGalleryBlocks() {
         const tags = document.getElementById('blog-tags').value.trim();
         const ctaText = document.getElementById('cta-text').value.trim();
         const ctaLink = document.getElementById('cta-link').value.trim();
-        // Founder fields removed — skip if not present
-        const founderNameEl = document.getElementById('founder-name');
-        const founderName = founderNameEl ? founderNameEl.value.trim() : '';
-        const founderRoleEl = document.getElementById('founder-role');
-        const founderRole = founderRoleEl ? founderRoleEl.value.trim() : '';
-        const founderNoteEl = document.getElementById('founder-note');
-        const founderNote = founderNoteEl ? founderNoteEl.value.trim() : '';
         const content = quill ? quill.root.innerHTML : '';
 
         document.getElementById('review-title').textContent = title || '—';
@@ -1165,21 +1045,6 @@ function prepareLoadedGalleryBlocks() {
         if (!html) return html;
         const wrapper = document.createElement('div');
         wrapper.innerHTML = html;
-
-        wrapper.querySelectorAll('.gallery-block').forEach(block => {
-          block.setAttribute('contenteditable', 'false');
-          block.querySelectorAll('.gallery-add-btn, .gallery-cell-remove, .gallery-spinner, .gallery-error').forEach(el => el.remove());
-          block.querySelectorAll('.gallery-cell.is-uploading, .gallery-cell.is-error').forEach(el => el.remove());
-          block.querySelectorAll('.gallery-caption').forEach(input => {
-            input.setAttribute('value', input.value || input.getAttribute('value') || '');
-          });
-          const grid = block.querySelector('.gallery-grid');
-          if (grid) {
-            const cells = grid.querySelectorAll('.gallery-cell').length;
-            grid.classList.remove('count-1', 'count-2', 'count-3');
-            grid.classList.add(`count-${Math.max(1, Math.min(cells, 3))}`);
-          }
-        });
 
         return wrapper.innerHTML
           .replace(/color:\s*rgb\(255,\s*255,\s*255\)/gi, '')

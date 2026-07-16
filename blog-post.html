@@ -6,60 +6,43 @@
     <title>Blog Post — TayNova</title>
     <link rel="stylesheet" href="style.css" />
     <style>
-      .gallery-block {
+      /* Blog inline image gallery — matches admin editor: 16:9, up to 3 per row */
+      .blog-gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
         margin: 1.5rem 0;
-        border-radius: 16px;
-        overflow: hidden;
-        border: 1px dashed rgba(201,162,39,0.3);
-        background: rgba(245,239,230,0.06);
-        padding: 0.75rem;
       }
-      .gallery-grid { display: grid; gap: 0.5rem; }
-      .gallery-grid.count-1 { grid-template-columns: 1fr; }
-      .gallery-grid.count-2 { grid-template-columns: 1fr 1fr; }
-      .gallery-grid.count-3 { grid-template-columns: 1fr 1fr 1fr; }
-      .gallery-cell {
-        position: relative;
+      .blog-gallery-item {
         aspect-ratio: 16/9;
         border-radius: 12px;
         overflow: hidden;
-        background: rgba(255,255,255,0.06);
+        background: var(--color-beige);
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      .gallery-cell img,
-      .gallery-cell video {
+      .blog-gallery-item img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         display: block;
       }
-      .gallery-cell-remove,
-      .gallery-add-btn { display: none; }
-      .gallery-caption {
-        width: 100%;
-        margin-top: 0.5rem;
-        background: transparent;
-        border: none;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        color: rgba(255,255,255,0.5);
-        font-size: 0.82rem;
-        padding: 0.35rem 0;
-        outline: none;
-        font-style: italic;
-      }
-      .blog-detail-content .gallery-block,
-      .post-content .gallery-block {
-        border-color: rgba(201,162,39,0.2);
-        background: rgba(245,239,230,0.4);
-      }
-      .blog-detail-content .gallery-caption,
-      .post-content .gallery-caption {
-        color: rgba(0,0,0,0.45);
-        border-bottom-color: rgba(0,0,0,0.1);
-        pointer-events: none;
-      }
       @media (max-width: 700px) {
-        .gallery-grid.count-2,
-        .gallery-grid.count-3 { grid-template-columns: 1fr; }
+        .blog-gallery { grid-template-columns: repeat(2, 1fr); }
+      }
+      @media (max-width: 420px) {
+        .blog-gallery { grid-template-columns: 1fr; }
+      }
+
+      /* Related / More To Read section */
+      #related-posts-section {
+        padding-top: 1rem;
+      }
+      #related-posts-section .section-title {
+        text-align: left;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        margin-bottom: 2rem;
       }
     </style>
   </head>
@@ -101,6 +84,12 @@
           <div class="blog-detail-actions detail-actions" id="detail-links"></div>
         </article>
       </section>
+
+      <!-- MORE TO READ / RELATED POSTS -->
+      <section class="section-container" id="related-posts-section">
+        <h2 class="section-title">More To Read</h2>
+        <div class="blog-grid" id="related-posts-grid"></div>
+      </section>
     </main>
 
     <footer class="site-footer">
@@ -123,5 +112,79 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="supabase.js"></script>
     <script src="script.js"></script>
+    <script>
+      // MORE TO READ — related blog posts (same category first, falls back to most recent)
+      (async function loadRelatedPosts(){
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+        const grid = document.getElementById('related-posts-grid');
+        const section = document.getElementById('related-posts-section');
+        if(!id || !grid){ if(section) section.style.display = 'none'; return; }
+
+        function waitForClient(){
+          return new Promise(resolve=>{
+            if(window.supabaseClient) return resolve(window.supabaseClient);
+            const check = setInterval(()=>{
+              if(window.supabaseClient){ clearInterval(check); resolve(window.supabaseClient); }
+            }, 100);
+            setTimeout(()=>{ clearInterval(check); resolve(window.supabaseClient || null); }, 8000);
+          });
+        }
+
+        try{
+          const client = await waitForClient();
+          if(!client){ section.style.display = 'none'; return; }
+
+          const { data: current } = await client
+            .from('blog_posts')
+            .select('category')
+            .eq('id', id)
+            .single();
+          const category = current ? current.category : null;
+
+          let related = [];
+          if(category){
+            const { data } = await client
+              .from('blog_posts')
+              .select('id,title,short_description,cover_url,category')
+              .eq('status','published')
+              .eq('category', category)
+              .neq('id', id)
+              .order('created_at', { ascending:false })
+              .limit(3);
+            related = data || [];
+          }
+
+          if(related.length < 3){
+            const { data: fallback } = await client
+              .from('blog_posts')
+              .select('id,title,short_description,cover_url,category')
+              .eq('status','published')
+              .neq('id', id)
+              .order('created_at', { ascending:false })
+              .limit(6);
+            const existingIds = new Set(related.map(p => p.id));
+            const extra = (fallback || []).filter(p => !existingIds.has(p.id));
+            related = [...related, ...extra].slice(0, 3);
+          }
+
+          if(!related.length){ section.style.display = 'none'; return; }
+
+          grid.innerHTML = related.map(post => `
+            <article class="blog-card">
+              <img src="${post.cover_url || ''}" alt="${post.title}" onerror="this.outerHTML='<div class=&quot;image-placeholder&quot;>Image coming soon</div>';" />
+              <h3>${post.title}</h3>
+              <p>${post.short_description || ''}</p>
+              <div class="card-actions">
+                <a class="btn btn-read" href="blog-post.html?id=${post.id}">Read More</a>
+              </div>
+            </article>
+          `).join('');
+        }catch(e){
+          console.error('Failed to load related posts', e);
+          if(section) section.style.display = 'none';
+        }
+      })();
+    </script>
   </body>
 </html>
