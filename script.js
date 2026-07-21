@@ -1057,11 +1057,21 @@ async function fetchSingle(table, id) {
         detailimageshop.alt = product.name || '';
       }
       if (detailPrice) {
-        const isFree = !product.price || product.price == 0;
-        detailPrice.innerHTML = isFree
-          ? '<span style="color:var(--color-purple);font-weight:800;font-size:1.5rem">FREE</span>'
-          : `<span style="font-weight:800;font-size:1.5rem">$${Number(product.price).toFixed(2)}</span>${product.discount ? ` <span style="background:rgba(201,162,39,0.15);color:var(--color-purple);padding:0.3rem 0.75rem;border-radius:999px;font-size:0.85rem;font-weight:700">${product.discount}% OFF</span>` : ''}`;
+      const isFree = !product.price || product.price == 0;
+      if (isFree) {
+        detailPrice.innerHTML = '<span style="color:var(--color-purple);font-weight:800;font-size:1.5rem">FREE</span>';
+      } else {
+        const price = Number(product.price);
+        const discount = Number(product.discount) || 0;
+        const finalPrice = discount > 0 ? price - (price * discount / 100) : price;
+
+        detailPrice.innerHTML = `
+          <span style="font-weight:800;font-size:1.5rem">$${finalPrice.toFixed(2)}</span>
+          ${discount > 0 ? `<span style="text-decoration:line-through;color:var(--color-muted);margin-left:0.5rem;font-size:1rem">$${price.toFixed(2)}</span>` : ''}
+          ${discount > 0 ? ` <span style="background:rgba(201,162,39,0.15);color:var(--color-purple);padding:0.3rem 0.75rem;border-radius:999px;font-size:0.85rem;font-weight:700">${discount}% OFF</span>` : ''}
+        `;
       }
+    }
       if (detailContentShop) {
         if (Array.isArray(product.details)) {
           detailContentShop.innerHTML = product.details.map((p) => `<p>${p}</p>`).join('');
