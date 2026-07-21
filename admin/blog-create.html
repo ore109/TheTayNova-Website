@@ -384,27 +384,26 @@
 
       /* Blog inline image gallery — simple upload, 16:9, max 3 per row */
       .blog-gallery {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.75rem;
-        margin: 1.5rem 0;
-      }
-      .blog-gallery-item {
-        aspect-ratio: 16/9;
-        border-radius: 12px;
-        overflow: hidden;
-        background: rgba(255,255,255,0.06);
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .blog-gallery-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        display: block;
-      }
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+    }
+    .blog-gallery-item {
+      aspect-ratio: 16/9;
+      border-radius: 12px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.06);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .blog-gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* fills the box cleanly instead of letterboxing */
+    }
       .ql-toolbar .ql-formats.ql-addimages-group {
         display: inline-flex;
         align-items: center;
