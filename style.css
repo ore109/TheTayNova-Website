@@ -487,18 +487,25 @@ body.ebooks-page .section-title {
   text-transform: uppercase;
   color: var(--color-purple);
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .blog-detail-card h2 {
   font-family: 'Playfair Display', serif;
   font-size: clamp(2rem, 4vw, 2.75rem);
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .blog-detail-copy {
-  color: var(--color-muted);
-  line-height: 1.8;
+  color: var(--color-black);
+  font-family: 'Merriweather', Georgia, serif;
+  line-height: 1.6;
   margin-bottom: 1.75rem;
+  text-align: left;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .blog-detail-image {
@@ -508,17 +515,149 @@ body.ebooks-page .section-title {
   object-fit: contain;
 }
 
+.blog-detail-content {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
 .blog-detail-content p,
 .blog-detail-content li {
   color: var(--color-black);
-  line-height: 1.8;
-  margin-bottom: 1rem;
+  font-family: 'Merriweather', Georgia, serif;
+  line-height: 1.6;
+  margin-bottom: 0.85rem;
+  text-align: left;
 }
 
-.blog-detail-content ul {
-  list-style: disc;
-  margin: 0 0 1rem 1.4rem;
-  padding: 0;
+.blog-detail-content ul,
+.blog-detail-content ol {
+  list-style-position: outside;
+  margin: 0 0 1.1rem;
+  padding-left: 1.4rem;
+  text-align: left;
+}
+
+.blog-detail-content ol li,
+.blog-detail-content ul li {
+  padding-left: 0.3rem;
+}
+
+/* Tagline text — anything set to the Cambria font in the Quill editor
+   renders italic + Cambria on the public page (used for product blurbs,
+   feature callouts, etc). */
+.blog-detail-content .ql-font-cambria {
+  font-family: Cambria, Georgia, serif !important;
+  font-style: italic;
+}
+
+/* Links inserted via the editor's link tool — bold, underlined, Cambria,
+   so CTAs like "Shop the Curtains" stand out from body copy. */
+.blog-detail-content a {
+  font-family: Cambria, Georgia, serif;
+  font-weight: 700;
+  text-decoration: underline;
+  color: var(--color-black);
+}
+
+.blog-detail-content a:hover,
+.blog-detail-content a:focus-visible {
+  color: var(--color-purple);
+}
+
+.blog-detail-content h1,
+.blog-detail-content h2,
+.blog-detail-content h3,
+.blog-detail-content h4 {
+  text-align: center;
+}
+
+/* Blog inline image gallery — inserted via the "Add Images" button in the
+   admin editor. Kept in sync with the admin's own gallery CSS so a post
+   looks the same whether you're writing it or reading it. */
+.blog-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.blog-gallery-item {
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-beige);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blog-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 420px) {
+  .blog-gallery {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tables pasted/typed into Quill blog content */
+.blog-detail-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.blog-detail-content th,
+.blog-detail-content td {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.blog-detail-content th {
+  background: var(--color-beige);
+  font-weight: 700;
+}
+
+.blog-detail-content tr:nth-child(even) td {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+@media (max-width: 600px) {
+  .blog-detail-content table,
+  .blog-detail-content thead,
+  .blog-detail-content tbody,
+  .blog-detail-content th,
+  .blog-detail-content td,
+  .blog-detail-content tr {
+    display: block;
+  }
+
+  .blog-detail-content tr {
+    margin-bottom: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .blog-detail-content th {
+    display: none;
+  }
+
+  .blog-detail-content td {
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .blog-detail-content td:last-child {
+    border-bottom: none;
+  }
 }
 
 .blog-detail-actions {
@@ -526,6 +665,7 @@ body.ebooks-page .section-title {
   flex-wrap: wrap;
   gap: 1rem;
   margin-top: 1.5rem;
+  justify-content: center;
 }
 
 .blog-detail-link {
@@ -2706,8 +2846,10 @@ body.privacy-modal-open {
 .ebook-detail-content p, #detail-description,
 #detail-content p, #detail-ebook-description p {
   color: var(--color-black) !important;
-  font-size: 0.95rem;
-  line-height: 1.8;
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  text-align: left;
 }
 
 @media (max-width: 900px) {
@@ -2730,4 +2872,110 @@ body.privacy-modal-open {
   display: block;
   object-fit: cover;
   border-radius: 16px;
+}
+
+/* ============================================================
+   SHARED BLOG CONTENT STYLING — used by any page rendering
+   Quill-generated blog content (currently blog-post.html).
+   Kept here (not duplicated per-page) so admin edits to the
+   underlying markup only need one matching update, not one
+   per public template.
+   ============================================================ */
+
+/* Inline image gallery — matches admin editor's Quill embed */
+.blog-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.blog-gallery-item {
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--color-beige);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.blog-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* fills the box cleanly instead of letterboxing */
+  display: block;
+}
+
+@media (max-width: 420px) {
+  .blog-gallery {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tables typed/pasted into Quill content */
+.blog-detail-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.blog-detail-content th,
+.blog-detail-content td {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.blog-detail-content th {
+  background: var(--color-beige);
+  font-weight: 700;
+}
+
+.blog-detail-content tr:nth-child(even) td {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+@media (max-width: 600px) {
+  .blog-detail-content table,
+  .blog-detail-content thead,
+  .blog-detail-content tbody,
+  .blog-detail-content th,
+  .blog-detail-content td,
+  .blog-detail-content tr {
+    display: block;
+  }
+
+  .blog-detail-content tr {
+    margin-bottom: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .blog-detail-content th {
+    display: none;
+  }
+
+  .blog-detail-content td {
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .blog-detail-content td:last-child {
+    border-bottom: none;
+  }
+}
+
+/* Related / More To Read section (blog-post.html) */
+#related-posts-section {
+  padding-top: 1rem;
+}
+
+#related-posts-section .section-title {
+  text-align: left;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin-bottom: 2rem;
 }
